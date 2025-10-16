@@ -1,7 +1,7 @@
 import scala.io.StdIn.readLine
 
-@main
-def ttt() : Unit =
+//@main
+def TTTField() : Unit =
     val scale = readIntWithDefault("Bitte die größe des Spielfeldes eingeben, die default Größe ist 3 mal 3 ( für default enter drücken ): ", 3);
     val groeße = readIntWithDefault("Bitte die größe der einzelnen Felder eingeben, die default Größe ist 4 ( für default enter drücken ): ", 4);
    
