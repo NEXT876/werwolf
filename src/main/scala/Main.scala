@@ -1,8 +1,11 @@
+package de.htwg.werwolf
+
 import scala.io.StdIn.readLine
 import scala.io.Source
 import java.io.File
 
-@main def start(): Unit =
+//@main
+def start(): Unit =
   println("Willkommen zu Werwolf")
 
   val input = readLine("Spielanleitung anzeigen? ( Yes/No)").toLowerCase()
