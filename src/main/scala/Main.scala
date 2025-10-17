@@ -1,11 +1,33 @@
 package de.htwg.werwolf
 
 import scala.io.StdIn.readLine
-import scala.io.Source
-import java.io.File
+import scala.compiletime.ops.boolean
 
-//@main
-def start(): Unit =
+
+class werwolf(name : String) extends player(name){ 
+  def vote(vote : player) : Unit = println (s"Werwolf ${name} is voting for ${vote} to die")
+  def role : String = "Werwolf"
+ }
+
+class villager(name : String) extends player(name) { 
+    def vote(vote : player) : Unit = println (s"Villager ${name} is voting for ${vote} to die")
+    def role : String = "Villager"
+ }
+
+abstract class player(name : String){
+    protected var _isAlive : Boolean = true
+ 
+    def isAlive : Boolean = _isAlive
+    def die() : Unit =  _isAlive = false
+
+    def vote(vote : player) : Unit
+
+    def role : String
+  }
+
+def start(): Array[String] = {
+  import scala.io.Source
+  import java.io.File
   println("Willkommen zu Werwolf")
 
   val input = readLine("Spielanleitung anzeigen? ( Yes/No)").toLowerCase()
@@ -28,7 +50,13 @@ def start(): Unit =
   for i <- 0 until Spieleranzahl do
     names(i) = readLine(s"Spieler ${i+1}: Wie heißen sie: ")
   
-  println("Das Spiel beginnt mit folgenden Spielern:")
-  names.zipWithIndex.foreach{ case (name, index) => println(s"Spieler${index+1}: $name")}
+  names
+}
 
-  readLine("Um das Spiel zu beginnen, bitte eine beliebige Taste drücken")
+
+object Main {
+  def main(args: Array[String]): Unit = {
+    val player = start()
+    //addRole(player)
+  }
+}
