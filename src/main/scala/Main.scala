@@ -1,11 +1,35 @@
 package de.htwg.werwolf
 
 import scala.io.StdIn.readLine
-import scala.io.Source
-import java.io.File
 
-//@main
-def start(): Unit =
+
+
+class Werwolf(name : String) extends Player(name){ 
+  def vote(vote : Player) : Unit = println (s"Werwolf ${name} is voting for ${vote} to die")
+  def role : String = "Werwolf"
+ }
+
+class Villager(name : String) extends Player(name) { 
+    def vote(vote : Player) : Unit = println (s"Villager ${name} is voting for ${vote} to die")
+    def role : String = "Villager"
+ }
+
+abstract class Player(name : String){
+    protected var _isAlive : Boolean = true
+ 
+    def isAlive : Boolean = _isAlive
+    def die() : Unit =  _isAlive = false
+
+    def vote(vote : Player) : Unit
+
+    def role : String
+
+    override def toString(): String = s"player: $name |  role : $role"
+  }
+
+def start(): Array[String] = {
+  import scala.io.Source
+  import java.io.File
   println("Willkommen zu Werwolf")
 
   val input = readLine("Spielanleitung anzeigen? ( Yes/No)").toLowerCase()
@@ -28,7 +52,34 @@ def start(): Unit =
   for i <- 0 until Spieleranzahl do
     names(i) = readLine(s"Spieler ${i+1}: Wie heißen sie: ")
   
-  println("Das Spiel beginnt mit folgenden Spielern:")
-  names.zipWithIndex.foreach{ case (name, index) => println(s"Spieler${index+1}: $name")}
+  names
+}
 
-  readLine("Um das Spiel zu beginnen, bitte eine beliebige Taste drücken")
+def IncrementRolesCount(rolesAmount : Map[String, Int], role : String) : Map[String,Int] =
+  val currentCount = rolesAmount.getOrElse(role, 0)  
+  rolesAmount + (role -> (currentCount + 1))
+
+
+def addRole(player : Array[String]) : (Array[Player],Map[String,Int]) = {
+  val playerWithRoles = new  Array[Player](player.size)
+  var rolesAmount = Map.empty[String, Int]
+  var count = 0
+
+  if player.size == 2 then  
+    playerWithRoles(count) = Werwolf(player(count)) 
+    rolesAmount = IncrementRolesCount(rolesAmount, "werwolf")
+    count += 1
+    playerWithRoles(count) = Villager(player(count))
+    rolesAmount = IncrementRolesCount(rolesAmount, "villager")
+ 
+  (playerWithRoles,rolesAmount)
+}
+
+@main
+  def main(): Unit = {
+    val player = start()
+    val (playerToRoles, rolesAmount) = addRole(player)
+    playerToRoles.foreach { x => println(s"$x") } 
+    //rolesAmount.foreach { (x,y) => println(s"$x : $y") }
+  }
+
