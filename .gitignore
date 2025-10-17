@@ -8,6 +8,10 @@ project/target/
 project/project/target/
 project/project/project/target/
 
+# Scala TASTY files
+*.tasty
+**/*.tasty
+
 .bsp/
 
 # Bloop / Metals / VS Code
