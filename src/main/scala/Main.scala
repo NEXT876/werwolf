@@ -6,7 +6,7 @@ def start(): Vector[String] = {
     println("Willkommen zu Werwolf")
     val Spieleranzahl = readLine("Bitte Spieleranzahl eingeben ( Mindestanzahl 2): ").toInt
 
-    val names: Vector[String] = (0 until Spieleranzahl)
+    val names = (0 until Spieleranzahl)
     .map(i => readLine(s"Spieler ${i+1}: Wie heißen sie: "))
     .toVector
 
@@ -18,5 +18,6 @@ def start(): Vector[String] = {
   def main(): Unit = {
     val player = start()
     print(player);
+    //addRole(player)
   }
 

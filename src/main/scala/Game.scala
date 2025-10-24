@@ -1,4 +1,4 @@
 package de.htwg.werwolf
 
 
-def addRole(player : Array[String]) : Unit = {}
+def addRole(player : Vector[String]) : Unit = {}
