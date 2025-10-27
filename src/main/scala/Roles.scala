@@ -19,3 +19,21 @@ final case class Villager(name: String, isAlive: Boolean = true) extends Player 
   def vote(target: Player) = s"Villager $name votes for ${target.name} to die"
   def die = copy(isAlive = false)
 }
+
+final case class Amor(name: String, isAlive: Boolean = true) extends Player {
+  def role = "Amor"
+  def vote(target: Player) = s"Villager $name votes for ${target.name} to die"
+  def die = copy(isAlive = false)
+}
+
+final case class Terrorist(name: String, isAlive: Boolean = true) extends Player {
+  def role = "Terrorist"
+  def vote(target: Player) = s"Villager $name votes for ${target.name} to die"
+  def die = copy(isAlive = false)
+}
+
+final case class Witch(name: String, isAlive: Boolean = true) extends Player {
+  def role = "Witch"
+  def vote(target: Player) = s"Villager $name votes for ${target.name} to die"
+  def die = copy(isAlive = false)
+}
