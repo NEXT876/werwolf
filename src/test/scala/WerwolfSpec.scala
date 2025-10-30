@@ -5,6 +5,7 @@ import org.scalatest.matchers.should.Matchers._
 
 class WerwolfSpec extends AnyWordSpec {
 
+    // Game.scala
     "the addRoles function" should {
         "assign one Werwolf and one villager for two players" in {
             val players = Vector("Alice", "Bob")
@@ -30,22 +31,39 @@ class WerwolfSpec extends AnyWordSpec {
             roles.values.count(_.role == "Werwolf") should be(2)
             roles.values.map(_.name) should contain allOf("Alice", "Bob", "Karl", "Lara", "Paul", "Clara")
         }
-        "printPlayerRoles should format correctly" in {
+    }
+    // case class is needed to provide printPlayers with the players Map
+    // in order to make an instance of the Player trait is must not be sealed
+    case class DummyPlayer(name: String, isAlive: Boolean, role: String) extends Player {
+        def vote(target: Player): String = s"$name voted for ${target.name}"
+        def die: Player = copy(isAlive = false)
+    }
+
+    // TUI.scala
+    "the printPlayerRoles function" should {
+        "format player names, roles and states correctly" in {
             val players = Map(
-                "Alice" -> new DummyPlayer("Hexe", true),
-                "Bob"   -> new DummyPlayer("Werwolf", false)
+                "Alice" -> DummyPlayer("Alice", true, "Hexe"),
+                "Bob"   -> DummyPlayer("Bob", false, "Werwolf")
             )
 
             val result = printPlayerRoles(players)
 
-            assert(result.contains("Alice"))
-            assert(result.contains("Hexe"))
-            assert(result.contains("lebt"))
-            assert(result.contains("Bob"))
-            assert(result.contains("Werwolf"))
-            assert(result.contains("tot"))
-  }
+            result should include ("Alice")
+            result should include ("Hexe")
+            result should include ("lebt")
+
+            result should include ("Bob")
+            result should include ("Werwolf")
+            result should include ("tot")
+
+            result.linesIterator.size should be >= 3
+            result should startWith ("\n================")
+            result should endWith ("==========================\n")
+        }
     }
+
+    // Main.scala
 /*  "The getplayerAmount function" should {
         "return an Integer of the amount of players" in {
             val playerAmount = getplayerAmount()
@@ -64,5 +82,69 @@ class WerwolfSpec extends AnyWordSpec {
         }
     }*/
 
+    // Roles.java
+    "the functions from werwolf" should {
+        "return String werwolf, false, vote" in {
+            val werwolf = Werwolf("Hans")
+            val player = Villager("Berta")
+            val result_role = werwolf.role
+            val result_die = werwolf.die
+            val result_vote = werwolf.vote(player)
+            result_role should be("Werwolf")
+            result_die.isAlive should be(false)
+            result_vote should be("Werwolf Hans votes for Berta to die")
+        }
+    }
 
+    "the functions from Villager" should {
+        "return String Villager, false, vote" in {
+            val villager = Villager("Hansi")
+            val player = Villager("Bertai")
+            val result_role = villager.role
+            val result_die = villager.die
+            val result_vote = villager.vote(player)
+            result_role should be("Villager")
+            result_die.isAlive should be(false)
+            result_vote should be("Villager Hansi votes for Bertai to die")
+        }
+    }
+
+    "the functions from Amor" should {
+        "return String Amor, false, vote" in {
+            val amor = Amor("Herman")
+            val player = Villager("Bert")
+            val result_role = amor.role
+            val result_die = amor.die
+            val result_vote = amor.vote(player)
+            result_role should be("Amor")
+            result_die.isAlive should be(false)
+            result_vote should be("Amor Herman votes for Bert to die")
+        }
+    }
+
+    "the functions from Terrorist" should {
+        "return String Terrorist, false, vote" in {
+            val terrorist = Terrorist("Hannes")
+            val player = Villager("Brta")
+            val result_role = terrorist.role
+            val result_die = terrorist.die
+            val result_vote = terrorist.vote(player)
+            result_role should be("Terrorist")
+            result_die.isAlive should be(false)
+            result_vote should be("Terrorist Hannes votes for Brta to die")
+        }
+    }
+
+    "the functions from Witch" should {
+        "return String Witch, false, vote" in {
+            val witch = Witch("Han")
+            val player = Villager("Bertas")
+            val result_role = witch.role
+            val result_die = witch.die
+            val result_vote = witch.vote(player)
+            result_role should be("Witch")
+            result_die.isAlive should be(false)
+            result_vote should be("Witch Han votes for Bertas to die")
+        }
+    }
 }
