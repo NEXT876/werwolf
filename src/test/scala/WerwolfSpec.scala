@@ -30,7 +30,7 @@ class WerwolfSpec extends AnyWordSpec {
             roles.values.count(_.role == "Werwolf") should be(2)
             roles.values.map(_.name) should contain allOf("Alice", "Bob", "Karl", "Lara", "Paul", "Clara")
         }
-          test("printPlayerRoles should format correctly") {
+        "printPlayerRoles should format correctly" in {
             val players = Map(
                 "Alice" -> new DummyPlayer("Hexe", true),
                 "Bob"   -> new DummyPlayer("Werwolf", false)
