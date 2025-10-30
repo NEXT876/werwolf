@@ -30,13 +30,28 @@ class WerwolfSpec extends AnyWordSpec {
             roles.values.count(_.role == "Werwolf") should be(2)
             roles.values.map(_.name) should contain allOf("Alice", "Bob", "Karl", "Lara", "Paul", "Clara")
         }
+          test("printPlayerRoles should format correctly") {
+            val players = Map(
+                "Alice" -> new DummyPlayer("Hexe", true),
+                "Bob"   -> new DummyPlayer("Werwolf", false)
+            )
+
+            val result = printPlayerRoles(players)
+
+            assert(result.contains("Alice"))
+            assert(result.contains("Hexe"))
+            assert(result.contains("lebt"))
+            assert(result.contains("Bob"))
+            assert(result.contains("Werwolf"))
+            assert(result.contains("tot"))
+  }
     }
 /*  "The getplayerAmount function" should {
         "return an Integer of the amount of players" in {
             val playerAmount = getplayerAmount()
             playerAmount shouldBe a [Int]
             //playerAmount should be >= 2
-            //playerAmount should be <= 7 
+            //playerAmount should be <= 7
         }
     }*/
 
