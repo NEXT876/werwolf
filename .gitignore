@@ -39,3 +39,39 @@ out/
 # Linux
 *~
 
+# =========================
+# Zusätzliche Empfehlungen
+# =========================
+
+# sbt Cache und lokale Abhängigkeiten
+~/.ivy2/
+~/.cache/coursier/
+~/.sbt/
+
+# Temporäre Dateien und Backups
+*~
+*.bak
+*.swp
+
+# Test- und Build-Artifacts (optional, falls nicht in target/ enthalten)
+dist/
+build/
+
+# Editor-spezifische Dateien (zusätzlich zu .vscode)
+*.sublime-project
+*.sublime-workspace
+
+# Git-spezifische Dateien
+.gitignore
+.gitmodules
+
+# Scala-Compiler-Logs (falls vorhanden)
+scalac.log
+
+# Docker / Container (falls relevant)
+Dockerfile*
+docker-compose*
+
+# Coverage-Berichte (falls sbt-scoverage genutzt wird)
+scoverage-data/
+target/scoverage/
