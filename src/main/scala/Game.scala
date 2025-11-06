@@ -57,12 +57,14 @@ def night (playerRoles : Map[String, Player]) : Map[String, Player] = {
             val vote = readLine(s"Spieler $name ,bitte geben sie an wen sie umbringen möchten:")
             val voteText = player.vote(currentState(vote))
             print(s"\u001b[31m${voteText}\u001b[0m\n")
-            //vote-System(player, currentState(vote))
-            currentState.updated(vote, currentState(vote).die) 
+            Votes.addVote(vote)
+            currentState           
         }else{
             currentState
         }
     }
+    val votedPlayer = Votes.getVotedPlayer
+    playerRoles(votedPlayer).die
     /// weitere rollen
     ///...
     ///.. 
