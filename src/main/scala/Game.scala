@@ -16,7 +16,7 @@ enum Roles:
     
 def addRoles(players : Vector[String]) : Map[String, Player] = {
     import scala.util.Random
-    val playerRoles : Map[String, Player] = Map()
+    //val playerRoles : Map[String, Player] = Map()
 
     if players.size == 2 then  // sorgt dafür dass wenn es nur 2 Spieler gibt es immer 1 Werwolf und 1 Villager sind(sonst unnötig)
         val roles = Vector(Roles.werwolf, Roles.villager)
@@ -38,4 +38,39 @@ def addRoles(players : Vector[String]) : Map[String, Player] = {
             val player = role.toPlayer(name)
             player.name -> player
         }.toMap
+}
+
+def night (playerRoles : Map[String, Player]) : Map[String, Player] = {
+    import scala.io.StdIn.readLine
+    import scala.io.Source
+
+    val text =
+    Source.fromResource("narrator_Night.txt").getLines().mkString("\n")
+
+    tiping(text, 30)
+
+    val updatedRoles =  playerRoles.foldLeft(playerRoles) {
+        case (currentState, (name, player)) => 
+        if(player.role == "Werwolf" && player.isAlive){
+            print(printPlayerRoles(currentState)) 
+
+            val vote = readLine(s"Spieler $name ,bitte geben sie an wen sie umbringen möchten:")
+            val voteText = player.vote(currentState(vote))
+            print(s"\u001b[31m${voteText}\u001b[0m\n")
+            //vote-System(player, currentState(vote))
+            currentState.updated(vote, currentState(vote).die) 
+        }else{
+            currentState
+        }
+    }
+    /// weitere rollen
+    ///...
+    ///.. 
+   
+
+
+    ///Dorfbewohner
+    ///...
+    ///..
+    updatedRoles
 }
