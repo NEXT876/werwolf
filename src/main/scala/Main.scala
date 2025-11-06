@@ -38,11 +38,11 @@ def getPlayerNames(test : Boolean, playerAmount : Int, fakeInput : Vector[String
       fakeInput
       else
         (0 until playerAmount)
-        .foldLeft(Set[String]()) { (acc, _) =>
-          var name = readLine("Name").trim
+        .foldLeft(Set[String]()) { (acc, i) =>
+          var name = readLine(s"Spieler ${i+1} bitte geben sie ihren Namen an: ").trim
            while(acc.contains(name)){
-            println("name gibt es bereits")
-            name = readLine("Name").trim
+            println("Name gibt es bereits, bitte wähle einen anderen")
+            name = readLine(s"Spieler ${i+1} bitte geben sie ihren Namen an: ").trim
           } 
 
           acc + name
