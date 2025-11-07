@@ -1,6 +1,6 @@
 package de.htwg.werwolf
 
-def printPlayerRoles(playerRoles: Map[String, Player]): String = {
+def printPlayerRoles(playerRoles: Map[String, Player]): String =
   val header = "\n================ Spieler & Rollen ================\n"
   val body = playerRoles
     .map { case (name, player) =>
@@ -11,4 +11,4 @@ def printPlayerRoles(playerRoles: Map[String, Player]): String = {
     .mkString("\n")
   val footer = "\n==================================================\n"
   header + body + footer
-}
+
