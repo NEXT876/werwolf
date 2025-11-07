@@ -46,28 +46,28 @@ def night(playerRoles: Map[String, Player]): Map[String, Player] = {
     Source.fromResource("narrator_Night.txt").getLines().mkString("\n")
 
   tiping(text, 30)
+  val initialVotes = Votes()
+  val (updatedRoles, finalVotes) = playerRoles.foldLeft(playerRoles, initialVotes) {
+    case ((currentState, votesObject), (name, player)) =>
+      if (player.role == "Werwolf" && player.isAlive) {
+        print(printPlayerRoles(currentState))
 
-  val updatedRoles = playerRoles.foldLeft(playerRoles) { case (currentState, (name, player)) =>
-    if (player.role == "Werwolf" && player.isAlive) {
-      print(printPlayerRoles(currentState))
-
-      val vote = readLine(s"Spieler $name ,bitte geben sie an wen sie umbringen möchten:")
-      val voteText = player.vote(currentState(vote))
-      print(s"\u001b[31m${voteText}\u001b[0m\n")
-      Votes.addVote(vote)
-      currentState
-    } else {
-      currentState
-    }
+        val vote = readLine(s"Spieler $name ,bitte geben sie an wen sie umbringen möchten:")
+        val voteText = player.vote(currentState(vote))
+        print(s"\u001b[31m${voteText}\u001b[0m\n")
+        val updatedVotes = votesObject.addVote(vote)
+        (currentState, updatedVotes)
+      } else {
+        (currentState, votesObject)
+      }
   }
-  val votedPlayer = Votes.getVotedPlayer
-  playerRoles(votedPlayer).die
-  /// weitere rollen
-  /// ...
-  /// ..
+  finalVotes.getVotedPlayer match {
+    case Some(p) =>
+      val updatedPlayer = updatedRoles(p).die
+      val newRoles = updatedRoles.updated(p, updatedPlayer)
+      newRoles // diese Map zurückgeben
+    case None =>
+      updatedRoles
+  }
 
-  /// Dorfbewohner
-  /// ...
-  /// ..
-  updatedRoles
 }
