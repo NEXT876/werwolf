@@ -1,10 +1,11 @@
 package de.htwg.werwolf
 
-class Votes(initialVotes: Map[String, Int] = Map.empty):
+case class Votes(votes: Map[String, Int] = Map.empty):
 
-  def addVote(player: String): Unit =
+  def addVote(player: String): Votes =
     val current = votes.getOrElse(player, 0)
-    votes = votes.updated(player, current + 1)
+    copy(votes = votes.updated(player, current + 1))
 
-  def getVotedPlayer: String =
-    votes.maxBy(_._2)._1
+  def getVotedPlayer: Option[String] =
+    if votes.isEmpty then None
+    else Some(votes.maxBy(_._2)._1)
