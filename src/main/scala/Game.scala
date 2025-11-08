@@ -52,16 +52,14 @@ def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Pla
       if (player.role == "Werwolf" && player.isAlive) {
         print(printPlayerRoles(currentState))
         if (fakeInt == 999) {
-          val vote = readLine(s"Spieler $name ,bitte geben sie an wen sie umbringen möchten:")
+          val vote = readLine(s"Spieler $name, bitte geben sie an wen sie umbringen möchten: ")
           val voteText = player.vote(currentState(vote))
           print(s"\u001b[31m${voteText}\u001b[0m\n")
           val updatedVotes = votesObject.addVote(vote)
           (currentState, updatedVotes)
-
         } else {
           val updatedVotes = Votes(Map(name -> fakeInt))
           (currentState, updatedVotes)
-
         }
       } else {
         (currentState, votesObject)
