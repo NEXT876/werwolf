@@ -42,9 +42,7 @@ def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Pla
   import scala.io.StdIn.readLine
   import scala.io.Source
 
-  val text =
-    Source.fromResource("narrator_Night.txt").getLines().mkString("\n")
-
+  val text = randomNarratorText("Werwolf")
   tiping(text, 30)
   val initialVotes = Votes()
   val (updatedRoles, finalVotes) = playerRoles.foldLeft(playerRoles, initialVotes) {
