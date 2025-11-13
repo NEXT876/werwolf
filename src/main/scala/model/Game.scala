@@ -1,4 +1,20 @@
-package de.htwg.werwolf
+// src/main/model/Game.scala
+
+package de.htwg.werwolf.model
+import de.htwg.werwolf.model.{Amor, Player, Terrorist, Villager, Werwolf, Witch}
+import de.htwg.werwolf.model.Votes
+import de.htwg.werwolf.View.printPlayerRoles
+
+import java.util.concurrent.atomic.AtomicInteger
+
+
+object GlobalDayCounter {
+  private val day = new AtomicInteger(0)
+
+  def increment(): Int = day.incrementAndGet()
+  def get(): Int = day.get()
+  def reset(): Unit = day.set(0)
+}
 
 enum Roles:
   case werwolf

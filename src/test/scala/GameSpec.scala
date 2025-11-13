@@ -2,6 +2,8 @@ package de.htwg.werwolf
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
+import de.htwg.werwolf.model.{addRoles, night}
+import de.htwg.werwolf.model.{Villager, Werwolf}
 
 class GameSpec extends AnyWordSpec {
 

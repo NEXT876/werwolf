@@ -1,4 +1,6 @@
-package de.htwg.werwolf
+// src/main/scala/narrator/narrator.scala
+
+package de.htwg.werwolf.narrator
 
 import upickle.default._
 
