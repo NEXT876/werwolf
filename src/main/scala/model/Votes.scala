@@ -1,5 +1,4 @@
 // src/main/scala/model/Votes.scala
-
 package de.htwg.werwolf.model
 
 case class Votes(votes: Map[String, Int] = Map.empty):

@@ -3,10 +3,9 @@
 package de.htwg.werwolf.model
 import de.htwg.werwolf.model.{Amor, Player, Terrorist, Villager, Werwolf, Witch}
 import de.htwg.werwolf.model.Votes
-import de.htwg.werwolf.View.printPlayerRoles
 
 import java.util.concurrent.atomic.AtomicInteger
-
+import scala.util.Random
 
 object GlobalDayCounter {
   private val day = new AtomicInteger(0)
@@ -31,9 +30,6 @@ enum Roles:
     case Roles.witch     => Witch(name)
 
 def addRoles(players: Vector[String]): Map[String, Player] = {
-  import scala.util.Random
-  // val playerRoles : Map[String, Player] = Map()
-
   if players.size == 2
   then // sorgt dafür dass wenn es nur 2 Spieler gibt es immer 1 Werwolf und 1 Villager sind(sonst unnötig)
     val roles = Vector(Roles.werwolf, Roles.villager)
