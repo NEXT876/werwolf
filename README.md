@@ -1,6 +1,6 @@
-## Werwolf, a small scala student ptoject
-## sbt project compiled with Scala 3
+## Werwolf, a small student-scala-project
 
+### sbt project compiled with Scala 3
 ### Usage
 
 
