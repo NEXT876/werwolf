@@ -53,7 +53,7 @@ class TUI(game: Game, controller: GameController) extends Observer {
     val footer = "\n==================================================\n"
     header + body + footer
   }
-  
+
   def getplayerAmount(test: Boolean, fakeInput: Int): Int = {
     val playerAmount =
       if test then fakeInput

@@ -12,10 +12,4 @@ class GameController(game: Game) extends Subject {
 
     // UI übernimmt Anzeige
     notifyObservers(GameEvent.GameStart(updated))
-
-  def update(event: GameEvent): Unit = event match {
-    case GameEvent.NightPhaseStarted(roles)  => {}
-    case GameEvent.WerewolfTurn(name, roles) => {}
-    case GameEvent.GameStart(roles)          => {}
-  }
 }
