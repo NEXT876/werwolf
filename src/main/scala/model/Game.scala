@@ -6,6 +6,8 @@ import de.htwg.werwolf.model.Votes
 import de.htwg.werwolf.model.Observer
 import de.htwg.werwolf.model.Subject
 
+import de.htwg.werwolf.narrator.Root
+
 import java.util.concurrent.atomic.AtomicInteger
 import scala.util.Random
 
@@ -91,21 +93,20 @@ class Game extends Subject {
   }
 
   object NarratorService:
+    import upickle.default._
 
     def loadNarratorJson(path: os.Path): Root =
       val jsonString = os.read(path)
       read[Root](jsonString)
 
-    def randomNarratorText(Rolle: String): String =
-      val jsonString = os.read(os.pwd / "src" / "main" / "resources" / "narrator.json")
-      val data = read[Root](jsonString)
-      val text = Rolle match {
-        case "Start"   => data.Night.Start
-        case "Werwolf" => data.Night.Werwolf
-        case "Witch"   => data.Night.Witch
-        case "Amor"    => data.Night.Amor
-        case _         => List[String]("")
+    def randomNarratorText(role: String, root: Root): String =
+      val list = role match {
+        case "Start"   => root.Night.Start
+        case "Werwolf" => root.Night.Werwolf
+        case "Witch"   => root.Night.Witch
+        case "Amor"    => root.Night.Amor
+        case _         => List("")
       }
-      val randomText = util.Random.shuffle(text).head
-      randomText
+      util.Random.shuffle(list).head
+
 }
