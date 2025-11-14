@@ -4,11 +4,10 @@ package de.htwg.werwolf.view
 import scala.io.StdIn.readLine
 import scala.io.Source
 
-import de.htwg.werwolf.model.{Observer, GameEvent, Game, Player}
+import de.htwg.werwolf.model.*
 import de.htwg.werwolf.controller.GameController
 
-class TUI(game: Game, controller: GameController) extends Observer {
-  game.addObserver(this)
+class TUI(controller: GameController) extends Observer {
   override def update(event: GameEvent): Unit = event match {
     case GameEvent.NightPhaseStarted(roles) => {
       val data =
@@ -32,13 +31,23 @@ class TUI(game: Game, controller: GameController) extends Observer {
     tiping("Willkommen zu Werwolf", 100)
     showLogo()
 
-    val playerAmount = getplayerAmount(false, 0)
-    if playerAmount < 2 || playerAmount > 6 then
-      println("\u001b[31mUngültige Spieleranzahl\u001b[0m");
-      return;
-    val players = getPlayerNames(false, playerAmount, Vector[String]())
+    println("Wie viele Spieler? (mind. 5, max. 12)")
+    val numPlayers = readLine().toIntOption.getOrElse(5) max 5 min 12
+
+    val names = (1 to numPlayers).map { i =>
+      println(s"Spieler${i+1} wie heißen sie:")
+      readLine().trim match
+        case "" => s"Spieler$i"
+        case n  => n
+    }.toVector
     clearScreen()
-    controller.startGame(players)
+    controller.addRoles(names)
+    run()
+  }
+
+  def run() : Unit{
+    
+      //GameLoop
   }
 
   def printPlayerRoles(playerRoles: Map[String, Player]): String = {
@@ -54,15 +63,7 @@ class TUI(game: Game, controller: GameController) extends Observer {
     header + body + footer
   }
 
-  def getplayerAmount(test: Boolean, fakeInput: Int): Int = {
-    val playerAmount =
-      if test then fakeInput
-      else
-        readLine(
-          "Bitte Spieleranzahl eingeben ( Mindestanzahl 2, Maximale Spieleranzahl 7): "
-        ).toInt
-    playerAmount
-  }
+
 
   def askForPlayerName(playerIndex: Int): String =
     print(s"Spieler ${playerIndex + 1} bitte geben sie ihren Namen an: ")

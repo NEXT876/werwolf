@@ -1,67 +1,29 @@
 // src/main/model/Game.scala
 package de.htwg.werwolf.model
 
-import de.htwg.werwolf.model.{Amor, Player, Terrorist, Villager, Werwolf, Witch}
-import de.htwg.werwolf.model.Votes
-import de.htwg.werwolf.model.Observer
-import de.htwg.werwolf.model.Subject
 import de.htwg.werwolf.narrator.Root
-
-import java.util.concurrent.atomic.AtomicInteger
 import scala.util.Random
-import scala.compiletime.ops.boolean
 
-class Game extends Subject {
-  private var players: Vector[String] = Vector.empty
+private var players: List[Player] = Nil
+private var phase: Phase = Phase.Night
 
-  object GlobalDayCounter {
-    private val day = new AtomicInteger(0)
+case class GameState(
+    players: Map[String, Player], // Name -> Player (Werwolf, Villager, etc.)
+    day: Int = 1,
+    phase: Phase = Phase.Night, // Day, Night, Voting
+    votes: Votes = Votes(), // Aktuelle Abstimmungen
+    isRunning: Boolean = true
+) {}
 
-    def increment(): Int = day.incrementAndGet()
-    def get(): Int = day.get()
-    def reset(): Unit = day.set(0)
-  }
+enum Role:
+  case Villager, Werwolf, Terrorist
 
-  enum Roles:
-    case werwolf
-    case villager
-    case amor
-    case terrorist
-    case witch
+enum Phase:
+  case Night, Day
 
-    def toPlayer(name: String): Player = this match
-      case Roles.werwolf   => Werwolf(name)
-      case Roles.villager  => Villager(name)
-      case Roles.amor      => Amor(name)
-      case Roles.terrorist => Terrorist(name)
-      case Roles.witch     => Witch(name)
 
-  def addRoles(players: Vector[String]): Map[String, Player] = {
-    if players.size == 2
-    then // sorgt dafür dass wenn es nur 2 Spieler gibt es immer 1 Werwolf und 1 Villager sind(sonst unnötig)
-      val roles = Vector(Roles.werwolf, Roles.villager)
-      val shuffeledRoles = Random.shuffle(roles)
-      (players zip shuffeledRoles).map { case (name, role) =>
-        val player = role.toPlayer(name)
-        player.name -> player
-      }.toMap
-    else
-      val werwolfAmount = if players.size <= 3 then 1 else 2
-      val roles = Vector(Roles.villager, Roles.witch, Roles.amor, Roles.terrorist)
-      val shuffeledRoles = Random.shuffle(roles)
-      val finalRoles: Vector[Roles] = (Vector.fill(werwolfAmount)(Roles.werwolf)
-        ++ shuffeledRoles).take(players.size)
-      (players zip finalRoles).map { case (name, role) =>
-        val player = role.toPlayer(name)
-        player.name -> player
-      }.toMap
-  }
+class Game() extends Subject {
 
-  def setPlayers(names: Vector[String]): Vector[String] =
-    players = names
-    players
-
-  def getPlayers: Vector[String] = players
 
   def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Player] = {
     import scala.io.StdIn.readLine

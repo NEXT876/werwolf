@@ -2,28 +2,47 @@
 package de.htwg.werwolf.controller
 
 import de.htwg.werwolf.model.*
-import de.htwg.werwolf.view.*
 
-class GameController(game: Game) extends Subject {
+import scala.util.Random
 
-  def startGame(players: Vector[String]): Unit =
-    val roles = game.addRoles(players)
-    val updated = game.night(roles)
+enum Role:
+  case werwolf, villager, terrorist, witch, amor
 
-    // UI übernimmt Anzeige
-    notifyObservers(GameEvent.GameStart(updated))
+  def toPlayer(name: String): Player = this match
+    case Role.werwolf   => Werwolf(name)
+    case Role.villager  => Villager(name)
+    case Role.amor      => Amor(name)
+    case Role.terrorist => Terrorist(name)
+    case Role.witch     => Witch(name)
 
-  def update(event: GameEvent): Unit = event match {
-    case GameEvent.NightPhaseStarted(roles)  => {}
-    case GameEvent.WerewolfTurn(name, roles) => {}
-    case GameEvent.GameStart(roles)          => {}
+class GameController(game: Game) {
+
+  def addRoles(players: Vector[String]): Unit = {
+    val roles = getRoles(players.size)
+
+    //1. Möglichkeit auslagern
+    // game.generatePlayerList(Random.shuffle(players), roles)
+
+    //2. Möglichkeit hier lassen und rüber speichern am Ende
+    val playerMap = Random
+      .shuffle(players)
+      .zip(roles)
+      .map { case (name, role) =>
+        val player = role.toPlayer(name)
+        player.name -> player
+      }
+      .toMap
+
+    //dann sowas, addPlayer gibt es halt noch nicht
+    //playerMap.values.foreach(game.addPlayer)
   }
-  def getPlayerNames(playerAmount: Int): Vector[String] =
-    (0 until playerAmount).foldLeft(Vector.empty[String]) { (acc, i) =>
-      var name = notifyRequestName(i)
-      while acc.contains(name) do
-        notifyDuplicateNameWarning()
-        name = notifyRequestName(i)
-      acc :+ name
-    }
+
+  def getRoles(playeramount: Int): Vector[Role] = {
+    if playeramount == 2 then Vector(Role.werwolf, Role.villager)
+    else
+      Vector.fill(playeramount / 3)(Role.werwolf) ++ Random.shuffle(
+        Vector(Role.villager, Role.witch, Role.amor, Role.terrorist)
+      )
+  }
+
 }
