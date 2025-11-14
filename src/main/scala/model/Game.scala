@@ -104,6 +104,13 @@ class Game extends Subject {
         case "Witch"   => root.Night.Witch
         case "Amor"    => root.Night.Amor
         case _         => List("")
+    def randomNarratorText(role: String, root: Root): String =
+      val list = role match {
+        case "Start"   => root.Night.Start
+        case "Werwolf" => root.Night.Werwolf
+        case "Witch"   => root.Night.Witch
+        case "Amor"    => root.Night.Amor
+        case _         => List("")
       }
       util.Random.shuffle(list).head
 }

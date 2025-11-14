@@ -4,13 +4,18 @@ package de.htwg.werwolf.view
 import scala.io.StdIn.readLine
 import scala.io.Source
 
-import de.htwg.werwolf.model.{Observer, GameEvent, Game}
+import de.htwg.werwolf.model.{Observer, GameEvent, Game, Player, NightPhaseStarted, WerewolfTurn}
 
 class TUI(game: Game) extends Observer {
   game.addObserver(this)
   override def update(event: GameEvent): Unit = event match {
     case NightPhaseStarted(roles) => {
-      val text = randomNarratorText("Werwolf")
+      val data =
+        game.NarratorService.loadNarratorJson(
+          os.pwd / "src" / "main" / "resources" / "narrator.json"
+        )
+
+      val text = game.NarratorService.randomNarratorText("Werwolf", data)
       tiping(text, 30)
     }
     case WerewolfTurn(name, roles) => {
@@ -19,9 +24,7 @@ class TUI(game: Game) extends Observer {
   }
 
   def start(): Unit = {
-    import sys.process._
-    "clear".!
-
+    clearScreen()
     tiping("Willkommen zu Werwolf", 100)
     showLogo()
 
@@ -30,9 +33,9 @@ class TUI(game: Game) extends Observer {
       println("\u001b[31mUngültige Spieleranzahl\u001b[0m");
       return;
     val player = getPlayerNames(false, playerAmount, Vector[String]())
-    "clear".!
-    val playerRoles = addRoles(player)
-    val updatedplayerroles = night(playerRoles)
+    clearScreen()
+    val playerRoles = game.addRoles(player)
+    val updatedplayerroles = game.night(playerRoles)
     println(printPlayerRoles(updatedplayerroles))
   }
 
@@ -95,5 +98,10 @@ class TUI(game: Game) extends Observer {
   private def showLogo(): Unit = {
     val text = Source.fromResource("logo.txt").mkString
     println(text)
+  }
+
+  private def clearScreen(): Unit = {
+    import sys.process._
+    "clear".!
   }
 }
