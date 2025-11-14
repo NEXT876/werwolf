@@ -4,21 +4,25 @@ package de.htwg.werwolf.view
 import scala.io.StdIn.readLine
 import scala.io.Source
 
-import de.htwg.werwolf.model.{Observer, GameEvent, Game, Player, NightPhaseStarted, WerewolfTurn}
+import de.htwg.werwolf.model.{Observer, GameEvent, Game, Player}
+import de.htwg.werwolf.controller.GameController
 
-class TUI(game: Game) extends Observer {
+class TUI(game: Game, controller: GameController) extends Observer {
   game.addObserver(this)
   override def update(event: GameEvent): Unit = event match {
-    case NightPhaseStarted(roles) => {
+    case GameEvent.NightPhaseStarted(roles) => {
       val data =
         game.NarratorService.loadNarratorJson(
           os.pwd / "src" / "main" / "resources" / "narrator.json"
         )
-
       val text = game.NarratorService.randomNarratorText("Werwolf", data)
       tiping(text, 30)
     }
-    case WerewolfTurn(name, roles) => {
+    case GameEvent.WerewolfTurn(name, roles) => {
+      println(printPlayerRoles(roles))
+    }
+
+    case GameEvent.GameStart(roles) => {
       println(printPlayerRoles(roles))
     }
   }
@@ -32,11 +36,9 @@ class TUI(game: Game) extends Observer {
     if playerAmount < 2 || playerAmount > 6 then
       println("\u001b[31mUngültige Spieleranzahl\u001b[0m");
       return;
-    val player = getPlayerNames(false, playerAmount, Vector[String]())
+    val players = getPlayerNames(false, playerAmount, Vector[String]())
     clearScreen()
-    val playerRoles = game.addRoles(player)
-    val updatedplayerroles = game.night(playerRoles)
-    println(printPlayerRoles(updatedplayerroles))
+    controller.startGame(players)
   }
 
   def printPlayerRoles(playerRoles: Map[String, Player]): String = {
@@ -51,6 +53,7 @@ class TUI(game: Game) extends Observer {
     val footer = "\n==================================================\n"
     header + body + footer
   }
+  
   def getplayerAmount(test: Boolean, fakeInput: Int): Int = {
     val playerAmount =
       if test then fakeInput
