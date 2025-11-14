@@ -67,13 +67,13 @@ class Game extends Subject {
     import scala.io.StdIn.readLine
     import scala.io.Source
 
-    notifyObservers(NightPhaseStarted(playerRoles))
+    notifyObservers(GameEvent.NightPhaseStarted(playerRoles))
 
     val initialVotes = Votes()
     val (updatedRoles, finalVotes) = playerRoles.foldLeft(playerRoles, initialVotes) {
       case ((currentState, votesObject), (name, player)) =>
         if (player.role == "Werwolf" && player.isAlive) {
-          notifyObservers(WerewolfTurn(name, currentState))
+          notifyObservers(GameEvent.WerewolfTurn(name, currentState))
           if (fakeInt == 999) {
             val vote = readLine(s"Spieler $name, bitte geben sie an wen sie umbringen möchten: ")
             val voteText = player.vote(currentState(vote))
