@@ -5,7 +5,6 @@ import de.htwg.werwolf.model.{Amor, Player, Terrorist, Villager, Werwolf, Witch}
 import de.htwg.werwolf.model.Votes
 import de.htwg.werwolf.model.Observer
 import de.htwg.werwolf.model.Subject
-
 import de.htwg.werwolf.narrator.Root
 
 import java.util.concurrent.atomic.AtomicInteger
@@ -93,8 +92,7 @@ class Game extends Subject {
   }
 
   object NarratorService:
-    import upickle.default._
-
+    import upickle.default.*
     def loadNarratorJson(path: os.Path): Root =
       val jsonString = os.read(path)
       read[Root](jsonString)
@@ -108,5 +106,4 @@ class Game extends Subject {
         case _         => List("")
       }
       util.Random.shuffle(list).head
-
 }
