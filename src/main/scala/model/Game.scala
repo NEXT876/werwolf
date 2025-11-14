@@ -1,11 +1,15 @@
 // src/main/model/Game.scala
-
 package de.htwg.werwolf.model
+
 import de.htwg.werwolf.model.{Amor, Player, Terrorist, Villager, Werwolf, Witch}
 import de.htwg.werwolf.model.Votes
+import de.htwg.werwolf.model.Observer
+import de.htwg.werwolf.model.Subject
 
 import java.util.concurrent.atomic.AtomicInteger
 import scala.util.Random
+
+class Game extends Subject {
 
 object GlobalDayCounter {
   private val day = new AtomicInteger(0)
@@ -54,13 +58,14 @@ def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Pla
   import scala.io.StdIn.readLine
   import scala.io.Source
 
-  val text = randomNarratorText("Werwolf")
-  tiping(text, 30)
+
+  notifyObservers(NightPhaseStarted(playerRoles))
+
   val initialVotes = Votes()
   val (updatedRoles, finalVotes) = playerRoles.foldLeft(playerRoles, initialVotes) {
     case ((currentState, votesObject), (name, player)) =>
       if (player.role == "Werwolf" && player.isAlive) {
-        print(printPlayerRoles(currentState))
+        notifyObservers(WerewolfTurn(name, currentState))
         if (fakeInt == 999) {
           val vote = readLine(s"Spieler $name, bitte geben sie an wen sie umbringen möchten: ")
           val voteText = player.vote(currentState(vote))
@@ -84,4 +89,5 @@ def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Pla
       updatedRoles
   }
 
+}
 }
