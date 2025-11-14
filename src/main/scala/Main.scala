@@ -8,5 +8,5 @@ import view.TUI
 @main def main(): Unit =
   val game = Game()
   val controller = GameController(game)
-  val tui = TUI(controller)
+  val tui = TUI(game)
   tui.start()

@@ -5,9 +5,7 @@ import de.htwg.werwolf.model.{Observer, GameEvent, Game}
 
 class GameController(game: Game) extends Observer {
   game.addObserver(this)
-//...
-//..
-//.
+  
   val data =
     NarratorService.loadNarratorJson(os.pwd / "src" / "main" / "resources" / "narrator.json")
 
