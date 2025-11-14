@@ -85,3 +85,22 @@ def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Pla
   }
 
 }
+
+object NarratorService:
+
+  def loadNarratorJson(path: os.Path): Root =
+    val jsonString = os.read(path)
+    read[Root](jsonString)
+
+  def randomNarratorText(Rolle: String): String =
+    val jsonString = os.read(os.pwd / "src" / "main" / "resources" / "narrator.json")
+    val data = read[Root](jsonString)
+    val text = Rolle match {
+      case "Start"   => data.Night.Start
+      case "Werwolf" => data.Night.Werwolf
+      case "Witch"   => data.Night.Witch
+      case "Amor"    => data.Night.Amor
+      case _         => List[String]("")
+    }
+    val randomText = util.Random.shuffle(text).head
+    randomText
