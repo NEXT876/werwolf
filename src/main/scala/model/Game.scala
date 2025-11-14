@@ -9,8 +9,10 @@ import de.htwg.werwolf.narrator.Root
 
 import java.util.concurrent.atomic.AtomicInteger
 import scala.util.Random
+import scala.compiletime.ops.boolean
 
 class Game extends Subject {
+  private var players: Vector[String] = Vector.empty
 
   object GlobalDayCounter {
     private val day = new AtomicInteger(0)
@@ -54,6 +56,12 @@ class Game extends Subject {
         player.name -> player
       }.toMap
   }
+
+  def setPlayers(names: Vector[String]): Vector[String] =
+    players = names
+    players
+
+  def getPlayers: Vector[String] = players
 
   def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Player] = {
     import scala.io.StdIn.readLine
@@ -106,4 +114,5 @@ class Game extends Subject {
         case _         => List("")
       }
       util.Random.shuffle(list).head
+
 }
