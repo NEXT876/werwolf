@@ -64,25 +64,12 @@ class TUI(game: Game, controller: GameController) extends Observer {
     playerAmount
   }
 
-  def getPlayerNames(
-      test: Boolean,
-      playerAmount: Int,
-      fakeInput: Vector[String]
-  ): Vector[String] = {
-    if test then fakeInput
-    else
-      (0 until playerAmount)
-        .foldLeft(Set[String]()) { (acc, i) =>
-          var name = readLine(s"Spieler ${i + 1} bitte geben sie ihren Namen an: ").trim
-          while (acc.contains(name)) {
-            println("Name gibt es bereits, bitte wähle einen anderen")
-            name = readLine(s"Spieler ${i + 1} bitte geben sie ihren Namen an: ").trim
-          }
+  def askForPlayerName(playerIndex: Int): String =
+    print(s"Spieler ${playerIndex + 1} bitte geben sie ihren Namen an: ")
+    scala.io.StdIn.readLine().trim
 
-          acc + name
-        }
-        .toVector
-  }
+  def showDuplicateNameWarning(): Unit =
+    println("Name gibt es bereits, bitte wähle einen anderen")
 
   def tiping(text: String, waitTime_ms: Int): Boolean = {
     text.foreach { buchstabe =>
