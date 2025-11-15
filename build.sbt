@@ -8,6 +8,8 @@ lazy val root = project
 
     scalaVersion := scala3Version,
 
+    coverageEnabled.in(Test, test) := true,
+
     libraryDependencies ++= Seq(
       "org.scalameta" %% "munit" % "1.0.0" % Test,
       "org.scalactic" %% "scalactic" % "3.2.18",

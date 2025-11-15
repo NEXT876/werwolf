@@ -1,6 +1,39 @@
+# .travis.yml
 language: scala
+
 scala:
-  - 2.9.3
-  - 2.10.6
-  - 2.11.11
-  - 2.12.2
+  - 3.7.3   # Richtig: Scala 3.7.3
+
+jdk:
+  - openjdk21   # Scala 3.7.3 braucht mindestens JDK 17, JDK 21 ist empfohlen
+
+# Optional: SBT-Version fixieren (stabil)
+before_install:
+  - sbt -v sbtVersion
+
+# Caching: SBT & Ivy (beschleunigt Builds massiv)
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt
+    - $HOME/.cache/coursier   # Wichtig für Scala 3!
+
+# Build & Test mit Coverage
+script:
+  - sbt clean coverage test coverageReport
+
+# Coveralls nur bei Erfolg
+after_success:
+  - sbt coverageAggregate
+  - sbt coveralls
+
+# Nur main/master tracken
+branches:
+  only:
+    - main
+    - master
+
+# Optional: Debug-Ausgabe bei Fehlern
+env:
+  global:
+    - SBT_OPTS="-Xms512M -Xmx2G -XX:MaxMetaspaceSize=512M"
