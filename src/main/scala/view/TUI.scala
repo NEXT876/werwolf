@@ -25,6 +25,16 @@ class TUI(game: Game, controller: GameController) extends Observer {
     case GameEvent.GameStart(roles) => {
       println(printPlayerRoles(roles))
     }
+    case GameEvent.RequestPlayerName(index: Int) =>
+      print(s"Spieler ${index + 1} bitte geben sie ihren Namen an: ")
+      scala.io.StdIn.readLine().trim
+    // TODO check for duplicates
+    /*while acc.contains(name) do
+
+          name = notifyRequestName(i)
+        acc :+ name*/
+    case GameEvent.DuplicateNameWarning =>
+      println("Name gibt es bereits, bitte wähle einen anderen")
   }
 
   def start(): Unit = {
@@ -36,7 +46,7 @@ class TUI(game: Game, controller: GameController) extends Observer {
     if playerAmount < 2 || playerAmount > 6 then
       println("\u001b[31mUngültige Spieleranzahl\u001b[0m");
       return;
-    val players = getPlayerNames(false, playerAmount, Vector[String]())
+    val players = controller.getPlayerNames(false, playerAmount, Vector[String]())
     clearScreen()
     controller.startGame(players)
   }
@@ -63,13 +73,6 @@ class TUI(game: Game, controller: GameController) extends Observer {
         ).toInt
     playerAmount
   }
-
-  def askForPlayerName(playerIndex: Int): String =
-    print(s"Spieler ${playerIndex + 1} bitte geben sie ihren Namen an: ")
-    scala.io.StdIn.readLine().trim
-
-  def showDuplicateNameWarning(): Unit =
-    println("Name gibt es bereits, bitte wähle einen anderen")
 
   def tiping(text: String, waitTime_ms: Int): Boolean = {
     text.foreach { buchstabe =>

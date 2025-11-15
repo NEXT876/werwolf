@@ -10,3 +10,4 @@ import view.TUI
   val controller = GameController(game)
   val tui = TUI(game, controller)
   tui.start()
+//tui.run();

@@ -18,12 +18,15 @@ class GameController(game: Game) extends Subject {
     case GameEvent.WerewolfTurn(name, roles) => {}
     case GameEvent.GameStart(roles)          => {}
   }
-  def getPlayerNames(playerAmount: Int): Vector[String] =
-    (0 until playerAmount).foldLeft(Vector.empty[String]) { (acc, i) =>
-      var name = notifyRequestName(i)
-      while acc.contains(name) do
-        notifyDuplicateNameWarning()
-        name = notifyRequestName(i)
-      acc :+ name
-    }
+  def getPlayerNames(test: Boolean, fakeInput: Vector[String], playerAmount: Int): Vector[String] =
+    if test then fakeInput
+    else
+      (0 until playerAmount).foldLeft(Vector.empty[String]) { (acc, i) =>
+        // TODO no return value
+        var name = notifyObservers(GameEvent.RequestPlayerName(i))
+        /*while acc.contains(name) do
+          notifyDuplicateNameWarning()
+          name = notifyRequestName(i)
+        acc :+ name*/
+      }
 }
