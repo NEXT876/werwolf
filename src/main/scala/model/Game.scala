@@ -1,35 +1,81 @@
 // src/main/model/Game.scala
 package de.htwg.werwolf.model
 
-import de.htwg.werwolf.narrator.Root
+import de.htwg.werwolf.narrator.*
+
 import scala.util.Random
-
-private var players: List[Player] = Nil
-private var phase: Phase = Phase.Night
-
-case class GameState(
-    players: Map[String, Player], // Name -> Player (Werwolf, Villager, etc.)
-    day: Int = 1,
-    phase: Phase = Phase.Night, // Day, Night, Voting
-    votes: Votes = Votes(), // Aktuelle Abstimmungen
-    isRunning: Boolean = true
-) {}
-
-enum Role:
-  case Villager, Werwolf, Terrorist
 
 enum Phase:
   case Night, Day
 
+enum Roles:
+  case werwolf, villager, terrorist, witch, amor
 
-class Game() extends Subject {
+  def toPlayer(name: String): Player = this match
+    case Roles.werwolf   => Werwolf(name)
+    case Roles.villager  => Villager(name)
+    case Roles.terrorist => Terrorist(name)
+    case Roles.witch     => Witch(name)
+    case Roles.amor      => Amor(name)
 
+case class GameState(
+    day: Int,
+    phase: Phase,
+    votes: Votes,
+    isRunning: Boolean,
+    alivePlayers: Map[String, Player]
+)
 
-  def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Player] = {
+class Game() extends Subject[GameState] {
+  private var players: Map[String, Player] = Map.empty
+  private var phase: Phase = Phase.Night
+  private var day: Int = 1
+  private var votes: Votes = Votes()
+  private var isRunning: Boolean = true
+
+  def currentState: GameState =
+    GameState(
+      day = day,
+      phase = phase,
+      votes = votes, // Kopie, falls mutable
+      isRunning = isRunning,
+      alivePlayers = players.filter(_._2.isAlive).toMap
+    )
+
+  def addPlayers(newPlayers: Map[String, Player]): Unit =
+    players = players ++ newPlayers
+    notifyObservers(currentState)
+
+  def switchPhase(): Unit =
+    phase = if phase == Phase.Night then Phase.Day else Phase.Night
+    notifyObservers(currentState)
+
+  def GameEnd() : Unit = 
+    isRunning = false
+    notifyObservers(currentState)
+
+  object NarratorService:
+    import upickle.default.*
+    def loadNarratorJson(path: os.Path): Root =
+      val jsonString = os.read(path)
+      read[Root](jsonString)
+
+    def randomNarratorText(role: String, root: Root): String =
+      val list = role match {
+        case "Start"   => root.Night.Start
+        case "Werwolf" => root.Night.Werwolf
+        case "Witch"   => root.Night.Witch
+        case "Amor"    => root.Night.Amor
+        case _         => List("")
+      }
+      util.Random.shuffle(list).head
+}
+
+/* def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Player] = {
     import scala.io.StdIn.readLine
     import scala.io.Source
 
-    notifyObservers(GameEvent.NightPhaseStarted(playerRoles))
+    notifyObservers(currentState)
 
     val initialVotes = Votes()
     val (updatedRoles, finalVotes) = playerRoles.foldLeft(playerRoles, initialVotes) {
@@ -60,21 +106,4 @@ class Game() extends Subject {
     }
 
   }
-
-  object NarratorService:
-    import upickle.default.*
-    def loadNarratorJson(path: os.Path): Root =
-      val jsonString = os.read(path)
-      read[Root](jsonString)
-
-    def randomNarratorText(role: String, root: Root): String =
-      val list = role match {
-        case "Start"   => root.Night.Start
-        case "Werwolf" => root.Night.Werwolf
-        case "Witch"   => root.Night.Witch
-        case "Amor"    => root.Night.Amor
-        case _         => List("")
-      }
-      util.Random.shuffle(list).head
-
-}
+ */

@@ -1,42 +1,35 @@
 // src/main/scala/view/TUI.scala
 package de.htwg.werwolf.view
 
-import scala.io.StdIn.readLine
-import scala.io.Source
-
 import de.htwg.werwolf.model.*
 import de.htwg.werwolf.controller.GameController
 
-class TUI(controller: GameController) extends Observer {
-  override def update(event: GameEvent): Unit = event match {
-    case GameEvent.NightPhaseStarted(roles) => {
-      val data =
-        game.NarratorService.loadNarratorJson(
-          os.pwd / "src" / "main" / "resources" / "narrator.json"
-        )
-      val text = game.NarratorService.randomNarratorText("Werwolf", data)
-      tiping(text, 30)
-    }
-    case GameEvent.WerewolfTurn(name, roles) => {
-      println(printPlayerRoles(roles))
-    }
+import scala.io.StdIn.readLine
+import scala.io.Source
 
-    case GameEvent.GameStart(roles) => {
-      println(printPlayerRoles(roles))
-    }
-  }
+class TUI(controller: GameController) extends Observer[GameState] {
+  override def update(state : GameState): Unit = 
+    if state.isRunning then
+      clearScreen()
+      println(printPlayerRoles(state.alivePlayers))
+
+      state.phase match 
+        case Phase.Night => 
+        case Phase.Day => 
+      
+    else 
+      println("Game zuende")
+      System.exit(0)
 
   def start(): Unit = {
     clearScreen()
     tiping("Willkommen zu Werwolf", 100)
     showLogo()
 
-    println("Wie viele Spieler? (mind. 5, max. 12)")
-    val numPlayers = readLine().toIntOption.getOrElse(5) max 5 min 12
+    val numPlayers = readLine("Wie viele Spieler? (mind. 2, max. 6):").toIntOption.getOrElse(5) max 6 min 2
 
-    val names = (1 to numPlayers).map { i =>
-      println(s"Spieler${i+1} wie heißen sie:")
-      readLine().trim match
+    val names = (0 to numPlayers).map { i =>
+      readLine(s"Spieler${i+1} wie heißen sie:").trim match
         case "" => s"Spieler$i"
         case n  => n
     }.toVector
@@ -45,10 +38,12 @@ class TUI(controller: GameController) extends Observer {
     run()
   }
 
-  def run() : Unit{
-    
-      //GameLoop
-  }
+  def run() : Unit = 
+      while(true){
+        controller.process("switchPhase")
+        controller.process("GameEnd")
+      }
+  
 
   def printPlayerRoles(playerRoles: Map[String, Player]): String = {
     val header = "\n================ Spieler & Rollen ================\n"
@@ -72,7 +67,7 @@ class TUI(controller: GameController) extends Observer {
   def showDuplicateNameWarning(): Unit =
     println("Name gibt es bereits, bitte wähle einen anderen")
 
-  def tiping(text: String, waitTime_ms: Int): Boolean = {
+  def tiping(text: String, waitTime_ms: Int): Unit = {
     text.foreach { buchstabe =>
       if (buchstabe == '.') {
         Thread.sleep(waitTime_ms * 4)
@@ -83,7 +78,6 @@ class TUI(controller: GameController) extends Observer {
       }
     }
     println()
-    true
   }
 
   private def showLogo(): Unit = {

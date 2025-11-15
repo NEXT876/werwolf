@@ -1,15 +1,19 @@
 // src/main/scala/de/htwg/werwolf/model/Subject.scala
 package de.htwg.werwolf.model
 
-trait Subject {
-  private var observers: List[Observer] = Nil
-  
-  def addObserver(o: Observer): Unit = 
-    observers = o :: observers
-  
-  def removeObserver(o: Observer): Unit = 
-    observers = observers.filter(_ != o)
-    
-  protected def notifyObservers(event: GameEvent): Unit = 
-    observers.foreach(_.update(event))
-}
+trait Observer[-S]:
+  def update(state: S): Unit
+
+trait Subject[S]:
+  private var observers: Vector[Observer[S]] = Vector.empty
+
+  def addObserver(obs: Observer[S]): Unit =
+    if !observers.contains(obs) then
+      observers = observers :+ obs   // Duplikate vermeiden + performant append
+
+  def removeObserver(obs: Observer[S]): Unit =
+    observers = observers.filterNot(_ == obs)
+
+  protected def notifyObservers(state: S): Unit =
+    // Kopie + reverse = safe gegen ConcurrentModification, wenn Observer sich selbst entfernt
+    observers.reverse.foreach(_.update(state))
