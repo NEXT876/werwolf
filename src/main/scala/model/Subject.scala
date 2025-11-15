@@ -17,3 +17,4 @@ trait Subject[S]:
   protected def notifyObservers(Event : S): Unit =
     // Kopie + reverse = safe gegen ConcurrentModification, wenn Observer sich selbst entfernt
     observers.reverse.foreach(_.update(Event))
+    
