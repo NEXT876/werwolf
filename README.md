@@ -1,4 +1,3 @@
-[![Build Status](https://app.travis-ci.com/NEXT876/werwolf.svg?token=erB46LsWzGni8FYa97EZ&branch=feature/architecturefix)](https://app.travis-ci.com/NEXT876/werwolf)
 [![Coverage Status](https://coveralls.io/repos/github/NEXT876/werwolf/badge.svg?branch=main)](https://coveralls.io/github/NEXT876/werwolf?branch=main)
 
 ## Werwolf, a small student-scala-project
