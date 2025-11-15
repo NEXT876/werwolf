@@ -5,6 +5,7 @@ import de.htwg.werwolf.narrator.*
 
 import scala.util.Random
 
+
 enum Phase:
   case Night, Day
 
