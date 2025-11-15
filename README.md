@@ -1,3 +1,4 @@
+![GitHub Actions](https://github.com/NEXT876/werwolf/actions/workflows/ci.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/NEXT876/werwolf/badge.svg?branch=main)](https://coveralls.io/github/NEXT876/werwolf?branch=main)
 
 ## Werwolf, a small student-scala-project
