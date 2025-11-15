@@ -1,3 +1,5 @@
+[![Build Status](https://app.travis-ci.com/NEXT876/werwolf.svg?token=erB46LsWzGni8FYa97EZ&branch=feature/architecturefix)](https://app.travis-ci.com/NEXT876/werwolf)
+
 ## Werwolf, a small student-scala-project
 
 ### sbt project compiled with Scala 3
