@@ -5,7 +5,8 @@ import de.htwg.werwolf.model.*
 
 import scala.util.Random
 
-class GameController(game: Game) {
+class GameController(private val game: Game) {
+  def getGame: Game = game
 
   def addRoles(players: Vector[String]): Unit = {
     val roles = getRoles(players.size)
@@ -33,5 +34,6 @@ class GameController(game: Game) {
   def process(input : String): Unit = 
     input match 
       case "switchPhase" => game.switchPhase()
+      // 
       case "GameEnd" => game.GameEnd()
 }

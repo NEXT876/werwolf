@@ -26,7 +26,7 @@ case class GameState(
     alivePlayers: Map[String, Player]
 )
 
-class Game() extends Subject[GameState] {
+class Game() extends Subject[GameEvent] {
   private var players: Map[String, Player] = Map.empty
   private var phase: Phase = Phase.Night
   private var day: Int = 1
@@ -44,15 +44,15 @@ class Game() extends Subject[GameState] {
 
   def addPlayers(newPlayers: Map[String, Player]): Unit =
     players = players ++ newPlayers
-    notifyObservers(currentState)
+    notifyObservers(GameEvent.printGameState)
 
   def switchPhase(): Unit =
     phase = if phase == Phase.Night then Phase.Day else Phase.Night
-    notifyObservers(currentState)
+    notifyObservers(GameEvent.phaseSwitch)
 
   def GameEnd() : Unit = 
     isRunning = false
-    notifyObservers(currentState)
+    notifyObservers(GameEvent.gameEnd)
 
   object NarratorService:
     import upickle.default.*

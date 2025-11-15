@@ -14,6 +14,6 @@ trait Subject[S]:
   def removeObserver(obs: Observer[S]): Unit =
     observers = observers.filterNot(_ == obs)
 
-  protected def notifyObservers(state: S): Unit =
+  protected def notifyObservers(Event : S): Unit =
     // Kopie + reverse = safe gegen ConcurrentModification, wenn Observer sich selbst entfernt
-    observers.reverse.foreach(_.update(state))
+    observers.reverse.foreach(_.update(Event))
