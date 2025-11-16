@@ -2,31 +2,38 @@
 package de.htwg.werwolf.controller
 
 import de.htwg.werwolf.model.*
-import de.htwg.werwolf.view.*
 
-class GameController(game: Game) extends Subject {
+import scala.util.Random
 
-  def startGame(players: Vector[String]): Unit =
-    val roles = game.addRoles(players)
-    val updated = game.night(roles)
+class GameController(private val game: Game) {
+  def getGame: Game = game
 
-    // UI übernimmt Anzeige
-    notifyObservers(GameEvent.GameStart(updated))
+  def addRoles(players: Vector[String]): Unit = {
+    val roles = getRoles(players.size)
 
-  def update(event: GameEvent): Unit = event match {
-    case GameEvent.NightPhaseStarted(roles)  => {}
-    case GameEvent.WerewolfTurn(name, roles) => {}
-    case GameEvent.GameStart(roles)          => {}
-  }
-  def getPlayerNames(test: Boolean, fakeInput: Vector[String], playerAmount: Int): Vector[String] =
-    if test then fakeInput
-    else
-      (0 until playerAmount).foldLeft(Vector.empty[String]) { (acc, i) =>
-        // TODO no return value
-        var name = notifyObservers(GameEvent.RequestPlayerName(i))
-        /*while acc.contains(name) do
-          notifyDuplicateNameWarning()
-          name = notifyRequestName(i)
-        acc :+ name*/
+    val playerMap = Random
+      .shuffle(players)
+      .zip(roles)
+      .map { case (name, role) =>
+        val player = role.toPlayer(name)
+        player.name -> player
       }
+      .toMap
+
+    game.addPlayers(playerMap)
+  }
+
+  def getRoles(playeramount: Int): Vector[Roles] = {
+    if playeramount == 2 then Vector(Roles.werwolf, Roles.villager)
+    else
+      Vector.fill(playeramount / 3)(Roles.werwolf) ++ Random.shuffle(
+        Vector(Roles.villager, Roles.witch, Roles.amor, Roles.terrorist)
+      )
+  }
+
+  def process(input: String): Unit =
+    input match
+      case "switchPhase" => game.switchPhase()
+      //
+      case "GameEnd" => game.GameEnd()
 }

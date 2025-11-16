@@ -8,6 +8,7 @@ import view.TUI
 @main def main(): Unit =
   val game = Game()
   val controller = GameController(game)
-  val tui = TUI(game, controller)
+  val tui = TUI(controller)
+  game.addObserver(tui)
   tui.start()
 //tui.run();

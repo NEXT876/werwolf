@@ -1,55 +1,55 @@
 // src/main/scala/view/TUI.scala
 package de.htwg.werwolf.view
 
-import scala.io.StdIn.readLine
-import scala.io.Source
-
-import de.htwg.werwolf.model.{Observer, GameEvent, Game, Player}
+import de.htwg.werwolf.model.*
 import de.htwg.werwolf.controller.GameController
 
-class TUI(game: Game, controller: GameController) extends Observer {
-  game.addObserver(this)
-  override def update(event: GameEvent): Unit = event match {
-    case GameEvent.NightPhaseStarted(roles) => {
-      val data =
-        game.NarratorService.loadNarratorJson(
-          os.pwd / "src" / "main" / "resources" / "narrator.json"
-        )
-      val text = game.NarratorService.randomNarratorText("Werwolf", data)
-      tiping(text, 30)
-    }
-    case GameEvent.WerewolfTurn(name, roles) => {
-      println(printPlayerRoles(roles))
-    }
+import scala.io.StdIn.readLine
 
-    case GameEvent.GameStart(roles) => {
-      println(printPlayerRoles(roles))
-    }
-    case GameEvent.RequestPlayerName(index: Int) =>
-      print(s"Spieler ${index + 1} bitte geben sie ihren Namen an: ")
-      scala.io.StdIn.readLine().trim
-    // TODO check for duplicates
-    /*while acc.contains(name) do
+class TUI(controller: GameController) extends Observer[GameEvent] {
+  override def update(event: GameEvent): Unit =
+    val state = controller.getGame.currentState
 
-          name = notifyRequestName(i)
-        acc :+ name*/
-    case GameEvent.DuplicateNameWarning =>
-      println("Name gibt es bereits, bitte wähle einen anderen")
-  }
+    event match
+      case GameEvent.printGameState =>
+        clearScreen()
+        showLogo()
+        println(printPlayerRoles(state.alivePlayers))
+      case GameEvent.phaseSwitch =>
+      //
+      case GameEvent.gameEnd =>
+        println("Das Spiel ist vorbei")
+        System.exit(0)
 
   def start(): Unit = {
     clearScreen()
     tiping("Willkommen zu Werwolf", 100)
     showLogo()
 
-    val playerAmount = getplayerAmount(false, 0)
-    if playerAmount < 2 || playerAmount > 6 then
-      println("\u001b[31mUngültige Spieleranzahl\u001b[0m");
-      return;
-    val players = controller.getPlayerNames(false, playerAmount, Vector[String]())
+    val numPlayers = {
+      val input = readLine("Wie viele Spieler? (mind. 2, max. 6): ")
+      input.toIntOption match {
+        case Some(n) => n.min(6).max(2)
+        case None    => 5
+      }
+    }
+
+    val names = (0 until numPlayers).map { i =>
+      readLine(s"Spieler${i + 1} wie heißen sie:").trim match
+        case "" => s"Spieler${i + 1}"
+        case n  => n
+    }.toVector
     clearScreen()
-    controller.startGame(players)
+    controller.addRoles(names)
+    run()
   }
+
+  def run(): Unit =
+    while (true) {
+      controller.process("switchPhase")
+      //
+      controller.process("GameEnd")
+    }
 
   def printPlayerRoles(playerRoles: Map[String, Player]): String = {
     val header = "\n================ Spieler & Rollen ================\n"
@@ -64,17 +64,7 @@ class TUI(game: Game, controller: GameController) extends Observer {
     header + body + footer
   }
 
-  def getplayerAmount(test: Boolean, fakeInput: Int): Int = {
-    val playerAmount =
-      if test then fakeInput
-      else
-        readLine(
-          "Bitte Spieleranzahl eingeben ( Mindestanzahl 2, Maximale Spieleranzahl 7): "
-        ).toInt
-    playerAmount
-  }
-
-  def tiping(text: String, waitTime_ms: Int): Boolean = {
+  def tiping(text: String, waitTime_ms: Int): Unit = {
     text.foreach { buchstabe =>
       if (buchstabe == '.') {
         Thread.sleep(waitTime_ms * 4)
@@ -85,12 +75,11 @@ class TUI(game: Game, controller: GameController) extends Observer {
       }
     }
     println()
-    true
   }
 
   private def showLogo(): Unit = {
-    val text = Source.fromResource("logo.txt").mkString
-    println(text)
+    import scala.io.Source
+    println(Source.fromResource("logo.txt").mkString)
   }
 
   private def clearScreen(): Unit = {
