@@ -1,55 +1,42 @@
 name: Scala CI
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ main, develop ]
   workflow_dispatch:
+
 permissions:
-  contents: write # Für Dependency Submission
-  pull-requests: write # Für Dependabot-Alerts
+  contents: write
+  pull-requests: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Wichtig für korrekte Commit-Info bei Coveralls!
+          fetch-depth: 0
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v4
+      # Nur noch EIN Setup-Schritt – das reicht!
+      - name: Setup Java + Scala + SBT
+        uses: olafurpg/setup-scala@v15
         with:
-          distribution: 'temurin'
-          java-version: '11'
-          cache: 'sbt'  # SBT-Cache integriert
+          java-version: temurin@1.21   # oder temurin@1.17
 
-      - name: Setup sbt
-        uses: scalacenter/setup-scala@v4  # Besser als sbt/setup-sbt – unterstützt Scala 3+ und Coursier
-        with:
-          context-name: sbt  # Für Cache
-
-      - name: Cache sbt
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.sbt
-            ~/.ivy2/cache
-            ~/.cache/coursier
-          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt', 'project/**/*.scala', 'project/build.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-sbt-
+      # Der manuelle Cache ist jetzt überflüssig!
+      # olafurpg/setup-scala cached automatisch ~/.sbt, ~/.ivy2, ~/.coursier
+      # Du kannst ihn komplett entfernen → spart einen Step + ist zuverlässiger
 
       - name: Run tests with coverage
-        run: sbt clean coverage test coverageReport  # ← HIER der Coverage-Magic!
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}  # Für PRs verfügbar
-
-      - name: Upload coverage to Coveralls
-        run: sbt coverageAggregate coveralls  # ← Das sendet die Daten!
+        run: sbt clean coverage test coverageReport
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          COVERALLS_FLAG_NAME: Scala CI  # Optional: Job-Name für Multi-Job-Setups
-        if: success()  # Nur bei grünen Tests
+
+      - name: Upload coverage to Coveralls
+        run: sbt coverageAggregate coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
       - name: Upload dependency graph
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
