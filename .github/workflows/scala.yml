@@ -1,36 +1,33 @@
 name: Scala CI
-
 on:
   push:
     branches: [ "main", "develop" ]
   pull_request:
     branches: [ "main", "develop" ]
   workflow_dispatch:
-
 permissions:
-  contents: write   # Für Dependency Submission
-  pull-requests: write   # Für Dependabot-Alerts
-
+  contents: write # Für Dependency Submission
+  pull-requests: write # Für Dependabot-Alerts
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Wichtig für korrekte Commit-Info bei Coveralls!
 
       - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '11'
-          cache: 'sbt'   # Optional: Baut sbt-Cache in setup-java ein
+          cache: 'sbt'  # SBT-Cache integriert
 
-      # Hier der Fix: Vollständiger Action-Name mit Organisation
       - name: Setup sbt
-        uses: sbt/setup-sbt@v1   # ← Das war der fehlende Teil: sbt/
+        uses: scalacenter/setup-scala@v4  # Besser als sbt/setup-sbt – unterstützt Scala 3+ und Coursier
+        with:
+          context-name: sbt  # Für Cache
 
-      # Optional: Separater Cache für sbt-Dependencies (spart Zeit bei wiederholten Runs)
       - name: Cache sbt
         uses: actions/cache@v4
         with:
@@ -42,8 +39,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-sbt-
 
-      - name: Run tests
-        run: sbt test
+      - name: Run tests with coverage
+        run: sbt clean coverage test coverageReport  # ← HIER der Coverage-Magic!
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}  # Für PRs verfügbar
+
+      - name: Upload coverage to Coveralls
+        run: sbt coverageAggregate coveralls  # ← Das sendet die Daten!
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          COVERALLS_FLAG_NAME: Scala CI  # Optional: Job-Name für Multi-Job-Setups
+        if: success()  # Nur bei grünen Tests
 
       - name: Upload dependency graph
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
