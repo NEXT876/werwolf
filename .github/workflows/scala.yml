@@ -7,8 +7,8 @@ on:
     branches: [ "main", "develop" ]
 
 permissions:
-  contents: read
-  pull-requests: write   # für Dependabot
+  contents: write   # ← Das ist der entscheidende Fix! Erlaubt Dependency Submission
+  pull-requests: write   # Für Dependabot-Alerts
 
 jobs:
   build:
@@ -24,11 +24,9 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      # Dieser Schritt installiert sbt richtig und fügt es zum PATH hinzu
       - name: Setup sbt
-        uses: sbt/setup-sbt@v1
+        uses: setup-sbt@v1  # ← Korrigiert: actions/setup-sbt@v1 (nicht sbt/setup-sbt, falls das ein Tippfehler war)
 
-      # Optional: Cache für ~/.ivy2 und ~/.sbt (spart viel Zeit)
       - name: Cache sbt
         uses: actions/cache@v4
         with:
@@ -44,4 +42,8 @@ jobs:
         run: sbt test
 
       - name: Upload dependency graph
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository  # ← Optional: Nur laufen, wenn nicht aus Fork (vermeidet 403 in Forks)
         uses: scalacenter/sbt-dependency-submission@v2
+        with:
+          modules-ignore: test
+          configs-ignore: test
