@@ -2,8 +2,6 @@
 package de.htwg.werwolf.model
 
 enum GameEvent:
-    case printGameState
-    case phaseSwitch
-    case gameEnd
-
-
+  case printGameState
+  case phaseSwitch
+  case gameEnd

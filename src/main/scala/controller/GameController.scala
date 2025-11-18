@@ -31,10 +31,10 @@ class GameController(private val game: Game) {
       )
   }
 
-  def process(input : String): Unit = 
-    input match 
+  def process(input: String): Unit =
+    input match
       case "switchPhase" => game.switchPhase()
-      // 
+      //
       case "GameEnd" => game.GameEnd()
       case _ => return
 }
