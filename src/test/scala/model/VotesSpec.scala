@@ -2,6 +2,7 @@ package de.htwg.werwolf
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
+import de.htwg.werwolf.model.Votes
 
 class VotesSpec extends AnyWordSpec {
   "the function addVote" should {

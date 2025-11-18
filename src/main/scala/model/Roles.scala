@@ -1,4 +1,6 @@
-package de.htwg.werwolf
+// src/main/scala/model/Roles.scala
+
+package de.htwg.werwolf.model
 
 trait Player:
   def name: String

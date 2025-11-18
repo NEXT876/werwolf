@@ -1,0 +1,49 @@
+name: Scala CI
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+permissions:
+  contents: write   # ← Das ist der entscheidende Fix! Erlaubt Dependency Submission
+  pull-requests: write   # Für Dependabot-Alerts
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Setup sbt
+        uses: setup-sbt@v1  # ← Korrigiert: actions/setup-sbt@v1 (nicht sbt/setup-sbt, falls das ein Tippfehler war)
+
+      - name: Cache sbt
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.sbt
+            ~/.ivy2/cache
+            ~/.cache/coursier
+          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt', 'project/**/*.scala', 'project/build.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-sbt-
+
+      - name: Run tests
+        run: sbt test
+
+      - name: Upload dependency graph
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository  # ← Optional: Nur laufen, wenn nicht aus Fork (vermeidet 403 in Forks)
+        uses: scalacenter/sbt-dependency-submission@v2
+        with:
+          modules-ignore: test
+          configs-ignore: test

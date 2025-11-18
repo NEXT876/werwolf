@@ -1,77 +1,37 @@
 # =========================
-# Scala / sbt / Giter8
+# sbt / Build
 # =========================
-
-# sbt build directories
 target/
 project/target/
-project/project/target/
-project/project/project/target/
+project/project/
 
-# Scala TASTY files
-*.tasty
-**/*.tasty
-
-.bsp/
-
-# Bloop / Metals / VS Code
+# =========================
+# Metals / Bloop / BSP
+# =========================
 .bloop/
 .metals/
+.bsp/
 .scala-build/
 
-# Generated class files
-*.class
-
-# Eclipse / IntelliJ / IDEA
+# =========================
+# IDE / Editor
+# =========================
 .idea/
 *.iml
-*.iws
-*.ipr
-out/
-*.log
-
-# VS Code
 .vscode/
 
-# MacOS
+# =========================
+# Scala / JVM
+# =========================
+*.class
+*.tasty
+**/*.tasty
+*.log
+
+# =========================
+# OS / Temp
+# =========================
 .DS_Store
-
-# Linux
 *~
-
-# =========================
-# Zusätzliche Empfehlungen
-# =========================
-
-# sbt Cache und lokale Abhängigkeiten
-~/.ivy2/
-~/.cache/coursier/
-~/.sbt/
-
-# Temporäre Dateien und Backups
-*~
-*.bak
 *.swp
-
-# Test- und Build-Artifacts (optional, falls nicht in target/ enthalten)
-dist/
-build/
-
-# Editor-spezifische Dateien (zusätzlich zu .vscode)
-*.sublime-project
-*.sublime-workspace
-
-# Git-spezifische Dateien
-.gitignore
-.gitmodules
-
-# Scala-Compiler-Logs (falls vorhanden)
-scalac.log
-
-# Docker / Container (falls relevant)
-Dockerfile*
-docker-compose*
-
-# Coverage-Berichte (falls sbt-scoverage genutzt wird)
-scoverage-data/
-target/scoverage/
+*.bak
