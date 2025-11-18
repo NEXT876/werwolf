@@ -3,6 +3,7 @@ package de.htwg.werwolf.model
 
 import de.htwg.werwolf.narrator.*
 
+import upickle.default.*
 import scala.util.Random
 
 
@@ -56,22 +57,21 @@ class Game() extends Subject[GameEvent] {
     notifyObservers(GameEvent.gameEnd)
 
   object NarratorService:
-    import upickle.default.*
     def loadNarratorJson(path: os.Path): Root =
       val jsonString = os.read(path)
       read[Root](jsonString)
 
-    def randomNarratorText(role: String, root: Root): String =
-      val list = role match {
+    // Random ist jetzt Parameter!
+    def randomNarratorText(role: String, root: Root)(using rnd: Random): String =
+      val list = role match
         case "Start"   => root.Night.Start
         case "Werwolf" => root.Night.Werwolf
         case "Witch"   => root.Night.Witch
         case "Amor"    => root.Night.Amor
         case _         => List("")
-      }
-      util.Random.shuffle(list).head
-}
+      rnd.shuffle(list).headOption.getOrElse("")
 
+}
 /* def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Player] = {
     import scala.io.StdIn.readLine
     import scala.io.Source

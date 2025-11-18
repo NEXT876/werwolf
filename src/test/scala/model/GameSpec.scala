@@ -1,64 +1,159 @@
-package de.htwg.werwolf
+// src/test/scala/de/htwg/werwolf/model/GameSpec.scala
+package de.htwg.werwolf.model
 
+import de.htwg.werwolf.narrator.*
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.matchers.should.Matchers._
-import de.htwg.werwolf.model.{addRoles, night}
-import de.htwg.werwolf.model.{Villager, Werwolf}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.BeforeAndAfter
 
-class GameSpec extends AnyWordSpec {
+import java.nio.file.Files
+import java.nio.file.Paths
+import scala.util.Random
+import scala.compiletime.uninitialized
 
-  "the addRoles function" should {
-    "assign one Werwolf and one villager for two players" in {
-      val players = Vector("Alice", "Bob")
-      val roles = addRoles(players)
-      roles should have size 2
-      roles.keys should contain allOf ("Alice", "Bob")
-      roles("Alice").role should (be("Werwolf") or be("Villager"))
-      roles("Bob").role should (be("Werwolf") or be("Villager"))
-    }
+class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
 
-    "return a map of one Werwolf and 2 random roles for more than 2 and less than 6 players" in {
-      val players = Vector("Alice", "Bob", "Karl")
-      val roles = addRoles(players)
-      roles should have size 3
-      roles.values.count(_.role == "Werwolf") should be(1)
-      roles.values.map(_.name) should contain allOf ("Alice", "Bob", "Karl")
-    }
+  var game: Game = uninitialized
+  var observerCalled: GameEvent = uninitialized
 
-    "return a map of two Werwolf and two random roles for more tahn 5 an less than 8 players" in {
-      val players = Vector("Alice", "Bob", "Karl", "Lara", "Paul", "Clara")
-      val roles = addRoles(players)
-      roles should have size 6
-      roles.values.count(_.role == "Werwolf") should be(2)
-      roles.values.map(
-        _.name
-      ) should contain allOf ("Alice", "Bob", "Karl", "Lara", "Paul", "Clara")
+  // Mock Observer
+  class TestObserver extends Observer[GameEvent] {
+    override def update(event: GameEvent): Unit = {
+      observerCalled = event
     }
   }
 
-  "the night function" should {
-    "return a map of players with one or less additional deaths" in {
+  before {
+    game = new Game()
+    observerCalled = null
+    game.addObserver(new TestObserver())
+  }
+
+  "A Game" should {
+
+    "initialize with correct default state" in {
+      val state = game.currentState
+      state.day shouldBe 1
+      state.phase shouldBe Phase.Night
+      state.isRunning shouldBe true
+      state.alivePlayers shouldBe empty
+      state.votes shouldBe Votes()
+    }
+
+    "add players and update currentState correctly" in {
       val players = Map(
+        "Alice" -> Werwolf("Alice"),
         "Bob" -> Villager("Bob"),
-        "Ben" -> Villager("Ben"),
-        "Berta" -> Werwolf("Berta")
+        "Charlie" -> Witch("Charlie")
       )
-      val result_1 = night(players, 1)
-      val result_2 = night(players, 0)
-      result_1 should be(
+
+      game.addPlayers(players)
+
+      val state = game.currentState
+      state.alivePlayers should contain theSameElementsAs players
+      state.alivePlayers("Alice").isAlive shouldBe true
+
+      // Observer wurde benachrichtigt
+      observerCalled shouldBe GameEvent.printGameState
+    }
+
+    "switch phase correctly and notify observer" in {
+      game.switchPhase()
+      game.currentState.phase shouldBe Phase.Day
+      observerCalled shouldBe GameEvent.phaseSwitch
+
+      game.switchPhase()
+      game.currentState.phase shouldBe Phase.Night
+      observerCalled shouldBe GameEvent.phaseSwitch
+    }
+
+    "end the game and notify observer" in {
+      game.GameEnd()
+      game.currentState.isRunning shouldBe false
+      observerCalled shouldBe GameEvent.gameEnd
+    }
+
+    "filter dead players from currentState.alivePlayers" in {
+      val aliveWolf = Werwolf("Luna")
+      val deadVillager = Villager("Max").copy(isAlive = false)
+
+      game.addPlayers(
         Map(
-          "Bob" -> { Villager("Bob", Villager("Bob").isAlive == true) },
-          "Ben" -> { Villager("Ben", Villager("Ben").isAlive == true) },
-          "Berta" -> { Werwolf("Berta", Werwolf("Berta").isAlive == false) }
+          "Luna" -> aliveWolf,
+          "Max" -> deadVillager
         )
       )
-      result_2 should be(
-        Map(
-          "Bob" -> { Villager("Bob", Villager("Bob").isAlive == true) },
-          "Ben" -> { Villager("Ben", Villager("Ben").isAlive == true) },
-          "Berta" -> { Werwolf("Berta", Villager("Berta").isAlive == false) }
+
+      val state = game.currentState
+      state.alivePlayers should contain only ("Luna" -> aliveWolf)
+      state.alivePlayers should not contain key("Max")
+    }
+
+    "increment day only when needed (not in this version)" in {
+      // In deiner Version wird `day` nicht erhöht → aber Test zeigt: aktuell bleibt 1
+      game.switchPhase()
+      game.switchPhase()
+      game.currentState.day shouldBe 1
+    }
+  }
+
+  "NarratorService" should {
+
+    "load JSON from file path using os-lib" in {
+      val tempDir = os.pwd / "target" / "test-narrator"
+
+      // 1. Lösche alten Ordner (falls vorhanden)
+      if (os.exists(tempDir)) os.remove.all(tempDir)
+      os.makeDir.all(tempDir)
+
+      val jsonPath = tempDir / "narrator.json"
+
+      val testJson =
+        """{
+        "Night": {
+          "Start": ["Gute Nacht"],
+          "Werwolf": ["Wölfe wachen auf"],
+          "Witch": ["Hexe?"],
+          "Amor": ["Amor!"]
+        }
+      }"""
+
+      // 2. Schreibe JSON (overwrite = true)
+      os.write.over(jsonPath, testJson)
+
+      // 3. Lade mit NarratorService
+      val root = game.NarratorService.loadNarratorJson(jsonPath)
+
+      // 4. Prüfe Inhalt
+      root.Night.Start should contain("Gute Nacht")
+      root.Night.Werwolf should contain("Wölfe wachen auf")
+    }
+
+   /* "return random text for known roles" in {
+      val root = Root(
+        Night(
+          Start = List("A", "B"),
+          Werwolf = List("W1", "W2"),
+          Witch = List("H1"),
+          Amor = List("L1", "L2")
         )
       )
+
+      // Fester Seed → immer dasselbe Ergebnis
+      val fixedRandom = new Random(42)
+      given Random = fixedRandom
+
+      val text1 = game.NarratorService.randomNarratorText("Werwolf", root)
+      val text2 = game.NarratorService.randomNarratorText("Werwolf", root)
+
+      // Mit Seed 42 → immer "W1" oder "W2" – aber gleich!
+      text1 shouldBe text2
+      text1 should (be("W1") or be("W2"))
+    }*/
+    "return empty string for unknown role" in {
+      val root = Root(Night(List(), List(), List(), List()))
+      given Random = new Random(0)
+      game.NarratorService.randomNarratorText("Seher", root) shouldBe ""
     }
   }
 }

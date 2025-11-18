@@ -36,4 +36,5 @@ class GameController(private val game: Game) {
       case "switchPhase" => game.switchPhase()
       // 
       case "GameEnd" => game.GameEnd()
+      case _ => return
 }

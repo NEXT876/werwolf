@@ -8,7 +8,11 @@ lazy val root = project
 
     scalaVersion := scala3Version,
 
-    coverageEnabled.in(Test, test) := true,
+    coverageEnabled := true,
+
+    coverageExcludedPackages := "upickle.*;de\\.htwg\\.werwolf\\.narrator.*",
+
+    //coverageExcludedPackages := "upickle.*;.*narrator.*",
 
     libraryDependencies ++= Seq(
       "org.scalameta" %% "munit" % "1.0.0" % Test,
