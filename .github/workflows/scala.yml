@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: write  # Für Dependency Submission
+  pull-requests: write  # Für Dependabot-Alerts
 
 jobs:
   build:
@@ -16,17 +16,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Wichtig für korrekte Commit-Info bei Coveralls
 
-      # Nur noch EIN Setup-Schritt – das reicht!
-      - name: Setup Java + Scala + SBT
-        uses: olafurpg/setup-scala@v15
+      # Setup Java 21 + SBT-Cache (automatisch!)
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          java-version: temurin@1.21   # oder temurin@1.17
+          distribution: temurin
+          java-version: 21
+          cache: sbt  # Cached ~/.sbt + Dependencies – superschnell!
 
-      # Der manuelle Cache ist jetzt überflüssig!
-      # olafurpg/setup-scala cached automatisch ~/.sbt, ~/.ivy2, ~/.coursier
-      # Du kannst ihn komplett entfernen → spart einen Step + ist zuverlässiger
+      # Setup SBT (offiziell und stabil)
+      - name: Setup SBT
+        uses: sbt/setup-sbt@v1  # ← Das ist der Fix: v1 existiert und funktioniert!
+
+      # Manueller Cache ist jetzt überflüssig (durch setup-java abgedeckt)
+      # Falls du ihn behalten willst: Lass ihn drin, schadet nicht
 
       - name: Run tests with coverage
         run: sbt clean coverage test coverageReport
@@ -37,6 +42,8 @@ jobs:
         run: sbt coverageAggregate coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          COVERALLS_FLAG_NAME: Scala CI
+        if: success()
 
       - name: Upload dependency graph
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
