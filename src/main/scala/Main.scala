@@ -11,4 +11,3 @@ import view.TUI
   val tui = TUI(controller)
   game.addObserver(tui)
   tui.start()
-//tui.run();

@@ -11,6 +11,7 @@ import java.nio.file.Paths
 import scala.util.Random
 import scala.compiletime.uninitialized
 
+
 class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
 
   var game: Game = uninitialized
