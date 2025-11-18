@@ -7,7 +7,7 @@ on:
     branches: [ "main", "develop" ]
 
 permissions:
-  contents: write   # ← Das ist der entscheidende Fix! Erlaubt Dependency Submission
+  contents: write   # Für Dependency Submission
   pull-requests: write   # Für Dependabot-Alerts
 
 jobs:
@@ -23,10 +23,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
+          cache: 'sbt'   # Optional: Baut sbt-Cache in setup-java ein
 
+      # Hier der Fix: Vollständiger Action-Name mit Organisation
       - name: Setup sbt
-        uses: setup-sbt@v1  # ← Korrigiert: actions/setup-sbt@v1 (nicht sbt/setup-sbt, falls das ein Tippfehler war)
+        uses: sbt/setup-sbt@v1   # ← Das war der fehlende Teil: sbt/
 
+      # Optional: Separater Cache für sbt-Dependencies (spart Zeit bei wiederholten Runs)
       - name: Cache sbt
         uses: actions/cache@v4
         with:
@@ -42,7 +45,7 @@ jobs:
         run: sbt test
 
       - name: Upload dependency graph
-        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository  # ← Optional: Nur laufen, wenn nicht aus Fork (vermeidet 403 in Forks)
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         uses: scalacenter/sbt-dependency-submission@v2
         with:
           modules-ignore: test
