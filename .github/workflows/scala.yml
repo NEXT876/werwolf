@@ -7,42 +7,44 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write  # Für Dependency Submission
-  pull-requests: write  # Für Dependabot-Alerts
+  contents: write
+  pull-requests: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # Getrennter Checkout: Für PRs den HEAD-SHA verwenden!
+      - name: Checkout (für Push)
+        if: github.event_name != 'pull_request'
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Wichtig für korrekte Commit-Info bei Coveralls
+          fetch-depth: 0
 
-      # Setup Java 21 + SBT-Cache (automatisch!)
+      - name: Checkout (für PRs – das ist der Fix!)
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
-          cache: sbt  # Cached ~/.sbt + Dependencies – superschnell!
+          cache: sbt  # Gut so – cached alles Nötige
 
-      # Setup SBT (offiziell und stabil)
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1  # ← Das ist der Fix: v1 existiert und funktioniert!
-
-      # Manueller Cache ist jetzt überflüssig (durch setup-java abgedeckt)
-      # Falls du ihn behalten willst: Lass ihn drin, schadet nicht
+        uses: sbt/setup-sbt@v1
 
       - name: Run tests with coverage
         run: sbt clean coverage test coverageReport
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
       - name: Upload coverage to Coveralls
         run: sbt coverageAggregate coveralls
         env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          COVERALLS_FLAG_NAME: Scala CI
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # ← Hier der 2. Fix: GITHUB_TOKEN statt separatem Token!
         if: success()
 
       - name: Upload dependency graph
