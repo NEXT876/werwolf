@@ -6,7 +6,6 @@ import de.htwg.werwolf.narrator.*
 import upickle.default.*
 import scala.util.Random
 
-
 enum Phase:
   case Night, Day
 
@@ -44,15 +43,34 @@ class Game() extends Subject[GameEvent] {
       alivePlayers = players.filter(_._2.isAlive).toMap
     )
 
-  def addPlayers(newPlayers: Map[String, Player]): Unit =
-    players = players ++ newPlayers
+  def addRoles(playerNames: Vector[String]): Unit = {
+    val roles = getRoles(playerNames.size)
+
+    players = players ++ Random
+      .shuffle(playerNames)
+      .zip(roles)
+      .map { case (name, role) =>
+        val player = role.toPlayer(name)
+        player.name -> player
+      }
+      .toMap
+
     notifyObservers(GameEvent.printGameState)
+  }
+
+  def getRoles(playeramount: Int): Vector[Roles] = {
+    if playeramount == 2 then Vector(Roles.werwolf, Roles.villager)
+    else
+      Vector.fill(playeramount / 3)(Roles.werwolf) ++ Random.shuffle(
+        Vector(Roles.villager, Roles.witch, Roles.amor, Roles.terrorist)
+      )
+  }
 
   def switchPhase(): Unit =
     phase = if phase == Phase.Night then Phase.Day else Phase.Night
     notifyObservers(GameEvent.phaseSwitch)
 
-  def GameEnd() : Unit = 
+  def GameEnd(): Unit =
     isRunning = false
     notifyObservers(GameEvent.gameEnd)
 
@@ -62,14 +80,14 @@ class Game() extends Subject[GameEvent] {
       read[Root](jsonString)
 
     // Random ist jetzt Parameter!
-    def randomNarratorText(role: String, root: Root)(using rnd: Random): String =
+    def randomNarratorText(role: String, root: Root)/*(using rnd: Random)*/: String =
       val list = role match
         case "Start"   => root.Night.Start
         case "Werwolf" => root.Night.Werwolf
         case "Witch"   => root.Night.Witch
         case "Amor"    => root.Night.Amor
         case _         => List("")
-      rnd.shuffle(list).headOption.getOrElse("")
+      /*rnd.*/Random.shuffle(list).headOption.getOrElse("")
 
 }
 /* def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Player] = {

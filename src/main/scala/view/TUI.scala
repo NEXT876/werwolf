@@ -26,21 +26,10 @@ class TUI(controller: GameController) extends Observer[GameEvent] {
     tiping("Willkommen zu Werwolf", 100)
     showLogo()
 
-    val numPlayers = {
-      val input = readLine("Wie viele Spieler? (mind. 2, max. 6): ")
-      input.toIntOption match {
-        case Some(n) => n.min(6).max(2)
-        case None    => 5
-      }
-    }
+    val names = getPlayerNames(getPlayerAmount())
 
-    val names = (0 until numPlayers).map { i =>
-      readLine(s"Spieler${i + 1} wie heißen sie:").trim match
-        case "" => s"Spieler${i + 1}"
-        case n  => n
-    }.toVector
     clearScreen()
-    controller.addRoles(names)
+    controller.initializePlayers(names)
     run()
   }
 
@@ -50,6 +39,22 @@ class TUI(controller: GameController) extends Observer[GameEvent] {
       //
       controller.process("GameEnd")
     }
+
+  def getPlayerAmount(): Int = {
+    val input = readLine("Wie viele Spieler? (mind. 2, max. 6): ")
+    input.toIntOption match {
+      case Some(n) => n.min(6).max(2)
+      case None    => 5
+    }
+  }
+
+  def getPlayerNames(playerAmount: Int): Vector[String] = {
+    (0 until playerAmount).map { i =>
+      readLine(s"Spieler${i + 1} wie heißen sie:").trim match
+        case "" => s"Spieler${i + 1}"
+        case n  => n
+    }.toVector
+  }
 
   def printPlayerRoles(playerRoles: Map[String, Player]): String = {
     val header = "\n================ Spieler & Rollen ================\n"
@@ -84,6 +89,7 @@ class TUI(controller: GameController) extends Observer[GameEvent] {
 
   private def clearScreen(): Unit = {
     import sys.process._
-    "clear".!
+    if (sys.props("os.name").toLowerCase.contains("win")) "cls".!
+    else "clear".! // clear Screen for WIndows and Linux/Mac
   }
 }

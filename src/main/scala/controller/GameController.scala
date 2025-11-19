@@ -8,27 +8,8 @@ import scala.util.Random
 class GameController(private val game: Game) {
   def getGame: Game = game
 
-  def addRoles(players: Vector[String]): Unit = {
-    val roles = getRoles(players.size)
-
-    val playerMap = Random
-      .shuffle(players)
-      .zip(roles)
-      .map { case (name, role) =>
-        val player = role.toPlayer(name)
-        player.name -> player
-      }
-      .toMap
-
-    game.addPlayers(playerMap)
-  }
-
-  def getRoles(playeramount: Int): Vector[Roles] = {
-    if playeramount == 2 then Vector(Roles.werwolf, Roles.villager)
-    else
-      Vector.fill(playeramount / 3)(Roles.werwolf) ++ Random.shuffle(
-        Vector(Roles.villager, Roles.witch, Roles.amor, Roles.terrorist)
-      )
+  def initializePlayers(players: Vector[String]) : Unit = {
+    game.addRoles(players)
   }
 
   def process(input: String): Unit =
@@ -36,5 +17,5 @@ class GameController(private val game: Game) {
       case "switchPhase" => game.switchPhase()
       //
       case "GameEnd" => game.GameEnd()
-      case _ => return
+      case _ =>
 }
