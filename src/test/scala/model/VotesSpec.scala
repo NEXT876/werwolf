@@ -26,5 +26,10 @@ class VotesSpec extends AnyWordSpec {
 
       votes5.getVotedPlayer should be(Some("Bob"))
     }
+    "return nothing for no votes" in {
+      val votes = Votes()
+
+      votes.getVotedPlayer should be(None)
+    }
   }
 }
