@@ -1,0 +1,55 @@
+name: Scala CI
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Getrennter Checkout: Für PRs den HEAD-SHA verwenden!
+      - name: Checkout (für Push)
+        if: github.event_name != 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout (für PRs – das ist der Fix!)
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: sbt  # Gut so – cached alles Nötige
+
+      - name: Setup SBT
+        uses: sbt/setup-sbt@v1
+
+      - name: Run tests with coverage
+        run: sbt clean coverage test coverageReport
+
+      - name: Upload coverage to Coveralls
+        run: sbt coverageAggregate coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # ← Hier der 2. Fix: GITHUB_TOKEN statt separatem Token!
+        if: success()
+
+      - name: Upload dependency graph
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: scalacenter/sbt-dependency-submission@v2
+        with:
+          modules-ignore: test
+          configs-ignore: test
