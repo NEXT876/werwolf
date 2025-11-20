@@ -1,48 +1,51 @@
 name: Scala CI
-
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ main, develop ]
+  workflow_dispatch:
 
 permissions:
-  contents: write   # Für Dependency Submission
-  pull-requests: write   # Für Dependabot-Alerts
+  contents: write
+  pull-requests: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # Getrennter Checkout: Für PRs den HEAD-SHA verwenden!
+      - name: Checkout (für Push)
+        if: github.event_name != 'pull_request'
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up JDK 11
+      - name: Checkout (für PRs – das ist der Fix!)
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '11'
-          cache: 'sbt'   # Optional: Baut sbt-Cache in setup-java ein
+          distribution: temurin
+          java-version: 21
+          cache: sbt  # Gut so – cached alles Nötige
 
-      # Hier der Fix: Vollständiger Action-Name mit Organisation
-      - name: Setup sbt
-        uses: sbt/setup-sbt@v1   # ← Das war der fehlende Teil: sbt/
+      - name: Setup SBT
+        uses: sbt/setup-sbt@v1
 
-      # Optional: Separater Cache für sbt-Dependencies (spart Zeit bei wiederholten Runs)
-      - name: Cache sbt
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.sbt
-            ~/.ivy2/cache
-            ~/.cache/coursier
-          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt', 'project/**/*.scala', 'project/build.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-sbt-
+      - name: Run tests with coverage
+        run: sbt clean coverage test coverageReport
 
-      - name: Run tests
-        run: sbt test
+      - name: Upload coverage to Coveralls
+        run: sbt coverageAggregate coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # ← Hier der 2. Fix: GITHUB_TOKEN statt separatem Token!
+        if: success()
 
       - name: Upload dependency graph
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
