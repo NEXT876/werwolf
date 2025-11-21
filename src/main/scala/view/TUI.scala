@@ -8,18 +8,19 @@ import scala.io.StdIn.readLine
 
 class TUI(controller: GameController) extends Observer[GameEvent] {
   override def update(event: GameEvent): Unit =
-    val state = controller.getGame.currentState
+    //val state = controller.getGame.currentState
 
     event match
-      case GameEvent.printGameState =>
+      case GameEvent.printGameState(alivePlayers) =>
         clearScreen()
         showLogo()
-        println(printPlayerRoles(state.alivePlayers))
-      case GameEvent.phaseSwitch =>
+        println(printPlayerRoles(alivePlayers))
+      case GameEvent.phaseSwitch(phase)  =>
       //
-      case GameEvent.gameEnd =>
-        println("Das Spiel ist vorbei")
-        System.exit(0)
+      case GameEvent.gameEnd(isRunning) =>
+        if(!isRunning)
+          println("Das Spiel ist vorbei")
+          System.exit(0)
 
   def start(): Unit = {
     clearScreen()
@@ -35,7 +36,9 @@ class TUI(controller: GameController) extends Observer[GameEvent] {
 
   def run(): Unit =
     while (true) {
+      controller.process("")
       controller.process("switchPhase")
+      //
       //
       controller.process("GameEnd")
     }

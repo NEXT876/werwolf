@@ -5,6 +5,7 @@ import de.htwg.werwolf.narrator.*
 
 import upickle.default.*
 import scala.util.Random
+import scala.util.chaining.scalaUtilChainingOps
 
 enum Phase:
   case Night, Day
@@ -27,18 +28,19 @@ case class GameState(
     alivePlayers: Map[String, Player]
 )
 
-class Game() extends Subject[GameEvent] {
-  private var players: Map[String, Player] = Map.empty
-  private var phase: Phase = Phase.Night
-  private var day: Int = 1
-  private var votes: Votes = Votes()
-  private var isRunning: Boolean = true
+case class Game /*private*/ (
+    players: Map[String, Player] = Map.empty,
+    phase: Phase = Phase.Night,
+    day: Int = 1,
+    votes: Votes = Votes(),
+    isRunning: Boolean = true
+) extends Subject[GameEvent] {
 
   def currentState: GameState =
     GameState(
       day = day,
       phase = phase,
-      votes = votes, // Kopie, falls mutable
+      votes = votes,
       isRunning = isRunning,
       alivePlayers = players.filter(_._2.isAlive).toMap
     )
@@ -46,7 +48,7 @@ class Game() extends Subject[GameEvent] {
   def addRoles(playerNames: Vector[String]): Unit = {
     val roles = getRoles(playerNames.size)
 
-    players = players ++ Random
+    val newPlayers = Random
       .shuffle(playerNames)
       .zip(roles)
       .map { case (name, role) =>
@@ -54,8 +56,7 @@ class Game() extends Subject[GameEvent] {
         player.name -> player
       }
       .toMap
-
-    notifyObservers(GameEvent.printGameState)
+    copy(players = newPlayers).tap(_ => notifyObservers(GameEvent.printGameState(newPlayers)))
   }
 
   def getRoles(playeramount: Int): Vector[Roles] = {
@@ -67,12 +68,14 @@ class Game() extends Subject[GameEvent] {
   }
 
   def switchPhase(): Unit =
-    phase = if phase == Phase.Night then Phase.Day else Phase.Night
-    notifyObservers(GameEvent.phaseSwitch)
+    val newPhase = if phase == Phase.Night then Phase.Day else Phase.Night
+    val newDay = day + 1
+    copy(phase = newPhase, day = newDay, votes = Votes())
+      .tap(_ => notifyObservers(GameEvent.phaseSwitch(newPhase)))
 
   def GameEnd(): Unit =
-    isRunning = false
-    notifyObservers(GameEvent.gameEnd)
+    val newIsRunning = false
+    copy(isRunning = false).tap(_ => notifyObservers(GameEvent.gameEnd(newIsRunning)))
 
   object NarratorService:
     def loadNarratorJson(path: os.Path): Root =
@@ -80,14 +83,15 @@ class Game() extends Subject[GameEvent] {
       read[Root](jsonString)
 
     // Random ist jetzt Parameter!
-    def randomNarratorText(role: String, root: Root)/*(using rnd: Random)*/: String =
+    def randomNarratorText(role: String, root: Root) /*(using rnd: Random)*/: String =
       val list = role match
         case "Start"   => root.Night.Start
         case "Werwolf" => root.Night.Werwolf
         case "Witch"   => root.Night.Witch
         case "Amor"    => root.Night.Amor
         case _         => List("")
-      /*rnd.*/Random.shuffle(list).headOption.getOrElse("")
+      /*rnd.*/
+      Random.shuffle(list).headOption.getOrElse("")
 
 }
 /* def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Player] = {
