@@ -36,9 +36,8 @@ class TUI(controller: GameController) extends Observer[GameEvent] {
 
   def run(): Unit =
     while (true) {
-      controller.process("")
+      controller.process("runPhase")
       controller.process("switchPhase")
-      //
       //
       controller.process("GameEnd")
     }

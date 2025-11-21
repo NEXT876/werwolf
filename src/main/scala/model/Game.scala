@@ -73,6 +73,22 @@ case class Game /*private*/ (
     copy(phase = newPhase, day = newDay, votes = Votes())
       .tap(_ => notifyObservers(GameEvent.phaseSwitch(newPhase)))
 
+
+  def runPhase(): Unit = {
+    if phase == Phase.Night then runNightPhase()
+    else runDayPhase()
+  }
+
+  def runNightPhase(): Unit = {
+    println("Es ist Nacht")
+    /** */
+  }
+
+  def runDayPhase(): Unit = {
+    println("Es ist Tag")
+    /** */
+  }
+
   def GameEnd(): Unit =
     val newIsRunning = false
     copy(isRunning = false).tap(_ => notifyObservers(GameEvent.gameEnd(newIsRunning)))
