@@ -20,15 +20,9 @@ enum Roles:
     case Roles.witch     => Witch(name)
     case Roles.amor      => Amor(name)
 
-case class GameState(
-    day: Int,
-    phase: Phase,
-    votes: Votes,
-    isRunning: Boolean,
-    alivePlayers: Map[String, Player]
-)
 
-case class Game /*private*/ (
+
+case class Game (
     players: Map[String, Player] = Map.empty,
     phase: Phase = Phase.Night,
     day: Int = 1,
@@ -36,16 +30,8 @@ case class Game /*private*/ (
     isRunning: Boolean = true
 ) extends Subject[GameEvent] {
 
-  def currentState: GameState =
-    GameState(
-      day = day,
-      phase = phase,
-      votes = votes,
-      isRunning = isRunning,
-      alivePlayers = players.filter(_._2.isAlive).toMap
-    )
 
-  def addRoles(playerNames: Vector[String]): Unit = {
+  def addRoles(playerNames: Vector[String]): Game = {
     val roles = getRoles(playerNames.size)
 
     val newPlayers = Random
@@ -56,7 +42,9 @@ case class Game /*private*/ (
         player.name -> player
       }
       .toMap
-    copy(players = newPlayers).tap(_ => notifyObservers(GameEvent.printGameState(newPlayers)))
+
+    notifyObservers(GameEvent.printGameState(newPlayers))
+    copy(players = newPlayers)
   }
 
   def getRoles(playeramount: Int): Vector[Roles] = {
@@ -67,12 +55,11 @@ case class Game /*private*/ (
       )
   }
 
-  def switchPhase(): Unit =
+  def switchPhase(): Game =
     val newPhase = if phase == Phase.Night then Phase.Day else Phase.Night
     val newDay = day + 1
+    notifyObservers(GameEvent.phaseSwitch(newPhase))
     copy(phase = newPhase, day = newDay, votes = Votes())
-      .tap(_ => notifyObservers(GameEvent.phaseSwitch(newPhase)))
-
 
   def runPhase(): Unit = {
     if phase == Phase.Night then runNightPhase()
@@ -81,17 +68,21 @@ case class Game /*private*/ (
 
   def runNightPhase(): Unit = {
     println("Es ist Nacht")
+
     /** */
   }
 
   def runDayPhase(): Unit = {
     println("Es ist Tag")
+
     /** */
   }
 
-  def GameEnd(): Unit =
+  def GameEnd(): Game =
     val newIsRunning = false
-    copy(isRunning = false).tap(_ => notifyObservers(GameEvent.gameEnd(newIsRunning)))
+    notifyObservers(GameEvent.gameEnd(newIsRunning))
+    copy(isRunning = false)
+
 
   object NarratorService:
     def loadNarratorJson(path: os.Path): Root =
