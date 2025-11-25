@@ -6,7 +6,7 @@ import de.htwg.werwolf.view.{GameView, PlayerView}
 
 import scala.util.Random
 
-class GameController(private var _game: Game, private val view: GameView)
+class GameController(private var _game: Game, val view: GameView)
     extends Observer[GameEvent] {
   def game: Game = _game
   private def updateGame(newGame: Game): Unit =
@@ -34,7 +34,7 @@ class GameController(private var _game: Game, private val view: GameView)
       case _             =>
 
   def run(): Unit =
-    while (true) {
+    while (game.isRunning) {
       process("runPhase")
       process("switchPhase")
       //
@@ -58,6 +58,5 @@ class GameController(private var _game: Game, private val view: GameView)
       //
       case GameEvent.gameEnd(isRunning) =>
         println("Das Spiel ist vorbei")
-        System.exit(0)
 
 }
