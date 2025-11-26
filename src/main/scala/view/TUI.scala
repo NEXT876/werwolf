@@ -1,7 +1,6 @@
 // src/main/scala/view/TUI.scala
 package de.htwg.werwolf.view
 
-
 import scala.io.StdIn.readLine
 
 class TUI() extends GameView {
@@ -22,16 +21,22 @@ class TUI() extends GameView {
     }.toVector
   }
 
-  def printPlayerRoles(playerRoles: Vector[PlayerView]): Unit = {
+  def printPlayerRoles(playerRoles: Vector[AnyRef]): Unit = {
     val header = "\n================ Spieler & Rollen ================\n"
+
     val body = playerRoles
-      .map { p =>
-        val role = p.role
-        val state = p.isAlive
-        f"• ${p.name}%-15s | Rolle: $role%-10s | Status: ${if p.isAlive then "lebt" else "tot"}%-7s"
+      .map {
+        case (name: String, role: String, isAlive: Boolean) =>
+          val state = if isAlive then "lebt" else "tot"
+          f"• ${name}%-15s | Rolle: ${role}%-10s | Status: ${state}%-7s"
+
+        case other =>
+          s"• Unbekanntes Objekt: ${other.getClass.getSimpleName}"
       }
       .mkString("\n")
+
     val footer = "\n==================================================\n"
+
     println(header + body + footer)
   }
 

@@ -2,12 +2,11 @@
 package de.htwg.werwolf.controller
 
 import de.htwg.werwolf.model.*
-import de.htwg.werwolf.view.{GameView, PlayerView}
+import de.htwg.werwolf.view.GameView
 
 import scala.util.Random
 
-class GameController(private var _game: Game, val view: GameView)
-    extends Observer[GameEvent] {
+class GameController(private var _game: Game, val view: GameView) extends Observer[GameEvent] {
   def game: Game = _game
   private def updateGame(newGame: Game): Unit =
     _game.removeObserver(this)
@@ -47,11 +46,7 @@ class GameController(private var _game: Game, val view: GameView)
         view.clearScreen()
         view.showLogo()
         view.printPlayerRoles(alivePlayers.map { case (name, player) =>
-          PlayerView(
-            name = name,
-            role = player.role.toString,
-            isAlive = player.isAlive
-          )
+          (name, player.role, player.isAlive)
         }.toVector)
 
       case GameEvent.phaseSwitch(phase) =>
