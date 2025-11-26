@@ -1,46 +1,10 @@
 // src/main/scala/view/TUI.scala
 package de.htwg.werwolf.view
 
-import de.htwg.werwolf.model.*
-import de.htwg.werwolf.controller.GameController
 
 import scala.io.StdIn.readLine
 
-class TUI(controller: GameController) extends Observer[GameEvent] {
-  override def update(event: GameEvent): Unit =
-    //val state = controller.getGame.currentState
-
-    event match
-      case GameEvent.printGameState(alivePlayers) =>
-        clearScreen()
-        showLogo()
-        println(printPlayerRoles(alivePlayers))
-      case GameEvent.phaseSwitch(phase)  =>
-      //
-      case GameEvent.gameEnd(isRunning) =>
-        if(!isRunning)
-          println("Das Spiel ist vorbei")
-          System.exit(0)
-
-  def start(): Unit = {
-    clearScreen()
-    tiping("Willkommen zu Werwolf", 100)
-    showLogo()
-
-    val names = getPlayerNames(getPlayerAmount())
-
-    clearScreen()
-    controller.initializePlayers(names)
-    run()
-  }
-
-  def run(): Unit =
-    while (true) {
-      controller.process("runPhase")
-      controller.process("switchPhase")
-      //
-      controller.process("GameEnd")
-    }
+class TUI() extends GameView {
 
   def getPlayerAmount(): Int = {
     val input = readLine("Wie viele Spieler? (mind. 2, max. 6): ")
@@ -58,17 +22,17 @@ class TUI(controller: GameController) extends Observer[GameEvent] {
     }.toVector
   }
 
-  def printPlayerRoles(playerRoles: Map[String, Player]): String = {
+  def printPlayerRoles(playerRoles: Vector[PlayerView]): Unit = {
     val header = "\n================ Spieler & Rollen ================\n"
     val body = playerRoles
-      .map { case (name, player) =>
-        val role = player.role
-        val state = player.isAlive
-        f"• $name%-15s | Rolle: $role%-10s | Status: ${if player.isAlive then "lebt" else "tot"}%-7s"
+      .map { p =>
+        val role = p.role
+        val state = p.isAlive
+        f"• ${p.name}%-15s | Rolle: $role%-10s | Status: ${if p.isAlive then "lebt" else "tot"}%-7s"
       }
       .mkString("\n")
     val footer = "\n==================================================\n"
-    header + body + footer
+    println(header + body + footer)
   }
 
   def tiping(text: String, waitTime_ms: Int): Unit = {
@@ -84,12 +48,12 @@ class TUI(controller: GameController) extends Observer[GameEvent] {
     println()
   }
 
-  private def showLogo(): Unit = {
+  def showLogo(): Unit = {
     import scala.io.Source
     println(Source.fromResource("logo.txt").mkString)
   }
 
-  private def clearScreen(): Unit = {
+  def clearScreen(): Unit = {
     import sys.process._
     if (sys.props("os.name").toLowerCase.contains("win")) "cls".!
     else "clear".! // clear Screen for WIndows and Linux/Mac
