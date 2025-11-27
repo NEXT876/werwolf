@@ -5,6 +5,7 @@ import de.htwg.werwolf.narrator.*
 
 import upickle.default.*
 import scala.util.Random
+import scala.collection.mutable.Stack
 
 enum Phase:
   case Night, Day
@@ -19,7 +20,14 @@ enum Roles:
     case Roles.witch     => Witch(name)
     case Roles.amor      => Amor(name)
 
-
+case class GameMemento(
+    players: Map[String, Player],
+    phase: Phase,
+    day: Int,
+    votes: Votes,
+    isRunning: Boolean,
+    commandHistory: Stack[GameCommand]
+)
 
 case class Game (
     players: Map[String, Player] = Map.empty,
@@ -30,7 +38,7 @@ case class Game (
 ) extends Subject[GameEvent] {
 
               //command pattern//
-  private val commandHistory = scala.collection.mutable.Stack[GameCommand]()
+private val commandHistory = Stack[GameCommand]()
 
   def executeCommand(cmd: GameCommand): Unit = {
     cmd.execute()
@@ -49,8 +57,31 @@ case class Game (
     }
   }
                 //
-                //
 
+            // Memento //
+
+  def createMemento(): GameMemento = 
+    GameMemento(
+      players = players, 
+      phase = phase ,
+      day = day ,
+      votes = votes ,
+      isRunning = isRunning,
+      commandHistory = commandHistory.reverse
+    )
+  
+
+  def restoreFromMemento(m: GameMemento): Game = {
+      copy(
+        players = m.players,
+        phase = m.phase,
+        day = m.day,
+        votes = m.votes,
+        isRunning = m.isRunning
+      )
+    }
+                      //
+                      //
 
   def addRoles(playerNames: Vector[String]): Game = {
     val roles = getRoles(playerNames.size)
