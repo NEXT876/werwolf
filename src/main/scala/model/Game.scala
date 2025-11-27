@@ -29,6 +29,28 @@ case class Game (
     isRunning: Boolean = true
 ) extends Subject[GameEvent] {
 
+              //command pattern//
+  private val commandHistory = scala.collection.mutable.Stack[GameCommand]()
+
+  def executeCommand(cmd: GameCommand): Unit = {
+    cmd.execute()
+    commandHistory.push(cmd)
+  }
+
+  def undoLast(): Unit = if (commandHistory.nonEmpty) {
+    commandHistory.pop().undo()
+    println("Letzte Aktion rückgängig gemacht!")
+  }
+
+  def replay(): Unit = {
+    println("=== REPLAY ===")
+    commandHistory.reverse.foreach { cmd =>
+      println(cmd.description)
+    }
+  }
+                //
+                //
+
 
   def addRoles(playerNames: Vector[String]): Game = {
     val roles = getRoles(playerNames.size)

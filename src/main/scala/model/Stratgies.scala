@@ -8,7 +8,8 @@ trait NightActionStrategy {
 case object WerwolfAction extends NightActionStrategy {
   def performAction(player: Player, game: Game): Unit = {
     println(s"${player.name} (Werwolf) darf jetzt töten...")
-    // z. B. game.requestKillTarget(player)
+    //val command = KillCommand(player, target, game)
+    //game.executeCommand(command)
   }
 }
 
@@ -21,21 +22,18 @@ case object WitchAction extends NightActionStrategy {
 case object TerroristAction extends NightActionStrategy {
   def performAction(player: Player, game: Game): Unit = {
     println(s"${player.name} (Terorist) darf jetzt explodieren...")
-    // z. B. game.requestKillTarget(player)
   }
 }
 
 case object AmorAction extends NightActionStrategy {
   def performAction(player: Player, game: Game): Unit = {
     println(s"${player.name} (Werwolf) darf jetzt verlieben...")
-    // z. B. game.requestKillTarget(player)
   }
 }
 
 case object VillagerAction extends NightActionStrategy {
   def performAction(player: Player, game: Game): Unit = {
     println(s"${player.name} (Werwolf) darf jetzt leben...")
-    // z. B. game.requestKillTarget(player)
   }
 }
 
