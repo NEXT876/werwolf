@@ -67,7 +67,7 @@ case class Game (
 
   def runNightPhase(): Unit = {
     println("Es ist Nacht")
-    for
+    players.foreach { (name, player) => player.nightAction.performAction(player, this)}
     /** */
   }
 
