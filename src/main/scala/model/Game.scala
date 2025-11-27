@@ -5,7 +5,6 @@ import de.htwg.werwolf.narrator.*
 
 import upickle.default.*
 import scala.util.Random
-import scala.util.chaining.scalaUtilChainingOps
 
 enum Phase:
   case Night, Day
@@ -68,7 +67,7 @@ case class Game (
 
   def runNightPhase(): Unit = {
     println("Es ist Nacht")
-
+    for
     /** */
   }
 
