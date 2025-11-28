@@ -18,9 +18,12 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
   var game: Game = uninitialized
   var observerCalled: GameEvent = uninitialized
     // DummyPlayer für Tests
-  case class DummyPlayer(name: String, var alive: Boolean, role: String) extends Player {
-    def isAlive: Boolean = alive
-    def die: Player = copy(alive = false)
+  case class DummyPlayer(name: String, var isAlive: Boolean, role: String) extends Player {
+    def _isAlive: Boolean = isAlive
+
+    def die = copy(isAlive = false)
+    def revive = copy(isAlive = true)
+
     def nightAction: NightActionStrategy = NoAction
     def vote(target: Player): String = s"$name votes for ${target.name}"
   }
@@ -145,47 +148,47 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
       }
     }*/
 
-  "Game.createMemento / restoreFromMemento" should {
-    "create and restore memento" in {
-      val killer = DummyPlayer("Werwolf", true, "Werwolf")
-      val target = DummyPlayer("Opfer", true, "Villager")
-      var game = Game(players = Map(killer.name -> killer, target.name -> target))
+    "Game.createMemento / restoreFromMemento" should {
+      "create and restore memento" in {
+        val killer = DummyPlayer("Werwolf", true, "Werwolf")
+        val target = DummyPlayer("Opfer", true, "Villager")
+        var game = Game(players = Map(killer.name -> killer, target.name -> target))
 
-      val memento = game.createMemento()
-      val newGame = game.restoreFromMemento(memento)
+        val memento = game.createMemento()
+        val newGame = game.restoreFromMemento(memento)
 
-      newGame.players.keys shouldBe game.players.keys
-      newGame.phase shouldBe game.phase
-      newGame.day shouldBe game.day
-      newGame.isRunning shouldBe game.isRunning
-    }
-  }
-
-  "Game.runPhase" should {
-    "run day phase without exception" in {
-      val player = DummyPlayer("Alice", true, "Villager")
-      val game = Game(players = Map(player.name -> player), phase = Phase.Day)
-
-      noException should be thrownBy game.runPhase()
+        newGame.players.keys shouldBe game.players.keys
+        newGame.phase shouldBe game.phase
+        newGame.day shouldBe game.day
+        newGame.isRunning shouldBe game.isRunning
+      }
     }
 
-    "run night phase without exception" in {
-      val player1 = DummyPlayer("Alice", true, "Villager")
-      val player2 = DummyPlayer("Bob", true, "Werwolf")
-      val game = Game(players = Map(player1.name -> player1, player2.name -> player2), phase = Phase.Night)
+    "Game.runPhase" should {
+      "run day phase without exception" in {
+        val player = DummyPlayer("Alice", true, "Villager")
+        val game = Game(players = Map(player.name -> player), phase = Phase.Day)
 
-      noException should be thrownBy game.runPhase()
-    }
-  }
+        noException should be thrownBy game.runPhase()
+      }
 
-  "Game.GameEnd" should {
-    "end the game correctly" in {
-      val game = Game(isRunning = true)
-      val endedGame = game.GameEnd()
-      endedGame.isRunning shouldBe false
+      "run night phase without exception" in {
+        val player1 = DummyPlayer("Alice", true, "Villager")
+        val player2 = DummyPlayer("Bob", true, "Werwolf")
+        val game = Game(players = Map(player1.name -> player1, player2.name -> player2), phase = Phase.Night)
+
+        noException should be thrownBy game.runPhase()
+      }
     }
-  }
-  }
+
+    "Game.GameEnd" should {
+      "end the game correctly" in {
+        val game = Game(isRunning = true)
+        val endedGame = game.GameEnd()
+        endedGame.isRunning shouldBe false
+      }
+    }
+    }
 
 
   "NarratorService" should {

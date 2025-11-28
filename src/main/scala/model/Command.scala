@@ -8,18 +8,15 @@ trait GameCommand {
 
 
 case class KillCommand(killer: Player, target: Player, game: Game) extends GameCommand {
-  private var oldTarget: Player = target  // merken für undo
-  private var newTarget: Player = target  // neue Instanz nach execute
+  private val oldTarget: Player = target  // neue Instanz nach execute
 
   override def execute(): Unit = {
-    newTarget = target.die
-    // Optional: das Game updaten, z.B. Spieler in der Map ersetzen
-    oldTarget = target
+    if target.isAlive then target.die 
   }
 
   override def undo(): Unit = {
     // undo: alte Instanz wieder herstellen
-    newTarget = oldTarget
+    if !(oldTarget.isAlive) then oldTarget.revive
   }
 
   override def description: String = s"${killer.name} tötet ${target.name}"

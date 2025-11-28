@@ -6,7 +6,9 @@ class NightActionStrategySpec extends AnyFlatSpec with Matchers {
 
   // DummyPlayer für Tests
   case class DummyPlayer(name: String, var isAlive: Boolean, role: String) extends Player {
-    def die: Player = copy(isAlive = false)
+    def die = copy(isAlive = false)
+    def revive = copy(isAlive = true)
+
     def nightAction: NightActionStrategy = NoAction
     def vote(target: Player): String = s"$name votes for ${target.name}"
   }
