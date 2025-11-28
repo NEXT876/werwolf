@@ -60,16 +60,16 @@ private val commandHistory = Stack[GameCommand]()
 
             // Memento //
 
-  def createMemento(): GameMemento = 
+  def createMemento(): GameMemento =
     GameMemento(
-      players = players, 
+      players = players,
       phase = phase ,
       day = day ,
       votes = votes ,
       isRunning = isRunning,
       commandHistory = commandHistory.reverse
     )
-  
+
 
   def restoreFromMemento(m: GameMemento): Game = {
       copy(
@@ -110,6 +110,7 @@ private val commandHistory = Stack[GameCommand]()
   def switchPhase(): Game =
     val newPhase = if phase == Phase.Night then Phase.Day else Phase.Night
     val newDay = day + 1
+
     notifyObservers(GameEvent.phaseSwitch(newPhase))
     copy(phase = newPhase, day = newDay, votes = Votes())
 
