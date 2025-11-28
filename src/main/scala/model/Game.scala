@@ -6,6 +6,7 @@ import de.htwg.werwolf.narrator.*
 import upickle.default.*
 import scala.util.Random
 import scala.collection.mutable.Stack
+import de.htwg.werwolf.util.Subject
 
 enum Phase:
   case Night, Day

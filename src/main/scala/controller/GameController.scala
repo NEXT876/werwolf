@@ -5,6 +5,7 @@ import de.htwg.werwolf.model.*
 import de.htwg.werwolf.view.GameView
 
 import scala.util.Random
+import de.htwg.werwolf.util.Observer
 
 class GameController(private var _game: Game, val view: GameView) extends Observer[GameEvent] {
   def game: Game = _game

@@ -11,6 +11,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import scala.util.Random
 import scala.compiletime.uninitialized
+import de.htwg.werwolf.util.Observer
 
 
 class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
