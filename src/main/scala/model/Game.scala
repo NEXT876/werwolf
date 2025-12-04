@@ -50,7 +50,6 @@ case class Game (
     os.pwd  / "src" / "main"/ "resources" / "narrator.json"
   )
 
-
   def executeCommand(cmd: GameCommand): Game = {
     val updatedGame = cmd.execute(this)
     updatedGame.copy(commandHistory = commandHistory.push(cmd))
@@ -71,8 +70,7 @@ case class Game (
     commandHistory.reverse.foreach { cmd =>
       println(s"• ${cmd.description}")
     }
-  }
-
+  
 
             // Memento //
 
@@ -110,8 +108,8 @@ case class Game (
         player.name -> player
       }
       .toMap
-
     copy(players = newPlayers)
+
 
   def getRoles(playeramount: Int): Vector[Roles] =
     if playeramount == 2 then Vector(Roles.werwolf, Roles.villager)
@@ -124,31 +122,20 @@ case class Game (
     createMemento()
     val newPhase = if phase == Phase.Night then Phase.Day else Phase.Night
     val newDay = day + 1
-
-    //notifyObservers(GameEvent.phaseSwitch(newPhase))
     copy(phase = newPhase, day = newDay, votes = Votes())
 
-  /*def runPhase(): Unit = {
-    if phase == Phase.Night then runNightPhase()
-    else runDayPhase()
-  }*/
 
   def runNightPhase(): Unit = {
     notifyObservers(GameEvent.printnarratorText(NarratorService.randomNarratorText("Start", narratorData)))
     notifyObservers(GameEvent.printGameState(players))
     players.foreach { (name, player) => player.nightAction.performAction(player, this)}
     /** */
+  }
 
   def runDayPhase(): Unit = {
     notifyObservers(GameEvent.printGameState(players))
     /** */
   }
-/*
-  def GameEnd(): Game =
-    val newIsRunning = false
-    notifyObservers(GameEvent.gameEnd(newIsRunning))
-    copy(isRunning = false)
-*/
 
   object NarratorService:
     def loadNarratorJson(path: os.Path): Root =
@@ -165,7 +152,6 @@ case class Game (
         case _         => List("")
       /*rnd.*/
       Random.shuffle(list).headOption.getOrElse("")
-
 }
 /* def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Player] = {
     import scala.io.StdIn.readLine
