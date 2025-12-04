@@ -3,5 +3,6 @@ package de.htwg.werwolf.model
 
 enum GameEvent:
   case printGameState(players : Map[String, Player])
-  case phaseSwitch(phase: Phase)
-  case gameEnd(isRunning: Boolean)
+ // case phaseSwitch(phase: Phase)
+ // case gameEnd(isRunning: Boolean)
+  case printnarratorText(text : String)

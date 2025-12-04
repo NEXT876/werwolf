@@ -35,29 +35,37 @@ case class Game (
     phase: Phase = Phase.Night,
     day: Int = 1,
     votes: Votes = Votes(),
-    isRunning: Boolean = true
+    isRunning: Boolean = true,
+    commandHistory: Stack[GameCommand] = Stack[GameCommand]()
 ) extends Subject[GameEvent] {
 
-              //command pattern//
-private val commandHistory = Stack[GameCommand]()
+  private val narratorData: Root = NarratorService.loadNarratorJson(
+    os.pwd  / "src" / "main"/ "resources" / "narrator.json"
+  )
 
-  def executeCommand(cmd: GameCommand): Unit = {
-    cmd.execute()
-    commandHistory.push(cmd)
+
+  def executeCommand(cmd: GameCommand): Game = {
+    val updatedGame = cmd.execute(this)
+    updatedGame.copy(commandHistory = commandHistory.push(cmd))
   }
 
-  def undoLast(): Unit = if (commandHistory.nonEmpty) {
-    commandHistory.pop().undo()
-    println("Letzte Aktion rückgängig gemacht!")
-  }
+  def undoLast(): Game = 
+    if (commandHistory.nonEmpty) {
+      val cmd = commandHistory.pop()
+      val revertedGame = cmd.undo(this)
+      revertedGame.copy(commandHistory = commandHistory)
+    } else {
+      println("Nichts zum Rückgängigmachen!")
+      this
+    }
 
   def replay(): Unit = {
     println("=== REPLAY ===")
     commandHistory.reverse.foreach { cmd =>
-      println(cmd.description)
+      println(s"• ${cmd.description}")
     }
   }
-                //
+
 
             // Memento //
 
@@ -78,7 +86,8 @@ private val commandHistory = Stack[GameCommand]()
         phase = m.phase,
         day = m.day,
         votes = m.votes,
-        isRunning = m.isRunning
+        isRunning = m.isRunning,
+        commandHistory = m.commandHistory
       )
     }
                       //
@@ -96,7 +105,6 @@ private val commandHistory = Stack[GameCommand]()
       }
       .toMap
 
-    notifyObservers(GameEvent.printGameState(newPlayers))
     copy(players = newPlayers)
   }
 
@@ -109,34 +117,35 @@ private val commandHistory = Stack[GameCommand]()
   }
 
   def switchPhase(): Game =
+    createMemento()
     val newPhase = if phase == Phase.Night then Phase.Day else Phase.Night
     val newDay = day + 1
 
-    notifyObservers(GameEvent.phaseSwitch(newPhase))
+    //notifyObservers(GameEvent.phaseSwitch(newPhase))
     copy(phase = newPhase, day = newDay, votes = Votes())
 
-  def runPhase(): Unit = {
+  /*def runPhase(): Unit = {
     if phase == Phase.Night then runNightPhase()
     else runDayPhase()
-  }
+  }*/
 
   def runNightPhase(): Unit = {
-    println("Es ist Nacht")
+    notifyObservers(GameEvent.printnarratorText(NarratorService.randomNarratorText("Start", narratorData)))
+    notifyObservers(GameEvent.printGameState(players))
     players.foreach { (name, player) => player.nightAction.performAction(player, this)}
     /** */
   }
 
   def runDayPhase(): Unit = {
-    println("Es ist Tag")
-
+    notifyObservers(GameEvent.printGameState(players))
     /** */
   }
-
+/*
   def GameEnd(): Game =
     val newIsRunning = false
     notifyObservers(GameEvent.gameEnd(newIsRunning))
     copy(isRunning = false)
-
+*/
 
   object NarratorService:
     def loadNarratorJson(path: os.Path): Root =

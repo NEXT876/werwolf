@@ -8,51 +8,79 @@ import scala.util.Random
 import de.htwg.werwolf.util.Observer
 
 class GameController(private var _game: Game, val view: GameView) extends Observer[GameEvent] {
+  private var savedMemento: Option[GameMemento] = None
   def game: Game = _game
-  private def updateGame(newGame: Game): Unit =
+  private def updateGame(newGame: Game): Game =
     _game.removeObserver(this)
     _game = newGame
     _game.addObserver(this)
+    game
+
+  private def saveGameState(): Unit = 
+    savedMemento = Some(game.createMemento())
+  
+
+  def undoFull(): Unit = savedMemento match 
+    case Some(memento) =>
+      val restoredGame = game.restoreFromMemento(memento)
+      updateGame(restoredGame)
+      view.tiping("↶ Vollständiges Undo – alles zurückgesetzt!", 70)
+    case None =>
+      view.tiping("Kein gespeicherter Spielstand zum Wiederherstellen.", 70)
+  
+
+  def executeCommand(cmd: GameCommand): Game =
+    saveGameState()
+    updateGame(game.executeCommand(cmd))
+
+  def undoCommand(): Game =
+    saveGameState()
+    updateGame(game.undoLast())
 
   def start(): Unit = {
     view.clearScreen()
     view.tiping("Willkommen zu Werwolf", 100)
     view.showLogo()
 
+    saveGameState()
     val names = view.getPlayerNames(view.getPlayerAmount())
 
     view.clearScreen()
+
+    saveGameState()
     updateGame(game.addRoles(names))
-    run()
+    runGame()
   }
 
-  def process(input: String): Unit =
-    input match
-      case "switchPhase" => updateGame(game.switchPhase())
-      case "runPhase"    => game.runPhase()
-      case "GameEnd"     => updateGame(_game.GameEnd())
-      case _             =>
-
-  def run(): Unit =
+  private def runGame(): Unit =
     while (game.isRunning) {
-      process("runPhase")
-      process("switchPhase")
-      //
-      process("GameEnd")
+      view.clearScreen()
+
+      game.phase match {
+        case Phase.Night => game.runNightPhase()
+        case Phase.Day   => game.runDayPhase()
+      }
+
+      if (true) {
+        saveGameState()
+        updateGame(executeCommand(GameEndCommand()))
+      }
+      //undoFull()
     }
+
+    view.showGameOver()
 
   override def update(event: GameEvent): Unit =
     event match
-      case GameEvent.printGameState(alivePlayers) =>
+      case GameEvent.printGameState(players) =>
         view.clearScreen()
         view.showLogo()
-        view.printPlayerRoles(alivePlayers.map { case (name, player) =>
+        view.printPlayerRoles(players.map { case (name, player) =>
           (name, player.role, player.isAlive)
         }.toVector)
 
-      case GameEvent.phaseSwitch(phase) =>
-      //
-      case GameEvent.gameEnd(isRunning) =>
-        println("Das Spiel ist vorbei")
+      case GameEvent.printnarratorText(text) => 
+        view.showLogo()
+        view.tiping(text)
 
 }

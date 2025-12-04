@@ -40,7 +40,7 @@ class TUI() extends GameView {
     println(header + body + footer)
   }
 
-  def tiping(text: String, waitTime_ms: Int): Unit = {
+  def tiping(text: String, waitTime_ms: Int = 30): Unit = {
     text.foreach { buchstabe =>
       if (buchstabe == '.') {
         Thread.sleep(waitTime_ms * 4)
@@ -63,4 +63,8 @@ class TUI() extends GameView {
     if (sys.props("os.name").toLowerCase.contains("win")) "cls".!
     else "clear".! // clear Screen for WIndows and Linux/Mac
   }
+
+  def showGameOver(): Unit =
+    println("Das Game ist vorbei")
+    println("Gewonnen hat: {!Beat}")
 }

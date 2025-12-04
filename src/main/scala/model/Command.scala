@@ -1,44 +1,46 @@
 package de.htwg.werwolf.model
 
 trait GameCommand {
-  def execute(): Unit
-  def undo(): Unit
-  def description: String  // für Logging/Replay
+  def description: String
+  def execute(game: Game): Game
+  def undo( game: Game): Game
 }
 
 
-case class KillCommand(killer: Player, target: Player, game: Game) extends GameCommand {
-  private val oldTarget: Player = target  // neue Instanz nach execute
+case class KillCommand(killerName: String, targetName: String) extends GameCommand {
 
-  override def execute(): Unit = {
-    if target.isAlive then target.die 
+  override def description: String = s"${killerName} tötet ${targetName}"
+  override def execute(game: Game): Game = {
+    game.players.get(targetName) match {
+      case Some(target) if target.isAlive =>
+        val killedPlayer = target.die
+        game.copy(players = game.players.updated(targetName, killedPlayer))
+      case _ => game // Ziel schon tot oder nicht existent → nichts tun
+    }
   }
 
-  override def undo(): Unit = {
-    // undo: alte Instanz wieder herstellen
-    if !(oldTarget.isAlive) then oldTarget.revive
+  override def undo(game: Game): Game = {
+    game.players.get(targetName) match {
+      case Some(target) if !target.isAlive =>
+        val revivedPlayer = target.revive
+        game.copy(players = game.players.updated(targetName, revivedPlayer))
+      case _ => game
+    }
   }
-
-  override def description: String = s"${killer.name} tötet ${target.name}"
 }
 
-case class HealCommand(witch: Player, target: Player) extends GameCommand {
-  private var oldTarget: Player = target
-  private var newTarget: Player = target
+case class GameEndCommand(winner: Option[String] = None) extends GameCommand {
 
-  override def execute(): Unit = {
-    newTarget = target match
-      case p if !p.isAlive => p match
-        case wp: Werwolf => wp.copy(isAlive = true)  // Bei allen konkreten Playern copy benutzen
-        case _ => target  // Andere Spielerarten
-      case _ => target
-    oldTarget = target
+  override val description: String = winner match
+      case Some(w) => s"Spiel beendet – Gewinner: $w"
+      case None    => "Spiel beendet (manuell abgebrochen)"
+
+
+  override def execute(game: Game): Game = {
+    game.copy(isRunning = false)
   }
 
-  override def undo(): Unit = {
-    newTarget = oldTarget
+  override def undo(game: Game): Game = {
+    game.copy(isRunning = true)
   }
-
-  override def description: String = s"Hexe heilt ${target.name}"
 }
-
