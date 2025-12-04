@@ -1,88 +1,158 @@
-// src/test/scala/de/htwg/werwolf/controller/GameControllerSpec.scala
 package de.htwg.werwolf.controller
 
-import de.htwg.werwolf.model.*
-import de.htwg.werwolf.view.*
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalactic.TypeCheckedTripleEquals
-import scala.util.Random
+import org.scalatest.wordspec.AnyWordSpec
 
-class GameControllerSpec extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
-/*
- /*   "handle special roles correctly" in {
-      val game = Game()
-      val controller = new GameController(game)
-      val players = Vector.tabulate(6)(i => s"P$i") // 10 Spieler
+import de.htwg.werwolf.model._
+import de.htwg.werwolf.view.GameView
 
-      // Fixiere Zufall für reproduzierbare Tests
-      val fixedRandom = new Random(42)
-      val fixedController = new GameController(game) {
-        override def getRoles(playeramount: Int): Vector[Roles] = {
-          if (playeramount == 2) Vector(Roles.werwolf, Roles.villager)
-          else {
-            val wolves = Vector.fill(playeramount / 3)(Roles.werwolf)
-            val specials = Vector(Roles.villager, Roles.witch, Roles.amor, Roles.terrorist)
-            wolves ++ fixedRandom.shuffle(specials.take(playeramount - wolves.size))
-          }
-        }
-      }
+import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.Stack
 
-      fixedController.initializePlayers(players)
+// Pragmatic test — eher grob, aber zielt darauf ab, viele Pfade in GameController zu durchlaufen.
+class GameControllerSpec extends AnyWordSpec with Matchers {
 
-      val roles = game.currentState.alivePlayers.values.map(_.role).toSet
-      roles should contain("Witch")
-      roles should contain("Amor")
-      roles should contain("Terrorist")
+  // Fake view, sammelt Aufrufe zum späteren Assert
+  class FakeView extends GameView {
+    val tipMessages = ListBuffer.empty[(String, Int)]
+    var logoShown = 0
+    var cleared = 0
+    var printedRoles: Option[Vector[AnyRef]] = None
+    var gameOverShown = false
+    var askedAmount: Option[Int] = None
+    var providedNames: Vector[String] = Vector.empty
+
+    override def getPlayerAmount(): Int = 
+      3
+
+    override def getPlayerNames(playerAmount: Int): Vector[String] = {
+      askedAmount = Some(playerAmount)
+      // return some deterministic names
+      Vector("Alice", "Bob", "Charlie")
     }
 
-    "process 'switchPhase' command" in {
-      val game = Game()
-      val view: GameView = new TUI()
-      val controller = new GameController(game, view)
-      // Spy auf game.switchPhase()
-      var called = false
-      val spyGame = new Game() {
-        override def switchPhase(): Game = {
-          called = true
-          super.switchPhase()
-        }
-      }
-      val spyController = new GameController(spyGame,view)
+    override def printPlayerRoles(playerRoles: Vector[AnyRef]): Unit =
+      printedRoles = Some(playerRoles)
 
-      spyController.process("switchPhase")
-      called shouldBe true
-    }
+    override def tiping(text: String, waitTime_ms: Int = 30): Unit =
+      tipMessages += ((text, waitTime_ms))
 
-    "process 'GameEnd' command" in {
-      val game = Game()
-      val view: GameView = new TUI()
-      val controller = new GameController(game, view)
-      var ended = false
-      val spyGame = new Game() {
-        override def GameEnd(): Game = {
-          ended = true
-          super.GameEnd()
-        }
-      }
-      val spyController = new GameController(spyGame, view)
-
-      spyController.process("GameEnd")
-      ended shouldBe true
-    }
-
-    "ignore unknown commands" in {
-      val view: GameView = new TUI()
-      var called = false
-      val spyGame = new Game() {
-        override def switchPhase(): Game = {
-        called = true               // side-effect
-        super.switchPhase()         // korrekter Rückgabewert vom Typ Game
-        }
-      }
-      val spyController = new GameController(spyGame, view)
-      spyController.process("unknown")
-      called shouldBe false
-}
-*/*/
+    override def showLogo(): Unit = logoShown += 1
+    override def clearScreen(): Unit = cleared += 1
+    override def showGameOver(): Unit = gameOverShown = true
   }
+
+  // Minimal dummy GameCommand to drive execute/undo
+  class DummyCmd(val description: String = "dummy") extends GameCommand {
+    override def execute(g: Game): Game = g.copy(day = g.day + 1)
+    override def undo(g: Game): Game = g.copy(day = Math.max(1, g.day - 1))
+  }
+
+  "GameController" should {
+
+    "handle undoFull when no saved memento exists" in {
+      val fakeView = new FakeView
+      val g = Game() // default game
+      val controller = new GameController(g, fakeView)
+
+      // call undoFull with no saved memento yet
+      controller.undoFull()
+
+      // view should have been informed about missing save
+      fakeView.tipMessages.nonEmpty shouldBe true
+      fakeView.tipMessages.last._1 should include("Kein gespeicherter Spielstand")
+    }
+
+    "executeCommand and produce saved memento so undoFull works afterwards" in {
+      val fakeView = new FakeView
+
+      // Make a game that simply delegates to default behavior
+      val g = Game()
+      val controller = new GameController(g, fakeView)
+
+      val cmd = new DummyCmd()
+      // executeCommand should save a memento and update the game (day+1)
+      val beforeDay = controller.game.day
+      controller.executeCommand(cmd)
+      controller.game.day shouldBe beforeDay + 1
+
+      // now undoFull should be able to restore (we expect a message about full undo)
+      controller.undoFull()
+      // The tip message should contain the full undo message
+      fakeView.tipMessages.exists(_._1.contains("Vollständiges Undo")) shouldBe true
+    }
+
+    "undoCommand should call game's undoLast and update controller.game" in {
+      val fakeView = new FakeView
+
+      // Create a custom game instance that uses the default commandHistory handling.
+      val baseGame = Game()
+      val controller = new GameController(baseGame, fakeView)
+
+      val cmd = new DummyCmd()
+      // execute then undo
+      controller.executeCommand(cmd)
+      val afterExecDay = controller.game.day
+      controller.undoCommand()
+      // after undoCommand controller.game.day should have been rolled back
+      controller.game.day shouldBe afterExecDay - 1
+    }
+
+    "start should call view methods and run a single game loop (via checkWinCondition)" in {
+      val fakeView = new FakeView
+
+      // create a custom game that will cause one iteration and then stop by returning a winner
+      val oneShotGame = new Game(isRunning = true) {
+        override def runNightPhase(): Unit = {
+          // no-op
+        }
+        override def runDayPhase(): Unit = {
+          // no-op
+        }
+        // when controller checks for winners, always return a winner so controller triggers GameEndCommand
+        override def checkWinCondition(players: Map[String, Player]): Option[Faction] =
+          Some(Faction._Villager)
+
+        // override executeCommand so GameEndCommand will make game not running anymore (controller expects this)
+        override def executeCommand(cmd: GameCommand): Game = this.copy(isRunning = false, commandHistory = this.commandHistory.push(cmd))
+      }
+
+      val controller = new GameController(oneShotGame, fakeView)
+
+      // start() will: clear screen, show tip, show logo, save memento, ask player count/names,
+      // clear screen, save memento, updateGame(addRoles(names)), runGame -> because checkWinCondition returns Some -> executeCommand -> showGameOver
+      controller.start()
+
+      // Views should have been invoked in the process
+      fakeView.logoShown should be >= 1
+      fakeView.cleared should be >= 2
+      fakeView.gameOverShown shouldBe true
+
+      // getPlayerNames must have been called with getPlayerAmount result (3)
+      fakeView.askedAmount shouldBe Some(3)
+    }
+
+    "update should handle printGameState and printnarratorText events" in {
+      val fakeView = new FakeView
+      val g = Game()
+      val controller = new GameController(g, fakeView)
+
+      // prepare sample players map: use Roles helper
+      val p1 = Roles.werwolf.toPlayer("W1")
+      val p2 = Roles.villager.toPlayer("V1")
+      val players: Map[String, Player] = Map("W1" -> p1, "V1" -> p2)
+
+      // call printGameState event
+      controller.update(GameEvent.printGameState(players))
+      // view should have printed roles (converted)
+      fakeView.printedRoles.isDefined shouldBe true
+      val printed = fakeView.printedRoles.get
+      printed.exists(_.isInstanceOf[Tuple3[?, ?, ?]]) shouldBe true // we expect tuples (name, roleString, isAlive) but be permissive
+
+      // call printnarratorText event
+      controller.update(GameEvent.printnarratorText("Ein Text"))
+      // tiping should have been called with the narrator text (last tip)
+      fakeView.tipMessages.last._1 should include("Ein Text")
+    }
+  }
+}
