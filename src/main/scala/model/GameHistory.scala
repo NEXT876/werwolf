@@ -14,6 +14,6 @@ class GameHistory {
   }
 
   def list(): Unit = saves.zipWithIndex.reverse.foreach {
-    case (m, i) => println(s"$i: ${m}")
+    case (m, i) =>// println(s"$i: ${m}")
   }
 }

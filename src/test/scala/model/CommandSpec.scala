@@ -1,83 +1,95 @@
-package de.htwg.werwolf.test
-import org.scalatest.flatspec.AnyFlatSpec
+package de.htwg.werwolf.model
+
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.werwolf.model.{Witch, Player, Game, KillCommand}
-import de.htwg.werwolf.model.*
-import de.htwg.werwolf.view.*
 
-class CommandSpec extends AnyFlatSpec with Matchers {
-    // Eine NightAction, die nichts tut – nur für Tests
-    class NoOpNightAction extends NightActionStrategy {
-        override def performAction(player: Player, game: Game): Unit = ()
-    }
-    case class DummyPlayer(name: String, var isAlive: Boolean, role: Roles) extends Player {
-        def die = copy(isAlive = false)
-        def revive = copy(isAlive = true)
+class CommandSpec extends AnyWordSpec with Matchers {
 
-        def nightAction: NightActionStrategy = new NoOpNightAction
-        def faction: Faction = ???
+  // Dummy Player für Tests (Player ist ein Trait)
+  class TestPlayer(val name: String, var isAlive: Boolean = true, val faction: Faction) extends Player {
+    override def role: Roles = ???
+    override def vote(target: Player): String = ???
+    override def nightAction: NightActionStrategy = ???
+    override def die: Player = { isAlive = false; this }
+    override def revive: Player = { isAlive = true; this }
+  }
 
-        def vote(target: Player): String = target.name
-        def winCondition(players: Map[String, Player]): Boolean = ???
-    }
+  "KillCommand" should {
 
-
-
-    "KillCommand" should "correctly describe the action" in {
-        //val killer = DummyPlayer("Werwolf", true, Roles.werwolf)
-        //val target = DummyPlayer("Opfer", true, Roles.villager)
-        val game = Game()
-        val command = KillCommand("Werwolf", "Opfer")
-
-        command.description shouldBe "Werwolf tötet Opfer"
+    "return correct description" in {
+      val cmd = KillCommand("A", "B")
+      cmd.description shouldBe "A tötet B" // Zeile 12
     }
 
-   /* it should "execute and mark the target as dead" in {
-        val killer = DummyPlayer("Werwolf", true, "Werwolf")
-        val target = DummyPlayer("Opfer", true, "Dorfbewohner")
-        val game = Game()
-        val command = KillCommand(killer, target, game)
+    "kill an alive target on execute" in {
+      val killer = new TestPlayer("A", isAlive = true, faction = Faction._Villager)
+      val target = new TestPlayer("B", isAlive = true, faction = Faction._Villager)
+      val game = Game(players = Map("A" -> killer, "B" -> target), isRunning = true)
 
-        // execute noch nicht implementiert, Test wird initially failen
-        game.executeCommand(command)
-        target.isAlive shouldBe false
-    }*/
+      val cmd = KillCommand("A", "B")
+      val updated = cmd.execute(game)
 
-    /*it should "undo the kill and revive the target" in {
-        val killer = DummyPlayer("Werwolf", true, "Werwolf")
-        val target = DummyPlayer("Opfer", true, "Dorfbewohner")
-        val game = Game()
-        val command = KillCommand(killer, target, game)
+      updated.players("B").isAlive shouldBe false
+    }
 
-        command.execute()
-        command.undo()
-        target.isAlive shouldBe true
-    }*/
+    "do nothing if target is dead or non-existent" in {
+      val killer = new TestPlayer("A", isAlive = true, faction = Faction._Villager)
+      val deadTarget = new TestPlayer("B", isAlive = false, faction = Faction._Villager)
+      val game = Game(players = Map("A" -> killer, "B" -> deadTarget), isRunning = true)
 
-  /*  "HealCommand" should "correctly describe the action" in {
-        val witch = Witch("Hexe", true)
-        val target = DummyPlayer("Opfer", false, Roles.villager)
-        val command = HealCommand(witch, target)
+      val cmd = KillCommand("A", "B")
+      val updated = cmd.execute(game)
 
-        command.description shouldBe "Hexe heilt Opfer"
-    }*/
+      updated shouldBe game // Zeile 18
+    }
 
-    /*it should "execute and revive a dead player" in {
-        val witch = Witch("Hexe", true)
-        val target = DummyPlayer("Opfer", false, "Dorfbewohner")
-        val command = HealCommand(witch, target)
+    "undo revives a previously killed target" in {
+      val killer = new TestPlayer("A", isAlive = true, faction = Faction._Villager)
+      val target = new TestPlayer("B", isAlive = false, faction = Faction._Villager)
+      val game = Game(players = Map("A" -> killer, "B" -> target), isRunning = true)
 
-        command.execute()
-        target.isAlive shouldBe true
-    }*/
+      val cmd = KillCommand("A", "B")
+      val reverted = cmd.undo(game)
 
- /*   it should "undo the heal and set the player back to dead" in {
-    val witch = Witch("Hexe", true)
-    val target = DummyPlayer("Opfer", false, Roles.villager)
-    val command = HealCommand(witch, target)
+      reverted.players("B").isAlive shouldBe true // Zeile 27
+    }
 
-    command.execute()
-    command.undo()
-    target.isAlive shouldBe false
-  }*/
+    "undo does nothing if target is already alive" in {
+      val killer = new TestPlayer("A", isAlive = true, faction = Faction._Villager)
+      val target = new TestPlayer("B", isAlive = true, faction = Faction._Villager)
+      val game = Game(players = Map("A" -> killer, "B" -> target), isRunning = true)
+
+      val cmd = KillCommand("A", "B")
+      val reverted = cmd.undo(game)
+
+      reverted shouldBe game
+    }
+  }
+
+  "GameEndCommand" should {
+
+    "return correct description when winner is Some" in {
+      val cmd = GameEndCommand(Some(Faction._Werwolf))
+      cmd.description shouldBe "Spiel beendet – Gewinner: Werwölfe" // Zeile 34-35
+    }
+
+    "return correct description when winner is None" in {
+      val cmd = GameEndCommand(None)
+      cmd.description shouldBe "Spiel beendet (manuell abgebrochen)" // Zeile 36
+    }
+
+    "execute sets game to not running" in {
+      val game = Game(players = Map.empty, isRunning = true)
+      val cmd = GameEndCommand()
+      val updated = cmd.execute(game)
+      updated.isRunning shouldBe false // Zeile 40
+    }
+
+    "undo sets game back to running" in {
+      val game = Game(players = Map.empty, isRunning = false)
+      val cmd = GameEndCommand()
+      val reverted = cmd.undo(game)
+      reverted.isRunning shouldBe true // Zeile 44
+    }
+  }
 }
