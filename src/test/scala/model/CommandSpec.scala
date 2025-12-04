@@ -10,20 +10,22 @@ class CommandSpec extends AnyFlatSpec with Matchers {
     class NoOpNightAction extends NightActionStrategy {
         override def performAction(player: Player, game: Game): Unit = ()
     }
-    case class DummyPlayer(name: String, var isAlive: Boolean, role: String) extends Player {
+    case class DummyPlayer(name: String, var isAlive: Boolean, role: Roles) extends Player {
         def die = copy(isAlive = false)
         def revive = copy(isAlive = true)
 
         def nightAction: NightActionStrategy = new NoOpNightAction
+        def faction: Faction = ???
 
         def vote(target: Player): String = target.name
+        def winCondition(players: Map[String, Player]): Boolean = ???
     }
 
 
 
     "KillCommand" should "correctly describe the action" in {
-        val killer = DummyPlayer("Werwolf", true, "Werwolf")
-        val target = DummyPlayer("Opfer", true, "Dorfbewohner")
+        val killer = DummyPlayer("Werwolf", true, Roles.werwolf)
+        val target = DummyPlayer("Opfer", true, Roles.villager)
         val game = Game()
         val command = KillCommand(killer, target, game)
 
@@ -54,7 +56,7 @@ class CommandSpec extends AnyFlatSpec with Matchers {
 
     "HealCommand" should "correctly describe the action" in {
         val witch = Witch("Hexe", true)
-        val target = DummyPlayer("Opfer", false, "Dorfbewohner")
+        val target = DummyPlayer("Opfer", false, Roles.villager)
         val command = HealCommand(witch, target)
 
         command.description shouldBe "Hexe heilt Opfer"
@@ -71,7 +73,7 @@ class CommandSpec extends AnyFlatSpec with Matchers {
 
     it should "undo the heal and set the player back to dead" in {
     val witch = Witch("Hexe", true)
-    val target = DummyPlayer("Opfer", false, "Dorfbewohner")
+    val target = DummyPlayer("Opfer", false, Roles.villager)
     val command = HealCommand(witch, target)
 
     command.execute()

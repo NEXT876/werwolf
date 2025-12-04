@@ -12,6 +12,7 @@ import java.nio.file.Paths
 import scala.util.Random
 import scala.compiletime.uninitialized
 import de.htwg.werwolf.util.Observer
+import de.htwg.werwolf.model.Roles
 
 
 class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
@@ -19,14 +20,16 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
   var game: Game = uninitialized
   var observerCalled: GameEvent = uninitialized
     // DummyPlayer für Tests
-  case class DummyPlayer(name: String, var isAlive: Boolean, role: String) extends Player {
+  case class DummyPlayer(name: String, var isAlive: Boolean, role: Roles) extends Player {
     def _isAlive: Boolean = isAlive
 
     def die = copy(isAlive = false)
     def revive = copy(isAlive = true)
+    def faction: Faction = ???
 
     def nightAction: NightActionStrategy = NoAction
     def vote(target: Player): String = s"$name votes for ${target.name}"
+    def winCondition(players: Map[String, Player]): Boolean = ???
   }
 
   // Dummy GameEvent Observer
@@ -151,8 +154,8 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
 
     "Game.createMemento / restoreFromMemento" should {
       "create and restore memento" in {
-        val killer = DummyPlayer("Werwolf", true, "Werwolf")
-        val target = DummyPlayer("Opfer", true, "Villager")
+        val killer = DummyPlayer("Werwolf", true, Roles.werwolf)
+        val target = DummyPlayer("Opfer", true, Roles.villager)
         var game = Game(players = Map(killer.name -> killer, target.name -> target))
 
         val memento = game.createMemento()
@@ -167,15 +170,15 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
 
     "Game.runPhase" should {
       "run day phase without exception" in {
-        val player = DummyPlayer("Alice", true, "Villager")
+        val player = DummyPlayer("Alice", true, Roles.villager)
         val game = Game(players = Map(player.name -> player), phase = Phase.Day)
 
         noException should be thrownBy game.runPhase()
       }
 
       "run night phase without exception" in {
-        val player1 = DummyPlayer("Alice", true, "Villager")
-        val player2 = DummyPlayer("Bob", true, "Werwolf")
+        val player1 = DummyPlayer("Alice", true, Roles.villager)
+        val player2 = DummyPlayer("Bob", true, Roles.werwolf)
         val game = Game(players = Map(player1.name -> player1, player2.name -> player2), phase = Phase.Night)
 
         noException should be thrownBy game.runPhase()

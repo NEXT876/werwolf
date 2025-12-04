@@ -11,9 +11,16 @@ import de.htwg.werwolf.util.Subject
 enum Phase:
   case Night, Day
 
+enum Faction:
+  case _Werwolf, _Villager
+  def winCondition(players: Map[String, Player]): Boolean = this match
+    case Faction._Werwolf =>
+      players.values.forall(p => p.faction == Faction._Werwolf)
+    case Faction._Villager =>
+      players.values.forall(p => p.faction != Faction._Werwolf)
+
 enum Roles:
   case werwolf, villager, terrorist, witch, amor
-
   def toPlayer(name: String): Player = this match
     case Roles.werwolf   => Werwolf(name)
     case Roles.villager  => Villager(name)
@@ -41,22 +48,19 @@ case class Game (
               //command pattern//
 private val commandHistory = Stack[GameCommand]()
 
-  def executeCommand(cmd: GameCommand): Unit = {
+  def executeCommand(cmd: GameCommand): Unit =
     cmd.execute()
     commandHistory.push(cmd)
-  }
 
-  def undoLast(): Unit = if (commandHistory.nonEmpty) {
+  def undoLast(): Unit = if (commandHistory.nonEmpty)
     commandHistory.pop().undo()
     println("Letzte Aktion rückgängig gemacht!")
-  }
 
-  def replay(): Unit = {
+  def replay(): Unit =
     println("=== REPLAY ===")
     commandHistory.reverse.foreach { cmd =>
       println(cmd.description)
     }
-  }
                 //
 
             // Memento //
@@ -72,7 +76,7 @@ private val commandHistory = Stack[GameCommand]()
     )
 
 
-  def restoreFromMemento(m: GameMemento): Game = {
+  def restoreFromMemento(m: GameMemento): Game =
       copy(
         players = m.players,
         phase = m.phase,
@@ -80,11 +84,10 @@ private val commandHistory = Stack[GameCommand]()
         votes = m.votes,
         isRunning = m.isRunning
       )
-    }
                       //
                       //
 
-  def addRoles(playerNames: Vector[String]): Game = {
+  def addRoles(playerNames: Vector[String]): Game =
     val roles = getRoles(playerNames.size)
 
     val newPlayers = Random
@@ -95,18 +98,15 @@ private val commandHistory = Stack[GameCommand]()
         player.name -> player
       }
       .toMap
-
     notifyObservers(GameEvent.printGameState(newPlayers))
     copy(players = newPlayers)
-  }
 
-  def getRoles(playeramount: Int): Vector[Roles] = {
+  def getRoles(playeramount: Int): Vector[Roles] =
     if playeramount == 2 then Vector(Roles.werwolf, Roles.villager)
     else
       Vector.fill(playeramount / 3)(Roles.werwolf) ++ Random.shuffle(
         Vector(Roles.villager, Roles.witch, Roles.amor, Roles.terrorist)
       )
-  }
 
   def switchPhase(): Game =
     val newPhase = if phase == Phase.Night then Phase.Day else Phase.Night
@@ -115,28 +115,30 @@ private val commandHistory = Stack[GameCommand]()
     notifyObservers(GameEvent.phaseSwitch(newPhase))
     copy(phase = newPhase, day = newDay, votes = Votes())
 
-  def runPhase(): Unit = {
+  def runPhase(): Unit =
     if phase == Phase.Night then runNightPhase()
     else runDayPhase()
-  }
 
-  def runNightPhase(): Unit = {
+  def runNightPhase(): Unit =
     println("Es ist Nacht")
     players.foreach { (name, player) => player.nightAction.performAction(player, this)}
     /** */
-  }
 
-  def runDayPhase(): Unit = {
+  def runDayPhase(): Unit =
     println("Es ist Tag")
-
     /** */
-  }
 
   def GameEnd(): Game =
     val newIsRunning = false
     notifyObservers(GameEvent.gameEnd(newIsRunning))
     copy(isRunning = false)
 
+  def checkWinCondition(players: Map[String, Player]): Option[Faction] =
+    val winners =
+      Faction.values.filter(_.winCondition(players))
+
+    if winners.size == 1 then Some(winners.head)
+    else None
 
   object NarratorService:
     def loadNarratorJson(path: os.Path): Root =
