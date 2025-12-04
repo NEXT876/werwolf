@@ -19,6 +19,11 @@ enum Faction:
     case Faction._Villager =>
       players.values.forall(p => p.faction != Faction._Werwolf)
 
+  override def toString(): String = this match
+    case Faction._Werwolf  => "Werwölfe"
+    case Faction._Villager => "Villager"
+  
+
 enum Roles:
   case werwolf, villager, terrorist, witch, amor
   def toPlayer(name: String): Player = this match
@@ -27,7 +32,14 @@ enum Roles:
     case Roles.terrorist => Terrorist(name)
     case Roles.witch     => Witch(name)
     case Roles.amor      => Amor(name)
-
+  
+  override def toString(): String = this match
+    case Roles.werwolf   => "Werwolf"
+    case Roles.villager  => "Villager"
+    case Roles.terrorist => "Terrorist"
+    case Roles.witch     => "Witch"
+    case Roles.amor      => "Amor"
+  
 case class GameMemento(
     players: Map[String, Player],
     phase: Phase,
@@ -94,8 +106,7 @@ case class Game (
         isRunning = m.isRunning,
         commandHistory = m.commandHistory
       )
-                      //
-                      //
+
 
   def addRoles(playerNames: Vector[String]): Game =
     val roles = getRoles(playerNames.size)
@@ -137,6 +148,14 @@ case class Game (
     /** */
   }
 
+
+  def checkWinCondition(players: Map[String, Player]): Option[Faction] =
+    val winners =
+      Faction.values.filter(_.winCondition(Map("Beat" -> Roles.werwolf.toPlayer("Beat!"))))
+
+    if winners.size == 1 then Some(winners.head)
+    else None
+    
   object NarratorService:
     def loadNarratorJson(path: os.Path): Root =
       val jsonString = os.read(path)

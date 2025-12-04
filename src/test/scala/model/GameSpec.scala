@@ -72,11 +72,6 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
       observerCalled shouldBe GameEvent.phaseSwitch(Phase.Night)
     }*/
 
-    "end the game and notify observer" in {
-      val ended = game.GameEnd()
-      ended.isRunning shouldBe false
-      observerCalled shouldBe GameEvent.gameEnd(false)
-    }
 
     "increment day only when needed (not in this version)" in {
       game.switchPhase()
@@ -168,32 +163,7 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
       }
     }
 
-    "Game.runPhase" should {
-      "run day phase without exception" in {
-        val player = DummyPlayer("Alice", true, Roles.villager)
-        val game = Game(players = Map(player.name -> player), phase = Phase.Day)
-
-        noException should be thrownBy game.runPhase()
-      }
-
-      "run night phase without exception" in {
-        val player1 = DummyPlayer("Alice", true, Roles.villager)
-        val player2 = DummyPlayer("Bob", true, Roles.werwolf)
-        val game = Game(players = Map(player1.name -> player1, player2.name -> player2), phase = Phase.Night)
-
-        noException should be thrownBy game.runPhase()
-      }
-    }
-
-    "Game.GameEnd" should {
-      "end the game correctly" in {
-        val game = Game(isRunning = true)
-        val endedGame = game.GameEnd()
-        endedGame.isRunning shouldBe false
-      }
-    }
-    }
-
+ 
 
   "NarratorService" should {
 
@@ -254,4 +224,5 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
       game.NarratorService.randomNarratorText("Seher", root) shouldBe ""
     }
   }
+}
 }

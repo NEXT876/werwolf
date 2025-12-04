@@ -29,7 +29,7 @@ case class KillCommand(killerName: String, targetName: String) extends GameComma
   }
 }
 
-case class GameEndCommand(winner: Option[String] = None) extends GameCommand {
+case class GameEndCommand(winner: Option[Faction] = None) extends GameCommand {
 
   override val description: String = winner match
       case Some(w) => s"Spiel beendet – Gewinner: $w"

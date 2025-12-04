@@ -29,7 +29,7 @@ class DummyPlayer(val role: Roles, val name: String = "dummy") extends Player:
             result_role should be(Roles.werwolf)
             result_faction should be(Faction._Werwolf)
             result_die.isAlive should be(false)
-            result_vote should be("werwolf Hans votes for Berta to die")
+            result_vote should be("Werwolf Hans votes for Berta to die")
         }
     }
 
@@ -44,7 +44,7 @@ class DummyPlayer(val role: Roles, val name: String = "dummy") extends Player:
             result_role should be(Roles.villager)
             result_faction should be(Faction._Villager)
             result_die.isAlive should be(false)
-            result_vote should be("villager Hansi votes for Bertai to die")
+            result_vote should be("Villager Hansi votes for Bertai to die")
         }
     }
 
@@ -59,7 +59,7 @@ class DummyPlayer(val role: Roles, val name: String = "dummy") extends Player:
             result_role should be(Roles.amor)
             result_faction should be(Faction._Villager)
             result_die.isAlive should be(false)
-            result_vote should be("amor Herman votes for Bert to die")
+            result_vote should be("Amor Herman votes for Bert to die")
         }
     }
 
@@ -74,7 +74,7 @@ class DummyPlayer(val role: Roles, val name: String = "dummy") extends Player:
             result_faction should be(Faction._Villager)
             result_role should be(Roles.terrorist)
             result_die.isAlive should be(false)
-            result_vote should be("terrorist Hannes votes for Brta to die")
+            result_vote should be("Terrorist Hannes votes for Brta to die")
         }
     }
 
@@ -89,7 +89,7 @@ class DummyPlayer(val role: Roles, val name: String = "dummy") extends Player:
             result_faction should be(Faction._Villager)
             result_role should be(Roles.witch)
             result_die.isAlive should be(false)
-            result_vote should be("witch Han votes for Bertas to die")
+            result_vote should be("Witch Han votes for Bertas to die")
         }
     }
 }

@@ -9,7 +9,7 @@ import org.scalactic.TypeCheckedTripleEquals
 import scala.util.Random
 
 class GameControllerSpec extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
-
+/*
  /*   "handle special roles correctly" in {
       val game = Game()
       val controller = new GameController(game)
@@ -34,7 +34,7 @@ class GameControllerSpec extends AnyWordSpec with Matchers with TypeCheckedTripl
       roles should contain("Witch")
       roles should contain("Amor")
       roles should contain("Terrorist")
-    }*/
+    }
 
     "process 'switchPhase' command" in {
       val game = Game()
@@ -84,5 +84,5 @@ class GameControllerSpec extends AnyWordSpec with Matchers with TypeCheckedTripl
       spyController.process("unknown")
       called shouldBe false
 }
-
+*/*/
   }

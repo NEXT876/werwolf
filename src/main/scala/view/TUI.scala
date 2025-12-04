@@ -66,5 +66,4 @@ class TUI() extends GameView {
 
   def showGameOver(): Unit =
     println("Das Game ist vorbei")
-    println("Gewonnen hat: {!Beat}")
-}
+  }

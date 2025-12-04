@@ -61,9 +61,12 @@ class GameController(private var _game: Game, val view: GameView) extends Observ
         case Phase.Day   => game.runDayPhase()
       }
 
-      if (true) {
-        saveGameState()
-        updateGame(executeCommand(GameEndCommand()))
+      game.checkWinCondition(game.players) match {
+        case Some(winningFaction) =>
+          saveGameState()                                      
+          executeCommand(GameEndCommand(Some(winningFaction))) 
+          view.tiping(s"Die $winningFaction haben gewonnen!!!", 120)
+        case None =>
       }
       //undoFull()
     }
@@ -76,7 +79,7 @@ class GameController(private var _game: Game, val view: GameView) extends Observ
         view.clearScreen()
         view.showLogo()
         view.printPlayerRoles(players.map { case (name, player) =>
-          (name, player.role, player.isAlive)
+          (name, player.role.toString(), player.isAlive)
         }.toVector)
 
       case GameEvent.printnarratorText(text) => 

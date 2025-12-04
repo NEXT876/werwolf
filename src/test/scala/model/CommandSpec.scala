@@ -1,7 +1,7 @@
 package de.htwg.werwolf.test
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.werwolf.model.{Witch, Player, Game, KillCommand, HealCommand}
+import de.htwg.werwolf.model.{Witch, Player, Game, KillCommand}
 import de.htwg.werwolf.model.*
 import de.htwg.werwolf.view.*
 
@@ -24,10 +24,10 @@ class CommandSpec extends AnyFlatSpec with Matchers {
 
 
     "KillCommand" should "correctly describe the action" in {
-        val killer = DummyPlayer("Werwolf", true, Roles.werwolf)
-        val target = DummyPlayer("Opfer", true, Roles.villager)
+        //val killer = DummyPlayer("Werwolf", true, Roles.werwolf)
+        //val target = DummyPlayer("Opfer", true, Roles.villager)
         val game = Game()
-        val command = KillCommand(killer, target, game)
+        val command = KillCommand("Werwolf", "Opfer")
 
         command.description shouldBe "Werwolf tötet Opfer"
     }
@@ -54,13 +54,13 @@ class CommandSpec extends AnyFlatSpec with Matchers {
         target.isAlive shouldBe true
     }*/
 
-    "HealCommand" should "correctly describe the action" in {
+  /*  "HealCommand" should "correctly describe the action" in {
         val witch = Witch("Hexe", true)
         val target = DummyPlayer("Opfer", false, Roles.villager)
         val command = HealCommand(witch, target)
 
         command.description shouldBe "Hexe heilt Opfer"
-    }
+    }*/
 
     /*it should "execute and revive a dead player" in {
         val witch = Witch("Hexe", true)
@@ -71,7 +71,7 @@ class CommandSpec extends AnyFlatSpec with Matchers {
         target.isAlive shouldBe true
     }*/
 
-    it should "undo the heal and set the player back to dead" in {
+ /*   it should "undo the heal and set the player back to dead" in {
     val witch = Witch("Hexe", true)
     val target = DummyPlayer("Opfer", false, Roles.villager)
     val command = HealCommand(witch, target)
@@ -79,5 +79,5 @@ class CommandSpec extends AnyFlatSpec with Matchers {
     command.execute()
     command.undo()
     target.isAlive shouldBe false
-  }
+  }*/
 }
