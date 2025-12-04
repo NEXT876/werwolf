@@ -163,38 +163,39 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
       }
     }
 
- 
 
-  "NarratorService" should {
 
-    "load JSON from file path using os-lib" in {
-      val tempDir = os.pwd / "target" / "test-narrator"
+    "NarratorService" should {
 
-      // 1. Lösche alten Ordner (falls vorhanden)
-      if (os.exists(tempDir)) os.remove.all(tempDir)
-      os.makeDir.all(tempDir)
+      "load JSON from file path using os-lib" in {
+        val tempDir = os.pwd / "target" / "test-narrator"
 
-      val jsonPath = tempDir / "narrator.json"
+        // 1. Lösche alten Ordner (falls vorhanden)
+        if (os.exists(tempDir)) os.remove.all(tempDir)
+        os.makeDir.all(tempDir)
 
-      val testJson =
-        """{
-        "Night": {
-          "Start": ["Gute Nacht"],
-          "Werwolf": ["Wölfe wachen auf"],
-          "Witch": ["Hexe?"],
-          "Amor": ["Amor!"]
-        }
-      }"""
+        val jsonPath = tempDir / "narrator.json"
 
-      // 2. Schreibe JSON (overwrite = true)
-      os.write.over(jsonPath, testJson)
+        val testJson =
+          """{
+          "Night": {
+            "Start": ["Gute Nacht"],
+            "Werwolf": ["Wölfe wachen auf"],
+            "Witch": ["Hexe?"],
+            "Amor": ["Amor!"]
+          }
+        }"""
 
-      // 3. Lade mit NarratorService
-      val root = game.NarratorService.loadNarratorJson(jsonPath)
+        // 2. Schreibe JSON (overwrite = true)
+        os.write.over(jsonPath, testJson)
 
-      // 4. Prüfe Inhalt
-      root.Night.Start should contain("Gute Nacht")
-      root.Night.Werwolf should contain("Wölfe wachen auf")
+        // 3. Lade mit NarratorService
+        val root = game.NarratorService.loadNarratorJson(jsonPath)
+
+        // 4. Prüfe Inhalt
+        root.Night.Start should contain("Gute Nacht")
+        root.Night.Werwolf should contain("Wölfe wachen auf")
+      }
     }
 
     "return random text for known roles" in {
@@ -224,5 +225,55 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
       game.NarratorService.randomNarratorText("Seher", root) shouldBe ""
     }
   }
-}
+  "Faction.winCondition" should {
+    "return true for Werwolf if all players are Werwolf" in {
+      val p = Roles.werwolf.toPlayer("A")
+      val players = Map("A" -> p)
+      Faction._Werwolf.winCondition(players) shouldBe true
+    }
+
+    "return false for Werwolf if any player is not Werwolf" in {
+      val p1 = Roles.werwolf.toPlayer("A")
+      val p2 = Roles.villager.toPlayer("B")
+      val players = Map("A" -> p1, "B" -> p2)
+      Faction._Werwolf.winCondition(players) shouldBe false
+    }
+
+    "return true for Villager if no player is Werwolf" in {
+      val p = Roles.villager.toPlayer("A")
+      val players = Map("A" -> p)
+      Faction._Villager.winCondition(players) shouldBe true
+    }
+  }
+
+  "checkWinCondition" should {
+    "return Some(faction) when exactly one faction satisfies winCondition" in {
+      val g = game
+      val result = g.checkWinCondition(Map("Beat" -> Roles.werwolf.toPlayer("Beat!")))
+      result shouldBe Some(Faction._Werwolf)
+    }
+
+    "return None when multiple or zero factions satisfy winCondition" in {
+      val g = game
+      // Hier musst du evtl. Spielregeln simulieren
+      val result = g.checkWinCondition(Map.empty)
+      result shouldBe None
+    }
+  }
+
+  "runNightPhase" should {
+    "call night actions without throwing" in {
+      noException shouldBe thrownBy {
+        game.runNightPhase()
+      }
+    }
+  }
+
+  "runDayPhase" should {
+    "run without exceptions" in {
+      noException shouldBe thrownBy {
+        game.runDayPhase()
+      }
+    }
+  }
 }

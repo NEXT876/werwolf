@@ -22,7 +22,7 @@ enum Faction:
   override def toString(): String = this match
     case Faction._Werwolf  => "Werwölfe"
     case Faction._Villager => "Villager"
-  
+
 
 enum Roles:
   case werwolf, villager, terrorist, witch, amor
@@ -32,14 +32,14 @@ enum Roles:
     case Roles.terrorist => Terrorist(name)
     case Roles.witch     => Witch(name)
     case Roles.amor      => Amor(name)
-  
+
   override def toString(): String = this match
     case Roles.werwolf   => "Werwolf"
     case Roles.villager  => "Villager"
     case Roles.terrorist => "Terrorist"
     case Roles.witch     => "Witch"
     case Roles.amor      => "Amor"
-  
+
 case class GameMemento(
     players: Map[String, Player],
     phase: Phase,
@@ -67,7 +67,7 @@ case class Game (
     updatedGame.copy(commandHistory = commandHistory.push(cmd))
   }
 
-  def undoLast(): Game = 
+  def undoLast(): Game =
     if (commandHistory.nonEmpty) {
       val cmd = commandHistory.pop()
       val revertedGame = cmd.undo(this)
@@ -82,7 +82,7 @@ case class Game (
     commandHistory.reverse.foreach { cmd =>
       println(s"• ${cmd.description}")
     }
-  
+
 
             // Memento //
 
@@ -151,11 +151,11 @@ case class Game (
 
   def checkWinCondition(players: Map[String, Player]): Option[Faction] =
     val winners =
-      Faction.values.filter(_.winCondition(Map("Beat" -> Roles.werwolf.toPlayer("Beat!"))))
+      Faction.values.filter(_.winCondition(players))
 
     if winners.size == 1 then Some(winners.head)
     else None
-    
+
   object NarratorService:
     def loadNarratorJson(path: os.Path): Root =
       val jsonString = os.read(path)
