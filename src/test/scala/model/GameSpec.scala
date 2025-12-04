@@ -166,7 +166,6 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
 
 
     "NarratorService" should {
-    "NarratorService" should {
 
       "load JSON from file path using os-lib" in {
         val tempDir = os.pwd / "target" / "test-narrator"
