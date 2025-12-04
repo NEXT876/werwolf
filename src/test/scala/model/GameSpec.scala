@@ -163,38 +163,40 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
       }
     }
 
- 
+
 
     "NarratorService" should {
+    "NarratorService" should {
 
-    "load JSON from file path using os-lib" in {
-      val tempDir = os.pwd / "target" / "test-narrator"
+      "load JSON from file path using os-lib" in {
+        val tempDir = os.pwd / "target" / "test-narrator"
 
-      // 1. Lösche alten Ordner (falls vorhanden)
-      if (os.exists(tempDir)) os.remove.all(tempDir)
-      os.makeDir.all(tempDir)
+        // 1. Lösche alten Ordner (falls vorhanden)
+        if (os.exists(tempDir)) os.remove.all(tempDir)
+        os.makeDir.all(tempDir)
 
-      val jsonPath = tempDir / "narrator.json"
+        val jsonPath = tempDir / "narrator.json"
 
-      val testJson =
-        """{
-        "Night": {
-          "Start": ["Gute Nacht"],
-          "Werwolf": ["Wölfe wachen auf"],
-          "Witch": ["Hexe?"],
-          "Amor": ["Amor!"]
-        }
-      }"""
+        val testJson =
+          """{
+          "Night": {
+            "Start": ["Gute Nacht"],
+            "Werwolf": ["Wölfe wachen auf"],
+            "Witch": ["Hexe?"],
+            "Amor": ["Amor!"]
+          }
+        }"""
 
-      // 2. Schreibe JSON (overwrite = true)
-      os.write.over(jsonPath, testJson)
+        // 2. Schreibe JSON (overwrite = true)
+        os.write.over(jsonPath, testJson)
 
-      // 3. Lade mit NarratorService
-      val root = game.NarratorService.loadNarratorJson(jsonPath)
+        // 3. Lade mit NarratorService
+        val root = game.NarratorService.loadNarratorJson(jsonPath)
 
-      // 4. Prüfe Inhalt
-      root.Night.Start should contain("Gute Nacht")
-      root.Night.Werwolf should contain("Wölfe wachen auf")
+        // 4. Prüfe Inhalt
+        root.Night.Start should contain("Gute Nacht")
+        root.Night.Werwolf should contain("Wölfe wachen auf")
+      }
     }
 
     "return random text for known roles" in {
@@ -224,5 +226,68 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
       game.NarratorService.randomNarratorText("Seher", root) shouldBe ""
     }
   }
-}
+  "Faction.winCondition" should {
+    "return true for Werwolf if all players are Werwolf" in {
+      val p = Roles.werwolf.toPlayer("A")
+      val players = Map("A" -> p)
+      Faction._Werwolf.winCondition(players) shouldBe true
+    }
+
+
+    "Faction.toString" should {
+      "return 'Werwölfe' for _Werwolf" in {
+        Faction._Werwolf.toString shouldBe "Werwölfe"
+      }
+      "return 'Villager' for _Villager" in {
+        Faction._Villager.toString shouldBe "Villager"
+      }
+    }
+
+    "return false for Werwolf if any player is not Werwolf" in {
+      val p1 = Roles.werwolf.toPlayer("A")
+      val p2 = Roles.villager.toPlayer("B")
+      val p3 = Roles.terrorist.toPlayer("C")
+      val p4 = Roles.witch.toPlayer("D")
+      val p5 = Roles.amor.toPlayer("E")
+      val players = Map("A" -> p1, "B" -> p2, "C" -> p3, "D" -> p4, "E" -> p5)
+      Faction._Werwolf.winCondition(players) shouldBe false
+    }
+
+    "return true for Villager if no player is Werwolf" in {
+      val p = Roles.villager.toPlayer("A")
+      val players = Map("A" -> p)
+      Faction._Villager.winCondition(players) shouldBe true
+    }
+  }
+
+  "checkWinCondition" should {
+    "return Some(faction) when exactly one faction satisfies winCondition" in {
+      val g = game
+      val result = g.checkWinCondition(Map("Beat" -> Roles.werwolf.toPlayer("Beat!")))
+      result shouldBe Some(Faction._Werwolf)
+    }
+
+    "return None when multiple or zero factions satisfy winCondition" in {
+      val g = game
+      // Hier musst du evtl. Spielregeln simulieren
+      val result = g.checkWinCondition(Map.empty)
+      result shouldBe None
+    }
+  }
+
+  "runNightPhase" should {
+    "call night actions without throwing" in {
+      noException shouldBe thrownBy {
+        game.runNightPhase()
+      }
+    }
+  }
+
+  "runDayPhase" should {
+    "run without exceptions" in {
+      noException shouldBe thrownBy {
+        game.runDayPhase()
+      }
+    }
+  }
 }
