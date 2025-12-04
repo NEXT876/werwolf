@@ -232,10 +232,23 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
       Faction._Werwolf.winCondition(players) shouldBe true
     }
 
+
+    "Faction.toString" should {
+      "return 'Werwölfe' for _Werwolf" in {
+        Faction._Werwolf.toString shouldBe "Werwölfe"
+      }
+      "return 'Villager' for _Villager" in {
+        Faction._Villager.toString shouldBe "Villager"
+      }
+    }
+
     "return false for Werwolf if any player is not Werwolf" in {
       val p1 = Roles.werwolf.toPlayer("A")
       val p2 = Roles.villager.toPlayer("B")
-      val players = Map("A" -> p1, "B" -> p2)
+      val p3 = Roles.terrorist.toPlayer("C")
+      val p4 = Roles.witch.toPlayer("D")
+      val p5 = Roles.amor.toPlayer("E")
+      val players = Map("A" -> p1, "B" -> p2, "C" -> p3, "D" -> p4, "E" -> p5)
       Faction._Werwolf.winCondition(players) shouldBe false
     }
 

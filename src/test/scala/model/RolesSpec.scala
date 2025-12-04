@@ -25,11 +25,16 @@ class DummyPlayer(val role: Roles, val name: String = "dummy") extends Player:
             val result_role = werwolf.role
             val result_faction = werwolf.faction
             val result_die = werwolf.die
+            val result_revive = werwolf.die.revive
             val result_vote = werwolf.vote(player)
             result_role should be(Roles.werwolf)
             result_faction should be(Faction._Werwolf)
             result_die.isAlive should be(false)
+            result_revive.isAlive should be(true)
             result_vote should be("Werwolf Hans votes for Berta to die")
+            noException should be thrownBy{
+                val action = player.nightAction
+                action should not be null}
         }
     }
 
@@ -40,11 +45,16 @@ class DummyPlayer(val role: Roles, val name: String = "dummy") extends Player:
             val result_role = villager.role
             val result_faction = villager.faction
             val result_die = villager.die
+            val result_revive = villager.die.revive
             val result_vote = villager.vote(player)
             result_role should be(Roles.villager)
             result_faction should be(Faction._Villager)
             result_die.isAlive should be(false)
+            result_revive.isAlive should be(true)
             result_vote should be("Villager Hansi votes for Bertai to die")
+            noException should be thrownBy{
+                val action = player.nightAction
+                action should not be null}
         }
     }
 
@@ -55,11 +65,16 @@ class DummyPlayer(val role: Roles, val name: String = "dummy") extends Player:
             val result_role = amor.role
             val result_faction = amor.faction
             val result_die = amor.die
+            val result_revive = amor.die.revive
             val result_vote = amor.vote(player)
             result_role should be(Roles.amor)
             result_faction should be(Faction._Villager)
             result_die.isAlive should be(false)
+            result_revive.isAlive should be(true)
             result_vote should be("Amor Herman votes for Bert to die")
+            noException should be thrownBy{
+                val action = player.nightAction
+                action should not be null}
         }
     }
 
@@ -70,11 +85,16 @@ class DummyPlayer(val role: Roles, val name: String = "dummy") extends Player:
             val result_role = terrorist.role
             val result_faction = terrorist.faction
             val result_die = terrorist.die
+            val result_revive = terrorist.die.revive
             val result_vote = terrorist.vote(player)
             result_faction should be(Faction._Villager)
             result_role should be(Roles.terrorist)
             result_die.isAlive should be(false)
+            result_revive.isAlive should be(true)
             result_vote should be("Terrorist Hannes votes for Brta to die")
+            noException should be thrownBy{
+                val action = player.nightAction
+                action should not be null}
         }
     }
 
@@ -85,11 +105,16 @@ class DummyPlayer(val role: Roles, val name: String = "dummy") extends Player:
             val result_role = witch.role
             val result_faction = witch.faction
             val result_die = witch.die
+            val result_revive = witch.die.revive
             val result_vote = witch.vote(player)
             result_faction should be(Faction._Villager)
             result_role should be(Roles.witch)
             result_die.isAlive should be(false)
+            result_revive.isAlive should be(true)
             result_vote should be("Witch Han votes for Bertas to die")
+            noException should be thrownBy{
+                val action = player.nightAction
+                action should not be null}
         }
     }
 }
