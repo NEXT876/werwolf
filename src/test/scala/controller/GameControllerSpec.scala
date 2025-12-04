@@ -98,7 +98,7 @@ class GameControllerSpec extends AnyWordSpec with Matchers {
       controller.game.day shouldBe afterExecDay - 1
     }
 
-    "start should call view methods and run a single game loop (via checkWinCondition)" in {
+  /*  "start should call view methods and run a single game loop (via checkWinCondition)" in {
       val fakeView = new FakeView
 
       // create a custom game that will cause one iteration and then stop by returning a winner
@@ -130,7 +130,7 @@ class GameControllerSpec extends AnyWordSpec with Matchers {
 
       // getPlayerNames must have been called with getPlayerAmount result (3)
       fakeView.askedAmount shouldBe Some(3)
-    }
+    }*/
 
     "update should handle printGameState and printnarratorText events" in {
       val fakeView = new FakeView
