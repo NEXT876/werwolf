@@ -11,9 +11,16 @@ import de.htwg.werwolf.util.Subject
 enum Phase:
   case Night, Day
 
+enum Faction:
+  case _Werwolf, _Villager
+  def winCondition(players: Map[String, Player]): Boolean = this match
+    case Faction._Werwolf =>
+      players.values.forall(p => p.faction == Faction._Werwolf)
+    case Faction._Villager =>
+      players.values.forall(p => p.faction != Faction._Werwolf)
+
 enum Roles:
   case werwolf, villager, terrorist, witch, amor
-
   def toPlayer(name: String): Player = this match
     case Roles.werwolf   => Werwolf(name)
     case Roles.villager  => Villager(name)
@@ -59,7 +66,7 @@ case class Game (
       this
     }
 
-  def replay(): Unit = {
+  def replay(): Unit =
     println("=== REPLAY ===")
     commandHistory.reverse.foreach { cmd =>
       println(s"• ${cmd.description}")
@@ -80,7 +87,7 @@ case class Game (
     )
 
 
-  def restoreFromMemento(m: GameMemento): Game = {
+  def restoreFromMemento(m: GameMemento): Game =
       copy(
         players = m.players,
         phase = m.phase,
@@ -89,11 +96,10 @@ case class Game (
         isRunning = m.isRunning,
         commandHistory = m.commandHistory
       )
-    }
                       //
                       //
 
-  def addRoles(playerNames: Vector[String]): Game = {
+  def addRoles(playerNames: Vector[String]): Game =
     val roles = getRoles(playerNames.size)
 
     val newPlayers = Random
@@ -106,15 +112,13 @@ case class Game (
       .toMap
 
     copy(players = newPlayers)
-  }
 
-  def getRoles(playeramount: Int): Vector[Roles] = {
+  def getRoles(playeramount: Int): Vector[Roles] =
     if playeramount == 2 then Vector(Roles.werwolf, Roles.villager)
     else
       Vector.fill(playeramount / 3)(Roles.werwolf) ++ Random.shuffle(
         Vector(Roles.villager, Roles.witch, Roles.amor, Roles.terrorist)
       )
-  }
 
   def switchPhase(): Game =
     createMemento()
@@ -134,7 +138,6 @@ case class Game (
     notifyObservers(GameEvent.printGameState(players))
     players.foreach { (name, player) => player.nightAction.performAction(player, this)}
     /** */
-  }
 
   def runDayPhase(): Unit = {
     notifyObservers(GameEvent.printGameState(players))
