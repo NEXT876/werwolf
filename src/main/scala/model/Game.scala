@@ -14,10 +14,12 @@ enum Phase:
 enum Faction:
   case _Werwolf, _Villager
   def winCondition(players: Map[String, Player]): Boolean = this match
-    case Faction._Werwolf =>
-      players.values.forall(p => p.faction == Faction._Werwolf)
-    case Faction._Villager =>
-      players.values.forall(p => p.faction != Faction._Werwolf)
+      case Faction._Werwolf =>
+        val alive = players.values.filter(_.isAlive)
+        alive.nonEmpty && alive.forall(p => p.faction == Faction._Werwolf)
+      case Faction._Villager =>
+        val alive = players.values.filter(_.isAlive)
+        alive.nonEmpty && alive.forall(p => p.faction != Faction._Werwolf)
 
   override def toString(): String = this match
     case Faction._Werwolf  => "Werwölfe"

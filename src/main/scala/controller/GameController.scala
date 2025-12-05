@@ -10,7 +10,7 @@ import de.htwg.werwolf.util.Observer
 class GameController(private var _game: Game, val view: GameView) extends Observer[GameEvent] {
   private var savedMemento: Option[GameMemento] = None
   def game: Game = _game
-   def updateGame(newGame: Game): Game =
+  def updateGame(newGame: Game): Game =
     _game.removeObserver(this)
     _game = newGame
     _game.addObserver(this)
@@ -50,11 +50,9 @@ class GameController(private var _game: Game, val view: GameView) extends Observ
     runGame()
   }
 
-   def runGame(): Unit =
+  def runGame(): Unit =
     while (game.isRunning) {
       view.clearScreen()
-
-      
 
       game.phase match {
         case Phase.Night => updateGame(game.runNightPhase())
@@ -66,10 +64,10 @@ class GameController(private var _game: Game, val view: GameView) extends Observ
       }*/
 
       game.checkWinCondition(game.players) match {
-        case None/*Some(winningFaction)*/ =>
+        case Some(winningFaction) =>
           saveGameState()
-          executeCommand(GameEndCommand(Some(Faction._Villager/*winningFaction*/)))
-          view.tiping(s"Die winningFaction haben gewonnen!!!", 120)
+          executeCommand(GameEndCommand(Some(winningFaction)))
+          view.tiping(s"Die $winningFaction haben gewonnen!!!", 120)
         case None =>
       }
 
