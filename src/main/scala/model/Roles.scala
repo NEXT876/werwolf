@@ -37,6 +37,7 @@ final case class Werwolf(name: String, isAlive: Boolean = true) extends Player:
   def die = copy(isAlive = false)
   def revive = copy(isAlive = true)
   def nightAction: NightActionStrategy = WerwolfAction
+
 final case class Villager(name: String, isAlive: Boolean = true) extends Player:
   def role = Roles.villager
   def faction = Faction._Villager
@@ -69,11 +70,11 @@ final case class Witch(name: String, isAlive: Boolean = true) extends Player:
   def revive = copy(isAlive = true)
   def nightAction: NightActionStrategy = WitchAction
 
-final class DoubleVoteDecorator(inner: Player)
+final case class DoubleVoteDecorator(inner: Player)
   extends PlayerDecorator(inner):
 
   override def vote(target: Player): String =
     s"${inner.name} votes TWICE for ${target.name}!"
 
   override protected def copyWith(newPlayer: Player): Player =
-    new DoubleVoteDecorator(newPlayer)
+    DoubleVoteDecorator(newPlayer)

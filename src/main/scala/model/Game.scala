@@ -111,17 +111,26 @@ case class Game (
   def addRoles(playerNames: Vector[String]): Game =
     val roles = getRoles(playerNames.size)
 
-    val newPlayers = Random
+    // 1. Erst alle Spieler mit normalen Rollen erzeugen
+    val basePlayers: Map[String, Player] = Random
       .shuffle(playerNames)
       .zip(roles)
       .map { case (name, role) =>
         val player = role.toPlayer(name)
-        player.name -> player
+        name -> player
       }
       .toMap
-    copy(players = newPlayers)
 
+    // 2. decorater greift ein
+    val updatedPlayers: Map[String, Player] = basePlayers.collectFirst {
+      case (name, p) if !p.isInstanceOf[Werwolf] =>         
+        name -> DoubleVoteDecorator(p)                       
+    }.fold(basePlayers) { case (name, decoratedPlayer) =>     
+      basePlayers.updated(name, decoratedPlayer)
+    }
 
+    copy(players = updatedPlayers)
+    
   def getRoles(playeramount: Int): Vector[Roles] =
     if playeramount == 2 then Vector(Roles.werwolf, Roles.villager)
     else
@@ -172,39 +181,3 @@ case class Game (
       /*rnd.*/
       Random.shuffle(list).headOption.getOrElse("")
 }
-/* def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Player] = {
-    import scala.io.StdIn.readLine
-    import scala.io.Source
-
-    notifyObservers(currentState)
-
-    val initialVotes = Votes()
-    val (updatedRoles, finalVotes) = playerRoles.foldLeft(playerRoles, initialVotes) {
-      case ((currentState, votesObject), (name, player)) =>
-        if (player.role == "Werwolf" && player.isAlive) {
-          notifyObservers(GameEvent.WerewolfTurn(name, currentState))
-          if (fakeInt == 999) {
-            val vote = readLine(s"Spieler $name, bitte geben sie an wen sie umbringen möchten: ")
-            val voteText = player.vote(currentState(vote))
-            print(s"\u001b[31m${voteText}\u001b[0m\n")
-            val updatedVotes = votesObject.addVote(vote)
-            (currentState, updatedVotes)
-          } else {
-            val updatedVotes = Votes(Map(name -> fakeInt))
-            (currentState, updatedVotes)
-          }
-        } else {
-          (currentState, votesObject)
-        }
-    }
-    finalVotes.getVotedPlayer match {
-      case Some(p) =>
-        val updatedPlayer = updatedRoles(p).die
-        val newRoles = updatedRoles.updated(p, updatedPlayer)
-        newRoles // diese Map zurückgeben
-      case None =>
-        updatedRoles
-    }
-
-  }
- */

@@ -59,14 +59,18 @@ class GameController(private var _game: Game, val view: GameView) extends Observ
         case Phase.Day   => game.runDayPhase()
       }
 
+      /*game.players.foreach { case (name, player) =>
+        println(player.vote(player))   // das ist nur eine Methode, die einen String zurückgibt
+      }*/
+
       game.checkWinCondition(game.players) match {
-        case Some(winningFaction) =>
+        case /*None*/Some(winningFaction) =>
           saveGameState()
-          executeCommand(GameEndCommand(Some(winningFaction)))
+          executeCommand(GameEndCommand(Some(/*Faction._Villager*/winningFaction)))
           view.tiping(s"Die $winningFaction haben gewonnen!!!", 120)
         case None =>
       }
-      // undoFull()
+
     }
     view.showGameOver()
 
