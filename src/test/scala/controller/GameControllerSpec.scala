@@ -98,31 +98,32 @@ class GameControllerSpec extends AnyWordSpec with Matchers {
       controller.game.day shouldBe afterExecDay - 1
     }
 
-  /*  "start should call view methods and run a single game loop (via checkWinCondition)" in {
+    "start should call view methods and run a single game loop (via checkWinCondition)" in {
       val fakeView = new FakeView
 
       // create a custom game that will cause one iteration and then stop by returning a winner
-      val oneShotGame = new Game(isRunning = true) {
-        override def runNightPhase(): Unit = {
-          // no-op
-        }
-        override def runDayPhase(): Unit = {
-          // no-op
-        }
-        // when controller checks for winners, always return a winner so controller triggers GameEndCommand
-        override def checkWinCondition(players: Map[String, Player]): Option[Faction] =
-          Some(Faction._Villager)
+      val Game = new Game(isRunning = false)
+      val controller = new GameController(Game, fakeView)
 
-        // override executeCommand so GameEndCommand will make game not running anymore (controller expects this)
-        override def executeCommand(cmd: GameCommand): Game = this.copy(isRunning = false, commandHistory = this.commandHistory.push(cmd))
-      }
-
-      val controller = new GameController(oneShotGame, fakeView)
-
-      // start() will: clear screen, show tip, show logo, save memento, ask player count/names,
-      // clear screen, save memento, updateGame(addRoles(names)), runGame -> because checkWinCondition returns Some -> executeCommand -> showGameOver
       controller.start()
 
+      val Game2 = new Game(isRunning = true, players = Map("Beate" -> Roles.werwolf.toPlayer("Beate"))) {
+        override def runNightPhase(): Unit = {}
+        override def runDayPhase(): Unit ={}
+        }
+
+       val controller2 = new GameController(Game2, fakeView)
+       controller2.runGame()
+
+      val Game3 = new Game(isRunning = true, players = Map("Beate" -> Roles.werwolf.toPlayer("Beate")), phase = Phase.Day) {
+        override def runNightPhase(): Unit = {}
+        override def runDayPhase(): Unit ={}
+        }
+
+       val controller3 = new GameController(Game3, fakeView)
+       controller3.runGame()
+      
+      
       // Views should have been invoked in the process
       fakeView.logoShown should be >= 1
       fakeView.cleared should be >= 2
@@ -130,7 +131,7 @@ class GameControllerSpec extends AnyWordSpec with Matchers {
 
       // getPlayerNames must have been called with getPlayerAmount result (3)
       fakeView.askedAmount shouldBe Some(3)
-    }*/
+    }
 
     "update should handle printGameState and printnarratorText events" in {
       val fakeView = new FakeView

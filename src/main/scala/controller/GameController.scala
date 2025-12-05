@@ -10,24 +10,22 @@ import de.htwg.werwolf.util.Observer
 class GameController(private var _game: Game, val view: GameView) extends Observer[GameEvent] {
   private var savedMemento: Option[GameMemento] = None
   def game: Game = _game
-  private def updateGame(newGame: Game): Game =
+   def updateGame(newGame: Game): Game =
     _game.removeObserver(this)
     _game = newGame
     _game.addObserver(this)
     game
 
-  private def saveGameState(): Unit = 
+  private def saveGameState(): Unit =
     savedMemento = Some(game.createMemento())
-  
 
-  def undoFull(): Unit = savedMemento match 
+  def undoFull(): Unit = savedMemento match
     case Some(memento) =>
       val restoredGame = game.restoreFromMemento(memento)
       updateGame(restoredGame)
       view.tiping("↶ Vollständiges Undo – alles zurückgesetzt!", 70)
     case None =>
       view.tiping("Kein gespeicherter Spielstand zum Wiederherstellen.", 70)
-  
 
   def executeCommand(cmd: GameCommand): Game =
     saveGameState()
@@ -52,7 +50,7 @@ class GameController(private var _game: Game, val view: GameView) extends Observ
     runGame()
   }
 
-  private def runGame(): Unit =
+   def runGame(): Unit =
     while (game.isRunning) {
       view.clearScreen()
 
@@ -63,14 +61,13 @@ class GameController(private var _game: Game, val view: GameView) extends Observ
 
       game.checkWinCondition(game.players) match {
         case Some(winningFaction) =>
-          saveGameState()                                      
-          executeCommand(GameEndCommand(Some(winningFaction))) 
+          saveGameState()
+          executeCommand(GameEndCommand(Some(winningFaction)))
           view.tiping(s"Die $winningFaction haben gewonnen!!!", 120)
         case None =>
       }
-      //undoFull()
+      // undoFull()
     }
-
     view.showGameOver()
 
   override def update(event: GameEvent): Unit =
@@ -82,7 +79,7 @@ class GameController(private var _game: Game, val view: GameView) extends Observ
           (name, player.role.toString(), player.isAlive)
         }.toVector)
 
-      case GameEvent.printnarratorText(text) => 
+      case GameEvent.printnarratorText(text) =>
         view.showLogo()
         view.tiping(text)
 
