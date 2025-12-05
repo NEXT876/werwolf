@@ -108,7 +108,7 @@ class GameControllerSpec extends AnyWordSpec with Matchers {
       controller.start()
 
       val Game2 = new Game(isRunning = true, players = Map("Beate" -> Roles.werwolf.toPlayer("Beate"))) {
-        override def runNightPhase(): Unit = {}
+        override def runNightPhase(): Game = {this}
         override def runDayPhase(): Unit ={}
         }
 
@@ -116,7 +116,7 @@ class GameControllerSpec extends AnyWordSpec with Matchers {
        controller2.runGame()
 
       val Game3 = new Game(isRunning = true, players = Map("Beate" -> Roles.werwolf.toPlayer("Beate")), phase = Phase.Day) {
-        override def runNightPhase(): Unit = {}
+        override def runNightPhase(): Game = {this}
         override def runDayPhase(): Unit ={}
         }
 

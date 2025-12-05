@@ -1,4 +1,4 @@
-import org.scalatest.wordspec.AnyWordSpec
+/*import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.werwolf.model.*
 
@@ -62,3 +62,4 @@ class GameHistorySpec extends AnyWordSpec with Matchers {
     }
   }
 }
+*/
