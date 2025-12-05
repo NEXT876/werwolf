@@ -149,6 +149,8 @@ case class Game (
     notifyObservers(GameEvent.printnarratorText(NarratorService.randomNarratorText("Start", narratorData)))
     notifyObservers(GameEvent.printGameState(players))
     players.foreach { (name, player) => player.nightAction.performAction(player, this)}
+
+    notifyObservers(GameEvent.printGameState(players))
     /** */
   }
 

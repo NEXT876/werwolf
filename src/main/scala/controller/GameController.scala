@@ -54,6 +54,8 @@ class GameController(private var _game: Game, val view: GameView) extends Observ
     while (game.isRunning) {
       view.clearScreen()
 
+      
+
       game.phase match {
         case Phase.Night => game.runNightPhase()
         case Phase.Day   => game.runDayPhase()
@@ -64,10 +66,10 @@ class GameController(private var _game: Game, val view: GameView) extends Observ
       }*/
 
       game.checkWinCondition(game.players) match {
-        case /*None*/Some(winningFaction) =>
+        case None/*Some(winningFaction)*/ =>
           saveGameState()
-          executeCommand(GameEndCommand(Some(/*Faction._Villager*/winningFaction)))
-          view.tiping(s"Die $winningFaction haben gewonnen!!!", 120)
+          executeCommand(GameEndCommand(Some(Faction._Villager/*winningFaction*/)))
+          view.tiping(s"Die winningFaction haben gewonnen!!!", 120)
         case None =>
       }
 
