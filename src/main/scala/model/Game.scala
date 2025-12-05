@@ -5,13 +5,29 @@ import de.htwg.werwolf.narrator.*
 
 import upickle.default.*
 import scala.util.Random
+import scala.collection.immutable.Vector
+import de.htwg.werwolf.util.Subject
 
 enum Phase:
   case Night, Day
 
+enum Faction:
+  case _Werwolf, _Villager
+  def winCondition(players: Map[String, Player]): Boolean = this match
+      case Faction._Werwolf =>
+        val alive = players.values.filter(_.isAlive)
+        alive.nonEmpty && alive.forall(p => p.faction == Faction._Werwolf)
+      case Faction._Villager =>
+        val alive = players.values.filter(_.isAlive)
+        alive.nonEmpty && alive.forall(p => p.faction != Faction._Werwolf)
+
+  override def toString(): String = this match
+    case Faction._Werwolf  => "Werwölfe"
+    case Faction._Villager => "Villager"
+
+
 enum Roles:
   case werwolf, villager, terrorist, witch, amor
-
   def toPlayer(name: String): Player = this match
     case Roles.werwolf   => Werwolf(name)
     case Roles.villager  => Villager(name)
@@ -19,60 +35,140 @@ enum Roles:
     case Roles.witch     => Witch(name)
     case Roles.amor      => Amor(name)
 
-case class GameState(
-    day: Int,
-    phase: Phase,
-    votes: Votes,
-    isRunning: Boolean,
-    alivePlayers: Map[String, Player]
+  override def toString(): String = this match
+    case Roles.werwolf   => "Werwolf"
+    case Roles.villager  => "Villager"
+    case Roles.terrorist => "Terrorist"
+    case Roles.witch     => "Witch"
+    case Roles.amor      => "Amor"
+
+case class GameMemento(
+  players: Map[String, Player],
+  phase: Phase,
+  day: Int,
+  votes: Votes,
+  isRunning: Boolean,
+  commandHistory: Vector[GameCommand]
 )
 
-class Game() extends Subject[GameEvent] {
-  private var players: Map[String, Player] = Map.empty
-  private var phase: Phase = Phase.Night
-  private var day: Int = 1
-  private var votes: Votes = Votes()
-  private var isRunning: Boolean = true
+case class Game (
+  players: Map[String, Player] = Map.empty,
+  phase: Phase = Phase.Night,
+  day: Int = 1,
+  votes: Votes = Votes(),
+  isRunning: Boolean = true,
+  commandHistory: Vector[GameCommand] = Vector.empty
+) extends Subject[GameEvent] {
 
-  def currentState: GameState =
-    GameState(
-      day = day,
-      phase = phase,
-      votes = votes, // Kopie, falls mutable
+  private val narratorData: Root = NarratorService.loadNarratorJson(
+    os.pwd  / "src" / "main"/ "resources" / "narrator.json"
+  )
+
+  def executeCommand(cmd: GameCommand): Game = {
+    val updatedGame = cmd.execute(this)
+    updatedGame.copy(commandHistory = commandHistory :+ cmd)
+  }
+
+  def undoLast(): Game =
+    if (commandHistory.nonEmpty) then
+      val cmd = commandHistory.last
+      val revertedGame = cmd.undo(this)
+      revertedGame.copy(commandHistory = commandHistory.init)
+    else
+      println("Nichts zum Rückgängigmachen!")
+      this
+
+  def replay(): Unit =
+    println("=== REPLAY ===")
+    commandHistory.reverse.foreach { cmd =>
+      println(s"• ${cmd.description}")
+    }
+
+
+            // Memento //
+
+  def createMemento(): GameMemento =
+    GameMemento(
+      players = players,
+      phase = phase ,
+      day = day ,
+      votes = votes ,
       isRunning = isRunning,
-      alivePlayers = players.filter(_._2.isAlive).toMap
+      commandHistory = commandHistory.reverse
     )
 
-  def addRoles(playerNames: Vector[String]): Unit = {
+
+  def restoreFromMemento(m: GameMemento): Game =
+      copy(
+        players = m.players,
+        phase = m.phase,
+        day = m.day,
+        votes = m.votes,
+        isRunning = m.isRunning,
+        commandHistory = m.commandHistory
+      )
+
+
+  def addRoles(playerNames: Vector[String]): Game =
     val roles = getRoles(playerNames.size)
 
-    players = players ++ Random
+    // 1. Erst alle Spieler mit normalen Rollen erzeugen
+    val basePlayers: Map[String, Player] = Random
       .shuffle(playerNames)
       .zip(roles)
       .map { case (name, role) =>
         val player = role.toPlayer(name)
-        player.name -> player
+        name -> player
       }
       .toMap
 
-    notifyObservers(GameEvent.printGameState)
-  }
+    // 2. decorater greift ein
+    val updatedPlayers: Map[String, Player] = basePlayers.collectFirst {
+      case (name, p) if !p.isInstanceOf[Werwolf] =>         
+        name -> DoubleVoteDecorator(p)                       
+    }.fold(basePlayers) { case (name, decoratedPlayer) =>     
+      basePlayers.updated(name, decoratedPlayer)
+    }
 
-  def getRoles(playeramount: Int): Vector[Roles] = {
+    copy(players = updatedPlayers)
+    
+  def getRoles(playeramount: Int): Vector[Roles] =
     if playeramount == 2 then Vector(Roles.werwolf, Roles.villager)
     else
       Vector.fill(playeramount / 3)(Roles.werwolf) ++ Random.shuffle(
         Vector(Roles.villager, Roles.witch, Roles.amor, Roles.terrorist)
       )
+
+  def switchPhase(): Game =
+    createMemento()
+    val newPhase = if phase == Phase.Night then Phase.Day else Phase.Night
+    val newDay = day + 1
+    copy(phase = newPhase, day = newDay, votes = Votes())
+
+
+  def runNightPhase(): Game = {
+    notifyObservers(GameEvent.printnarratorText(NarratorService.randomNarratorText("Start", narratorData)))
+    notifyObservers(GameEvent.printGameState(players))
+    val updatedGame = players.foldLeft(this) { case (g, (name, player)) =>
+      player.nightAction.performAction(player, g)
+    }
+
+    notifyObservers(GameEvent.printGameState(updatedGame.players))
+    updatedGame
   }
 
-  def switchPhase(): Unit =
-    phase = if phase == Phase.Night then Phase.Day else Phase.Night
-    notifyObservers(GameEvent.phaseSwitch)
+  def runDayPhase(): Unit = {
+    notifyObservers(GameEvent.printGameState(players))
+    /** */
+  }
 
-  def GameEnd(): Unit =
-    isRunning = false
-    notifyObservers(GameEvent.gameEnd)
+
+  def checkWinCondition(players: Map[String, Player]): Option[Faction] =
+    val winners =
+      Faction.values.filter(_.winCondition(players))
+
+    if winners.size == 1 then Some(winners.head)
+    else None
 
   object NarratorService:
     def loadNarratorJson(path: os.Path): Root =
@@ -80,49 +176,13 @@ class Game() extends Subject[GameEvent] {
       read[Root](jsonString)
 
     // Random ist jetzt Parameter!
-    def randomNarratorText(role: String, root: Root)/*(using rnd: Random)*/: String =
+    def randomNarratorText(role: String, root: Root) /*(using rnd: Random)*/: String =
       val list = role match
         case "Start"   => root.Night.Start
         case "Werwolf" => root.Night.Werwolf
         case "Witch"   => root.Night.Witch
         case "Amor"    => root.Night.Amor
         case _         => List("")
-      /*rnd.*/Random.shuffle(list).headOption.getOrElse("")
-
+      /*rnd.*/
+      Random.shuffle(list).headOption.getOrElse("")
 }
-/* def night(playerRoles: Map[String, Player], fakeInt: Int = 999): Map[String, Player] = {
-    import scala.io.StdIn.readLine
-    import scala.io.Source
-
-    notifyObservers(currentState)
-
-    val initialVotes = Votes()
-    val (updatedRoles, finalVotes) = playerRoles.foldLeft(playerRoles, initialVotes) {
-      case ((currentState, votesObject), (name, player)) =>
-        if (player.role == "Werwolf" && player.isAlive) {
-          notifyObservers(GameEvent.WerewolfTurn(name, currentState))
-          if (fakeInt == 999) {
-            val vote = readLine(s"Spieler $name, bitte geben sie an wen sie umbringen möchten: ")
-            val voteText = player.vote(currentState(vote))
-            print(s"\u001b[31m${voteText}\u001b[0m\n")
-            val updatedVotes = votesObject.addVote(vote)
-            (currentState, updatedVotes)
-          } else {
-            val updatedVotes = Votes(Map(name -> fakeInt))
-            (currentState, updatedVotes)
-          }
-        } else {
-          (currentState, votesObject)
-        }
-    }
-    finalVotes.getVotedPlayer match {
-      case Some(p) =>
-        val updatedPlayer = updatedRoles(p).die
-        val newRoles = updatedRoles.updated(p, updatedPlayer)
-        newRoles // diese Map zurückgeben
-      case None =>
-        updatedRoles
-    }
-
-  }
- */

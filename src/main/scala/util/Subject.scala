@@ -1,5 +1,5 @@
 // src/main/scala/de/htwg/werwolf/model/Subject.scala
-package de.htwg.werwolf.model
+package de.htwg.werwolf.util
 
 trait Observer[-S]:
   def update(state: S): Unit

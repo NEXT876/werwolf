@@ -3,11 +3,12 @@ package de.htwg.werwolf
 
 import model.Game
 import controller.GameController
-import view.TUI
+import view.*
 
 @main def main(): Unit =
+  val view: GameView = new TUI()
   val game = Game()
-  val controller = GameController(game)
-  val tui = TUI(controller)
-  game.addObserver(tui)
-  tui.start()
+  val controller = GameController(game,view)
+  
+  game.addObserver(controller)
+  controller.start()
