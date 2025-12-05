@@ -1,4 +1,4 @@
-/*import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.werwolf.model.*
 
@@ -11,7 +11,7 @@ class GameHistorySpec extends AnyWordSpec with Matchers {
     day = 1,
     votes = Votes(Map.empty),     // oder wie auch immer Votes gebaut wird
     isRunning = true,
-    commandHistory = scala.collection.mutable.Stack.empty
+    commandHistory = Vector.empty
   )
 
   // Minimal-Stub für Game
@@ -62,4 +62,3 @@ class GameHistorySpec extends AnyWordSpec with Matchers {
     }
   }
 }
-*/
