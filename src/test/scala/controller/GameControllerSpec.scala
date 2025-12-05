@@ -40,6 +40,7 @@ class GameControllerSpec extends AnyWordSpec with Matchers {
     override def showLogo(): Unit = logoShown += 1
     override def clearScreen(): Unit = cleared += 1
     override def showGameOver(): Unit = gameOverShown = true
+    override def printErrorMsg(msg: String): Unit = ???
   }
 
   // Minimal dummy GameCommand to drive execute/undo

@@ -66,4 +66,8 @@ class TUI() extends GameView {
 
   def showGameOver(): Unit =
     println("Das Game ist vorbei")
-  }
+
+  def printErrorMsg(msg: String): Unit =
+    println(msg)
+  
+}

@@ -4,6 +4,7 @@ package de.htwg.werwolf.controller
 import de.htwg.werwolf.model.*
 import de.htwg.werwolf.view.GameView
 
+import scala.util.{Try, Success, Failure}
 import scala.util.Random
 import de.htwg.werwolf.util.Observer
 
@@ -31,10 +32,18 @@ class GameController(private var _game: Game, val view: GameView) extends Observ
     saveGameState()
     updateGame(game.executeCommand(cmd))
 
-  def undoCommand(): Game =
-    saveGameState()
-    updateGame(game.undoLast())
-
+  def undoCommand(): Game = 
+    saveGameState()  
+    game.undoLast() match {  
+      case Success(newGame) =>
+        updateGame(newGame)  
+        newGame  
+      case Failure(_) =>
+        view.printErrorMsg("Nichts zum Rückgängigmachen!")  
+        game
+      }
+  
+ 
   def start(): Unit = {
     view.clearScreen()
     view.tiping("Willkommen zu Werwolf", 100)

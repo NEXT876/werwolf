@@ -9,3 +9,4 @@ trait GameView:
   def showLogo(): Unit
   def clearScreen(): Unit
   def showGameOver(): Unit
+  def printErrorMsg(msg: String): Unit
