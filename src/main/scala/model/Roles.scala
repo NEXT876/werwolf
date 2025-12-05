@@ -12,6 +12,24 @@ trait Player:
   def faction: Faction
   def nightAction: NightActionStrategy
 
+abstract class PlayerDecorator(inner: Player) extends Player:
+  def name: String = inner.name
+  def isAlive: Boolean = inner.isAlive
+  def role: Roles = inner.role
+  def vote(target: Player): String = inner.vote(target)
+  def die: Player =
+    val died = inner.die
+    this.copyWith(died)
+
+  def revive: Player =
+    val revived = inner.revive
+    this.copyWith(revived)
+
+  def faction: Faction = inner.faction
+  def nightAction: NightActionStrategy = inner.nightAction
+  protected def copyWith(newPlayer: Player): Player
+
+
 final case class Werwolf(name: String, isAlive: Boolean = true) extends Player:
   def role = Roles.werwolf
   def faction = Faction._Werwolf
@@ -50,3 +68,12 @@ final case class Witch(name: String, isAlive: Boolean = true) extends Player:
   def die = copy(isAlive = false)
   def revive = copy(isAlive = true)
   def nightAction: NightActionStrategy = WitchAction
+
+final class DoubleVoteDecorator(inner: Player)
+  extends PlayerDecorator(inner):
+
+  override def vote(target: Player): String =
+    s"${inner.name} votes TWICE for ${target.name}!"
+
+  override protected def copyWith(newPlayer: Player): Player =
+    new DoubleVoteDecorator(newPlayer)
