@@ -5,7 +5,7 @@ import de.htwg.werwolf.narrator.*
 
 import upickle.default.*
 import scala.util.Random
-import scala.collection.mutable.Stack
+import scala.collection.immutable.Vector
 import de.htwg.werwolf.util.Subject
 
 enum Phase:
@@ -41,21 +41,21 @@ enum Roles:
     case Roles.amor      => "Amor"
 
 case class GameMemento(
-    players: Map[String, Player],
-    phase: Phase,
-    day: Int,
-    votes: Votes,
-    isRunning: Boolean,
-    commandHistory: Stack[GameCommand]
+  players: Map[String, Player],
+  phase: Phase,
+  day: Int,
+  votes: Votes,
+  isRunning: Boolean,
+  commandHistory: Vector[GameCommand]
 )
 
 case class Game (
-    players: Map[String, Player] = Map.empty,
-    phase: Phase = Phase.Night,
-    day: Int = 1,
-    votes: Votes = Votes(),
-    isRunning: Boolean = true,
-    commandHistory: Stack[GameCommand] = Stack[GameCommand]()
+  players: Map[String, Player] = Map.empty,
+  phase: Phase = Phase.Night,
+  day: Int = 1,
+  votes: Votes = Votes(),
+  isRunning: Boolean = true,
+  commandHistory: Vector[GameCommand] = Vector.empty
 ) extends Subject[GameEvent] {
 
   private val narratorData: Root = NarratorService.loadNarratorJson(
@@ -64,18 +64,17 @@ case class Game (
 
   def executeCommand(cmd: GameCommand): Game = {
     val updatedGame = cmd.execute(this)
-    updatedGame.copy(commandHistory = commandHistory.push(cmd))
+    updatedGame.copy(commandHistory = commandHistory :+ cmd)
   }
 
   def undoLast(): Game =
-    if (commandHistory.nonEmpty) {
-      val cmd = commandHistory.pop()
+    if (commandHistory.nonEmpty) then
+      val cmd = commandHistory.last
       val revertedGame = cmd.undo(this)
-      revertedGame.copy(commandHistory = commandHistory)
-    } else {
+      revertedGame.copy(commandHistory = commandHistory.init)
+    else
       println("Nichts zum Rückgängigmachen!")
       this
-    }
 
   def replay(): Unit =
     println("=== REPLAY ===")
@@ -145,13 +144,15 @@ case class Game (
     copy(phase = newPhase, day = newDay, votes = Votes())
 
 
-  def runNightPhase(): Unit = {
+  def runNightPhase(): Game = {
     notifyObservers(GameEvent.printnarratorText(NarratorService.randomNarratorText("Start", narratorData)))
     notifyObservers(GameEvent.printGameState(players))
-    players.foreach { (name, player) => player.nightAction.performAction(player, this)}
+    val updatedGame = players.foldLeft(this) { case (g, (name, player)) =>
+      player.nightAction.performAction(player, g)
+    }
 
-    notifyObservers(GameEvent.printGameState(players))
-    /** */
+    notifyObservers(GameEvent.printGameState(updatedGame.players))
+    updatedGame
   }
 
   def runDayPhase(): Unit = {

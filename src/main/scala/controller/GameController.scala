@@ -57,7 +57,7 @@ class GameController(private var _game: Game, val view: GameView) extends Observ
       
 
       game.phase match {
-        case Phase.Night => game.runNightPhase()
+        case Phase.Night => updateGame(game.runNightPhase())
         case Phase.Day   => game.runDayPhase()
       }
 

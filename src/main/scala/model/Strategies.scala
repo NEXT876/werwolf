@@ -1,55 +1,45 @@
 package de.htwg.werwolf.model
 
 trait NightActionStrategy {
-  def performAction(player: Player, game: Game): Game
+  def performAction(player: Player, game: Game): Unit
   def canAct(player: Player): Boolean = player.isAlive
 }
 
 case object WerwolfAction extends NightActionStrategy {
-  def performAction(player: Player, game: Game): Game = {
+  def performAction(player: Player, game: Game): Unit = {
     println(s"${player.name} (Werwolf) darf jetzt töten...")
-    val possibleTargets = game.players.collect {
-      case (name, p) if p.isAlive && name != player.name => name
-    }.toVector
-    if possibleTargets.isEmpty then game
-    else
-      val targetName = possibleTargets.head
-      val cmd = KillCommand(player.name, targetName)
-      game.executeCommand(cmd)
+    val target = scala.io.StdIn.readLine("Werwolf wenn möchtest du töten")
+    val command = KillCommand(player.name, target)
+    game.executeCommand(command)
   }
 }
 
 case object WitchAction extends NightActionStrategy {
-  def performAction(player: Player, game: Game): Game = {
+  def performAction(player: Player, game: Game): Unit = {
     println(s"${player.name} (Hexe) darf heilen oder vergiften...")
-    game
   }
 }
 
 case object TerroristAction extends NightActionStrategy {
-  def performAction(player: Player, game: Game): Game = {
+  def performAction(player: Player, game: Game): Unit = {
     println(s"${player.name} (Terorist) darf jetzt explodieren...")
-    game
   }
 }
 
 case object AmorAction extends NightActionStrategy {
-  def performAction(player: Player, game: Game): Game = {
-    println(s"${player.name} (Amor) darf jetzt verlieben...")
-    game
+  def performAction(player: Player, game: Game): Unit = {
+    println(s"${player.name} (Werwolf) darf jetzt verlieben...")
   }
 }
 
 case object VillagerAction extends NightActionStrategy {
-  def performAction(player: Player, game: Game): Game = {
-    println(s"${player.name} (Villager) darf jetzt leben...")
-    game
+  def performAction(player: Player, game: Game): Unit = {
+    println(s"${player.name} (Werwolf) darf jetzt leben...")
   }
 }
 
 case object NoAction extends NightActionStrategy {
-  def performAction(player: Player, game: Game): Game = {
+  def performAction(player: Player, game: Game): Unit = {
     println(s"${player.name} hat heute Nacht nichts zu tun.")
-    game
   }
 }
