@@ -163,8 +163,6 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
       }
     }
 
-
-
     "NarratorService" should {
 
       "load JSON from file path using os-lib" in {
