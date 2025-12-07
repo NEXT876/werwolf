@@ -6,9 +6,9 @@ import controller.GameController
 import view.*
 
 @main def main(): Unit =
-  val view: GameView = new TUI()
   val game = Game()
-  val controller = GameController(game,view)
+  val controller = GameController(game)
+  val view = TUI(controller)
   
-  game.addObserver(controller)
+  controller.addObserver(view)
   controller.start()

@@ -1,9 +1,51 @@
 // src/main/scala/view/TUI.scala
 package de.htwg.werwolf.view
 
+import de.htwg.werwolf.model.GameEvent
+import de.htwg.werwolf.controller.GameController
+import de.htwg.werwolf.util.Observer
+
+
 import scala.io.StdIn.readLine
 
-class TUI() extends GameView {
+class TUI(controller : GameController) extends Observer[GameEvent] {
+
+
+
+  override def update(event: GameEvent): Unit =
+  event match
+    case GameEvent.printGameState(players) =>
+      clearScreen()
+      showLogo()
+      printPlayerRoles(players.map { case (name, player) =>
+        (name, player.role.toString(), player.isAlive)
+      }.toVector)
+
+    case GameEvent.printnarratorText(text) =>
+      showLogo()
+      tiping(text)
+    
+    case GameEvent.printText(text,wait) =>
+      tiping(text,wait)
+
+    case GameEvent.showLogo =>
+      showLogo()
+
+    case GameEvent.clearScreen =>
+      clearScreen()
+
+    case GameEvent.requestPlayerNames =>
+      val names = getPlayerNames(getPlayerAmount())
+      clearScreen()
+      controller.addRolesAndStart(names)
+
+    case GameEvent.GameOver =>
+      clearScreen()
+      showGameOver()
+
+    case GameEvent.printErrorMSG(msg) =>
+      printErrorMsg(msg)
+
 
   def getPlayerAmount(): Int = {
     val input = readLine("Wie viele Spieler? (mind. 2, max. 6): ")

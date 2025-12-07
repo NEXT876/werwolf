@@ -5,12 +5,12 @@ class GameHistory {
 
   def save(game: Game): Unit = {
     saves.push(game.createMemento())
-    println(s"Spielstand ${saves.size} gespeichert")
+    //println(s"Spielstand ${saves.size} gespeichert")
   }
 
   def undo(game: Game): Unit = if (saves.nonEmpty) {
     game.restoreFromMemento(saves.pop())
-    println("Zurück zum letzten Savepoint!")
+    //println("Zurück zum letzten Savepoint!")
   }
 
   def list(): Unit = saves.zipWithIndex.reverse.foreach {

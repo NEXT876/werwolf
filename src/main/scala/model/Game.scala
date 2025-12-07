@@ -62,11 +62,10 @@ case class Game (
   votes: Votes = Votes(),
   isRunning: Boolean = true,
   commandHistory: Vector[GameCommand] = Vector.empty
-) extends Subject[GameEvent] {
+)  {
 
-  private val narratorData: Root = NarratorService.loadNarratorJson(
-    os.pwd  / "src" / "main"/ "resources" / "narrator.json"
-  )
+  def narratorData () : Root =
+    NarratorService.loadNarratorJson(os.pwd  / "src" / "main"/ "resources" / "narrator.json")
 
   def executeCommand(cmd: GameCommand): Game = {
     val updatedGame = cmd.execute(this)
@@ -79,12 +78,12 @@ case class Game (
     val revertedGame = cmd.undo(this)
     revertedGame.copy(commandHistory = commandHistory.init)
   }
-
+/*
   def replay(): Unit =
     println("=== REPLAY ===")
     commandHistory.reverse.foreach { cmd =>
       println(s"• ${cmd.description}")
-    }
+    }*/
 
 
             // Memento //
@@ -149,18 +148,13 @@ case class Game (
 
 
   def runNightPhase(): Game = {
-    notifyObservers(GameEvent.printnarratorText(NarratorService.randomNarratorText("Start", narratorData)))
-    notifyObservers(GameEvent.printGameState(players))
     val updatedGame = players.foldLeft(this) { case (g, (name, player)) =>
       player.nightAction.performAction(player, g)
     }
-
-    notifyObservers(GameEvent.printGameState(updatedGame.players))
     updatedGame
   }
 
   def runDayPhase(): Unit = {
-    notifyObservers(GameEvent.printGameState(players))
     /** */
   }
 
