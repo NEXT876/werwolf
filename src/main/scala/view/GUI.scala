@@ -3,119 +3,203 @@ package de.htwg.werwolf.view
 import scalafx.application.JFXApp3
 import scalafx.scene.Scene
 import scalafx.scene.layout._
-import scalafx.scene.paint.Color._
+import scalafx.scene.paint.Color
 import scalafx.scene.shape._
 import scalafx.scene.text.Text
 import scalafx.scene.effect.DropShadow
 import scalafx.geometry.Insets
-import scalafx.animation.RotateTransition
+import scalafx.scene.input.MouseEvent
+import scalafx.scene.control._
+import scalafx.scene.Group
+import scalafx.Includes._
+import scalafx.animation.{RotateTransition, FillTransition, Timeline, KeyFrame}
 import scalafx.util.Duration
 
 object GUI extends JFXApp3 {
 
   override def start(): Unit = {
 
-    // Rotierbares Oval
-    val disk = new Ellipse {
-      centerX = 400
-      centerY = 300
-      radiusX = 350
-      radiusY = 180
-      stroke = Black
-      fill = White
-      strokeWidth = 2
-    }
-
-    val rotateAnimation = new RotateTransition {
-      node = disk
-      duration = Duration(5000)
-      byAngle = 360
-      cycleCount = RotateTransition.Indefinite
-    }
-    rotateAnimation.play()
-
-    // Helper: Box mit Rahmen & Text
-    def box(label: String, w: Double = 150, h: Double = 60) = new VBox {
-      padding = Insets(5)
-      spacing = 5
-      prefWidth = w
-      prefHeight = h
-      style = "-fx-border-color: black; -fx-background-color: white;"
-      children = Seq(new Text(label))
-    }
-
-    val root = new Pane {
-      children = Seq(
-        disk,
-
-        // Top left
-        new VBox {
-          layoutX = 20
-          layoutY = 20
-          children = Seq(box("amount of members per faction", 200, 80))
-        },
-
-        // Top center
-        new VBox {
-          layoutX = 300
-          layoutY = 20
-          children = Seq(box("day / night cycle", 300, 60))
-        },
-
-        // Top right
-        new VBox {
-          layoutX = 750
-          layoutY = 20
-          children = Seq(box("special information", 200, 80))
-        },
-
-        // Left middle (player4)
-        new VBox {
-          layoutX = 20
-          layoutY = 250
-          children = Seq(box("player4"))
-        },
-
-        // Bottom left (chat)
-        new VBox {
-          layoutX = 20
-          layoutY = 430
-          children = Seq(box("chat | team chat", 220, 200))
-        },
-
-        // Bottom middle (player1)
-        new VBox {
-          layoutX = 380
-          layoutY = 530
-          children = Seq(box("player1"))
-        },
-
-        // Right middle (player2)
-        new VBox {
-          layoutX = 900
-          layoutY = 250
-          children = Seq(box("player2"))
-        },
-
-        // Bottom right (rollen info)
-        new VBox {
-          layoutX = 900
-          layoutY = 430
-          children = Seq(box("rollen info", 220, 200))
-        },
-
-        // Top middle below cycle (player3)
-        new VBox {
-          layoutX = 420
-          layoutY = 120
-          children = Seq(box("player3"))
+    // --- Helper: Box mit Rahmen, Schatten & Hover-Effekt ---
+    def box(label: String, w: Double = 150, h: Double = 60): VBox = {
+      val b = new VBox {
+        padding = Insets(10)
+        spacing = 8
+        prefWidth = w
+        prefHeight = h
+        style =
+          "-fx-background-color: white; -fx-border-color: gray; -fx-border-radius: 10; -fx-background-radius: 10;"
+        effect = new DropShadow {
+          offsetX = 3
+          offsetY = 3
+          color = Color.LightGray
+          radius = 5
         }
-      )
+        children = Seq(new Text(label) {
+          style = "-fx-font-weight: bold; -fx-font-size: 14px;"
+        })
+      }
+
+      b.onMouseEntered = (_: MouseEvent) =>
+        b.style =
+          "-fx-background-color: #e0f7fa; -fx-border-color: #00acc1; -fx-border-radius: 10; -fx-background-radius: 10;"
+      b.onMouseExited = (_: MouseEvent) =>
+        b.style =
+          "-fx-background-color: white; -fx-border-color: gray; -fx-border-radius: 10; -fx-background-radius: 10;"
+
+      b
     }
 
+    // --- Chatbox zuerst definieren ---
+    val chatArea = new TextArea {
+      prefWidth = 200
+      prefHeight = 150
+      editable = false
+      styleClass.add("chat-textarea")
+    }
+    val chatInput = new TextField {
+      prefWidth = 200
+      styleClass.add("chat-input")
+    }
+    val sendButton = new Button("Send")
+    sendButton.onAction = _ => {
+      val msg = chatInput.text.value
+      if msg.nonEmpty then
+        chatArea.appendText(s"You: $msg\n")
+        chatInput.clear()
+    }
+    val chatBox = new VBox(5) {
+      children = Seq(chatArea, chatInput, sendButton)
+    }
+
+    // --- Drehendes Oval ---
+    val ovalRadiusX = 350
+    val ovalRadiusY = 180
+
+    val disk = new Ellipse {
+      centerX = 0
+      centerY = 0
+      radiusX = ovalRadiusX
+      radiusY = ovalRadiusY
+      stroke = Color.DarkGray
+      fill = Color.LightGray
+      strokeWidth = 3
+      effect = new DropShadow {
+        offsetX = 5
+        offsetY = 5
+        color = Color.Gray
+        radius = 10
+      }
+    }
+
+    val ovalGroup = new Group(disk)
+
+    // --- Spieler-Boxen auf Oval ---
+    val players = Seq(box("player1"), box("player2"), box("player3"), box("player4"))
+    ovalGroup.children.addAll(players.map(_.delegate): _*)
+
+    // Spielerpositionierung
+    var currentAngle = 0.0
+    def positionPlayers(angleDeg: Double): Unit = {
+      for ((player, idx) <- players.zipWithIndex) {
+        val angle = Math.toRadians(angleDeg + idx * 90)
+        player.layoutX = ovalRadiusX * Math.cos(angle) - player.prefWidth.value / 2
+        player.layoutY = ovalRadiusY * Math.sin(angle) - player.prefHeight.value / 2
+      }
+    }
+    positionPlayers(currentAngle)
+
+    // --- Steuer-Buttons unten Mitte ---
+    val nextButton = new Button("nächster")
+    val skipButton = new Button("skip")
+
+    nextButton.onAction = _ => {
+      val steps = 5
+      val stepAngle = 90.0 / steps
+      val stepDuration = 50 // ms pro Schritt
+
+      var stepCount = 0
+
+      // KeyFrames in einer lokalen Variablen anders nennen
+      val kfSeq = (1 to steps).map { _ =>
+        KeyFrame(
+          Duration(stepDuration),
+          onFinished = _ => {
+            currentAngle += stepAngle
+            if (currentAngle >= 360) currentAngle -= 360
+            positionPlayers(currentAngle)
+          }
+        )
+      }
+
+      val animTimeline = new Timeline {
+        keyFrames = kfSeq
+      }
+
+      animTimeline.onFinished = _ => {
+        currentAngle = Math.round(currentAngle / 90) * 90
+        positionPlayers(currentAngle)
+      }
+
+      animTimeline.play()
+    }
+
+    skipButton.onAction = _ => {
+      // keine Aktion
+    }
+
+    val bottomCenterButtons = new HBox(10) {
+      children = Seq(nextButton, skipButton)
+      alignment = scalafx.geometry.Pos.Center
+    }
+
+    // --- Top Bar ---
+    val topLeft = box("amount of members per faction", 200, 80)
+    val topCenter = box("day / night cycle", 300, 60)
+    val topRight = box("special information", 200, 80)
+
+    val topPane = new BorderPane {
+      left = topLeft
+      center = topCenter
+      right = topRight
+      padding = Insets(10)
+    }
+
+    // --- Bottom Pane ---
+    val bottomPane = new BorderPane {
+      left = chatBox
+      center = bottomCenterButtons
+      right = box("rollen info", 220, 200)
+      padding = Insets(10)
+    }
+
+    // --- Root Layout ---
+    val root = new BorderPane {
+      top = topPane
+      bottom = bottomPane
+      center = new StackPane {
+        children = Seq(ovalGroup)
+      }
+      padding = Insets(10)
+    }
+
+    // --- Oval-Farbwechsel ---
+    val colorAnimation = new FillTransition {
+      shape = disk
+      duration = Duration(4000)
+      fromValue = Color.LightGray
+      toValue = Color.LightBlue
+      cycleCount = FillTransition.Indefinite
+      autoReverse = true
+    }
+    colorAnimation.play()
+
+    // --- Scene & CSS ---
     stage = new JFXApp3.PrimaryStage {
       title = "Werwolf GUI"
-      scene = new Scene(root, 1150, 700)
+      scene = new Scene(root, 1200, 800) {
+        fill = Color.rgb(242, 242, 242)
+        stylesheets.add("styles.css")
+      }
     }
   }
 }
