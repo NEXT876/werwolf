@@ -12,5 +12,5 @@ import de.htwg.werwolf.view.*
 
   controller.addObserver(view)
   //controller.start()
-  */
-  ScalaFXHelloWorld.start()
+   */
+  GUI.start()
