@@ -1,19 +1,28 @@
-val scala3Version = "3.7.3"
+ThisBuild / scalaVersion := "3.7.3"
 
 lazy val root = project
   .in(file("."))
   .settings(
-    name := "werwolf",
-    version := "0.1.0-SNAPSHOT",
-    scalaVersion := scala3Version,
-    coverageEnabled := true,
-    coverageExcludedPackages := "upickle.*;de\\.htwg\\.werwolf\\.narrator.*",
+    name := "scalafx-test",
     
+    // Aktuelle ScalaFX (für JavaFX 21)
     libraryDependencies ++= Seq(
-      "org.scalameta" %% "munit" % "1.0.0" % Test,
-      "org.scalactic" %% "scalactic" % "3.2.18",
-      "org.scalatest" %% "scalatest" % "3.2.18" % Test,
-      "com.lihaoyi" %% "upickle" % "4.0.0",
-      "com.lihaoyi" %% "os-lib" % "0.9.1"
-    )
+          "org.scalameta" %% "munit" % "1.0.0" % Test,
+          "org.scalactic" %% "scalactic" % "3.2.18",
+          "org.scalatest" %% "scalatest" % "3.2.18" % Test,
+          "com.lihaoyi" %% "upickle" % "4.0.0",
+          "com.lihaoyi" %% "os-lib" % "0.9.1",
+          "org.scalafx" %% "scalafx" % "16.0.0-R24"
+        ),
+    libraryDependencies ++= {
+  val os = System.getProperty("os.name").toLowerCase match {
+    case mac if mac.contains("mac") => "mac"
+    case win if win.contains("win") => "win"
+    case _ => "linux"
+  }
+  Seq("base", "controls", "fxml", "graphics", "media", "web")  // <-- media hinzugefügt
+    .map(m => "org.openjfx" % s"javafx-$m" % "16" classifier os)
+},
+
+    fork := true   // WICHTIG, sonst findet JavaFX die Module nicht
   )
