@@ -2,23 +2,42 @@ package de.htwg.werwolf.view
 
 import scalafx.application.JFXApp3
 import scalafx.scene.Scene
-import scalafx.scene.layout._
+import scalafx.scene.layout.*
 import scalafx.scene.paint.Color
-import scalafx.scene.shape._
+import scalafx.scene.shape.*
 import scalafx.scene.text.Text
 import scalafx.scene.effect.DropShadow
 import scalafx.geometry.Insets
 import scalafx.scene.input.MouseEvent
-import scalafx.scene.control._
+import scalafx.scene.control.*
 import scalafx.scene.Group
-import scalafx.Includes._
+import scalafx.Includes.*
 import scalafx.animation.{RotateTransition, FillTransition, Timeline, KeyFrame}
 import scalafx.util.Duration
 
-object GUI extends JFXApp3 {
+import scala.compiletime.uninitialized
+
+import de.htwg.werwolf.util.*
+import de.htwg.werwolf.model.GameEvent
+import de.htwg.werwolf.controller.*
+import scalafx.beans.property.StringProperty
+import scalafx.application.Platform
+
+object GUI extends JFXApp3 with Observer[GameEvent] {
+  var controller: GameController = uninitialized // Controller injizieren
+
+  private val rollenInfoText = StringProperty("Willkommen zu Werwolf!")
+  private val NightDayCycleText = StringProperty("Nacht")
+
+
+  def init(c: GameController): Unit = {
+    controller = c
+    controller.addObserver(this) // GUI als Observer registrieren
+  }
 
   override def start(): Unit = {
 
+    println("[GUI] JavaFX Thread gestartet – Fenster wird jetzt gebaut...")
     // --- Helper: Box mit Rahmen, Schatten & Hover-Effekt ---
     def box(label: String, w: Double = 150, h: Double = 60): VBox = {
       val b = new VBox {
@@ -34,19 +53,34 @@ object GUI extends JFXApp3 {
           color = Color.LightGray
           radius = 5
         }
+
         children = Seq(new Text(label) {
           style = "-fx-font-weight: bold; -fx-font-size: 14px;"
         })
       }
-
       b.onMouseEntered = (_: MouseEvent) =>
         b.style =
           "-fx-background-color: #e0f7fa; -fx-border-color: #00acc1; -fx-border-radius: 10; -fx-background-radius: 10;"
       b.onMouseExited = (_: MouseEvent) =>
         b.style =
           "-fx-background-color: white; -fx-border-color: gray; -fx-border-radius: 10; -fx-background-radius: 10;"
-
+      // Box rückgabe
       b
+    }
+
+    val rollenInfoField = new TextArea {
+      text <== rollenInfoText // Automatisches Binding
+      editable = false
+      wrapText = true
+      prefRowCount = 8
+    }
+
+    def createRollenInfoBox(): VBox = new VBox {
+      padding = Insets(10)
+      children = Seq(
+        new Text("rollen info"),
+        rollenInfoField
+      )
     }
 
     // --- Chatbox zuerst definieren ---
@@ -168,7 +202,7 @@ object GUI extends JFXApp3 {
     val bottomPane = new BorderPane {
       left = chatBox
       center = bottomCenterButtons
-      right = box("rollen info", 220, 200)
+      right = createRollenInfoBox()
       padding = Insets(10)
     }
 
@@ -197,9 +231,40 @@ object GUI extends JFXApp3 {
     stage = new JFXApp3.PrimaryStage {
       title = "Werwolf GUI"
       scene = new Scene(root, 1200, 800) {
-        fill = Color.rgb(242, 242, 242)
-        stylesheets.add("styles.css")
+        fill = Color.rgb(153, 146, 146, 1)
+        stylesheets.add("style.css")
       }
+    }
+  }
+
+  override def update(event: GameEvent): Unit =
+    event match
+      case GameEvent.printGameState(players) =>
+        printPlayerRoles(players.map { case (name, player) =>
+          (name, player.role.toString(), player.isAlive)
+        }.toVector)
+
+      case _ =>
+
+  def printPlayerRoles(playerRoles: Vector[AnyRef]): Unit = {
+    val header = "\n================ Spieler & Rollen ================\n"
+
+    val body = playerRoles
+      .map {
+        case (name: String, role: String, isAlive: Boolean) =>
+          val state = if isAlive then "lebt" else "tot"
+          f"• ${name}%-15s | Rolle: ${role}%-10s | Status: ${state}%-7s"
+
+        case other =>
+          s"• Unbekanntes Objekt: ${other.getClass.getSimpleName}"
+      }
+      .mkString("\n")
+
+    val footer = "\n==================================================\n"
+
+     // WICHTIG: Platform.runLater für UI-Thread
+    Platform.runLater {
+      rollenInfoText.value = header + body + footer
     }
   }
 }

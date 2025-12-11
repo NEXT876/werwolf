@@ -5,6 +5,8 @@ lazy val root = project
   .settings(
     name := "scalafx-test",
 
+    scalacOptions += "-Wconf:msg=Implicit parameters should be provided with a `using` clause:s",
+
     // Aktuelle ScalaFX (für JavaFX 21)
     libraryDependencies ++= Seq(
       "org.scalameta" %% "munit" % "1.0.0" % Test,
@@ -22,6 +24,5 @@ lazy val root = project
       }
       Seq("base", "controls", "fxml", "graphics", "media", "web") // <-- media hinzugefügt
         .map(m => "org.openjfx" % s"javafx-$m" % "16" classifier os)
-    },
-    fork := true // WICHTIG, sonst findet JavaFX die Module nicht
+    }
   )

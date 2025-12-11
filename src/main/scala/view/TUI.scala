@@ -2,7 +2,7 @@
 package de.htwg.werwolf.view
 
 import de.htwg.werwolf.model.GameEvent
-import de.htwg.werwolf.controller.GameController
+import de.htwg.werwolf.controller.*
 import de.htwg.werwolf.util.Observer
 
 
@@ -35,9 +35,7 @@ class TUI(controller : GameController) extends Observer[GameEvent] {
       clearScreen()
 
     case GameEvent.requestPlayerNames =>
-      val names = getPlayerNames(getPlayerAmount())
-      clearScreen()
-      controller.addRolesAndStart(names)
+      
 
     case GameEvent.GameOver =>
       clearScreen()
@@ -46,6 +44,19 @@ class TUI(controller : GameController) extends Observer[GameEvent] {
     case GameEvent.printErrorMSG(msg) =>
       printErrorMsg(msg)
 
+
+  def start(): Unit = 
+    clearScreen()
+    tiping("Willkommen zu Werwolf", 100)
+    showLogo()
+    controller.saveGameState()
+
+    val names = getPlayerNames(getPlayerAmount())
+    clearScreen()
+    controller.addRoles(names)
+
+    controller.runGame()
+  
 
   def getPlayerAmount(): Int = {
     val input = readLine("Wie viele Spieler? (mind. 2, max. 6): ")
