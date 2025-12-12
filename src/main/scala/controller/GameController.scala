@@ -16,7 +16,7 @@ class GameController(private var _game: Game) extends Subject[GameEvent] {
     _game = newGame
     game
 
-  private def saveGameState(): Unit =
+  def saveGameState(): Unit =
     savedMemento = Some(game.createMemento())
 
   def undoFull(): Unit = savedMemento match
@@ -42,19 +42,12 @@ class GameController(private var _game: Game) extends Subject[GameEvent] {
         game
       }
   
-  def addRolesAndStart(names : Vector[String]) : Unit =  
+  def addRoles(names : Vector[String]) : Unit =  
     updateGame(game.addRoles(names))
-    runGame()
  
-  def start(): Unit = 
-    notifyObservers(GameEvent.clearScreen)
-    notifyObservers(GameEvent.printText("Willkommen zu Werwolf", 100))
-    notifyObservers(GameEvent.showLogo)
-    saveGameState()
-    notifyObservers(GameEvent.requestPlayerNames)
-  
 
   def runGame(): Unit =
+    notifyObservers(GameEvent.InitialthingsDone)
     while (game.isRunning) {
       notifyObservers(GameEvent.clearScreen)
 
@@ -66,8 +59,10 @@ class GameController(private var _game: Game) extends Subject[GameEvent] {
           notifyObservers(GameEvent.printGameState(game.players))
         case Phase.Day   => 
           notifyObservers(GameEvent.printGameState(game.players))
-          game.runDayPhase()
+          updateGame(game.runNightPhase())
+          notifyObservers(GameEvent.printGameState(game.players))
       }
+      notifyObservers(GameEvent.switchPhase(game.switchPhase().phase.toString()))
 
       game.checkWinCondition(game.players) match {
         case Some(winningFaction) =>
