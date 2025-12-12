@@ -59,7 +59,8 @@ class GameController(private var _game: Game) extends Subject[GameEvent] {
           notifyObservers(GameEvent.printGameState(game.players))
         case Phase.Day   => 
           notifyObservers(GameEvent.printGameState(game.players))
-          game.runDayPhase()
+          updateGame(game.runNightPhase())
+          notifyObservers(GameEvent.printGameState(game.players))
       }
       notifyObservers(GameEvent.switchPhase(game.switchPhase().phase.toString()))
 

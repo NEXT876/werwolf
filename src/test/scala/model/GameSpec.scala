@@ -46,7 +46,7 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
   before {
     game = new Game()
     observerCalled = null
-    game.addObserver(new TestObserver())
+    //game.addObserver(new TestObserver())
   }
 
   "A Game" should {
