@@ -44,6 +44,8 @@ class TUI(controller : GameController) extends Observer[GameEvent] {
     case GameEvent.printErrorMSG(msg) =>
       printErrorMsg(msg)
 
+    case _ =>
+
 
   def start(): Unit = 
     clearScreen()

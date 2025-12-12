@@ -26,8 +26,10 @@ import scalafx.application.Platform
 object GUI extends JFXApp3 with Observer[GameEvent] {
   var controller: GameController = uninitialized // Controller injizieren
 
-  private val rollenInfoText = StringProperty("Willkommen zu Werwolf!")
+  private val rollenInfoText = StringProperty("No Player with Roles at the moment")
   private val NightDayCycleText = StringProperty("Nacht")
+  private val FactionAmountText = StringProperty("Werwolf : \n Villager : ")
+  private val SpecialInformationText = StringProperty("No Special Informations")
 
 
   def init(c: GameController): Unit = {
@@ -68,20 +70,6 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
       b
     }
 
-    val rollenInfoField = new TextArea {
-      text <== rollenInfoText // Automatisches Binding
-      editable = false
-      wrapText = true
-      prefRowCount = 8
-    }
-
-    def createRollenInfoBox(): VBox = new VBox {
-      padding = Insets(10)
-      children = Seq(
-        new Text("rollen info"),
-        rollenInfoField
-      )
-    }
 
     // --- Chatbox zuerst definieren ---
     val chatArea = new TextArea {
@@ -187,9 +175,53 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
     }
 
     // --- Top Bar ---
-    val topLeft = box("amount of members per faction", 200, 80)
-    val topCenter = box("day / night cycle", 300, 60)
-    val topRight = box("special information", 200, 80)
+    val FactionAmountField = new TextArea {
+    text <== FactionAmountText // Automatisches Binding
+    editable = false
+    wrapText = true
+    prefRowCount = 8
+    prefColumnCount = 40
+  }
+    val topLeft = new VBox {
+      padding = Insets(10)
+      children = Seq(
+        new Text("alive Players per faction"),
+        FactionAmountField
+      )
+    }
+    
+
+    val DayNightCycleField = new TextArea {
+    text <== NightDayCycleText // Automatisches Binding
+    editable = false
+    wrapText = true
+    prefRowCount = 8
+    prefColumnCount = 40
+  }
+    val topCenter = new VBox {
+      padding = Insets(10)
+      children = Seq(
+        new Text("day / night cycle"),
+        DayNightCycleField
+      )
+    }
+    
+
+    val SpecialInformationField = new TextArea {
+    text <== SpecialInformationText // Automatisches Binding
+    editable = false
+    wrapText = true
+    prefRowCount = 8
+    prefColumnCount = 40
+  }
+    val topRight = new VBox {
+      padding = Insets(10)
+      children = Seq(
+        new Text("special information"),
+        SpecialInformationField
+      )
+    }
+    
 
     val topPane = new BorderPane {
       left = topLeft
@@ -198,13 +230,29 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
       padding = Insets(10)
     }
 
+    val rollenInfoField = new TextArea {
+      text <== rollenInfoText // Automatisches Binding
+      editable = false
+      wrapText = true
+      prefRowCount = 8
+    }
+
+
     // --- Bottom Pane ---
     val bottomPane = new BorderPane {
       left = chatBox
       center = bottomCenterButtons
-      right = createRollenInfoBox()
+      right = new VBox {
+        padding = Insets(10)
+        children = Seq(
+          new Text("rollen info"),
+          rollenInfoField
+        )
+      
+      }
       padding = Insets(10)
     }
+
 
     // --- Root Layout ---
     val root = new BorderPane {
@@ -244,9 +292,14 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
           (name, player.role.toString(), player.isAlive)
         }.toVector)
 
+      case GameEvent.switchPhase(phase) =>
+        Platform.runLater {NightDayCycleText.value = phase} 
+
+      case GameEvent.InitialthingsDone => 
+
       case _ =>
 
-  def printPlayerRoles(playerRoles: Vector[AnyRef]): Unit = {
+  def printPlayerRoles(playerRoles: Vector[AnyRef]): Unit = 
     val header = "\n================ Spieler & Rollen ================\n"
 
     val body = playerRoles
@@ -266,5 +319,24 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
     Platform.runLater {
       rollenInfoText.value = header + body + footer
     }
-  }
+    countAlivePlayer(playerRoles)
+  
+  def countAlivePlayer(playerRoles: Vector[AnyRef]): Unit =
+    // Count Werwölfe und Dorfbewohner die noch leben
+    val aliveWerwolves = playerRoles.count {
+      case (name: String, role: String, isAlive: Boolean) =>
+        role.toLowerCase.contains("werwolf") && isAlive
+      case _ => false
+    }
+
+    val aliveVillagers = playerRoles.count {
+      case (name: String, role: String, isAlive: Boolean) =>
+        !role.toLowerCase.contains("werwolf") && isAlive
+      case _ => false
+    }
+
+    Platform.runLater {
+      FactionAmountText.value = s"Werwölfe : ${aliveWerwolves} \nDorfbewohner : ${aliveVillagers}"
+    }
+  
 }

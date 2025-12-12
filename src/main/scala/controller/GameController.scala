@@ -47,6 +47,7 @@ class GameController(private var _game: Game) extends Subject[GameEvent] {
  
 
   def runGame(): Unit =
+    notifyObservers(GameEvent.InitialthingsDone)
     while (game.isRunning) {
       notifyObservers(GameEvent.clearScreen)
 
@@ -60,6 +61,7 @@ class GameController(private var _game: Game) extends Subject[GameEvent] {
           notifyObservers(GameEvent.printGameState(game.players))
           game.runDayPhase()
       }
+      notifyObservers(GameEvent.switchPhase(game.switchPhase().phase.toString()))
 
       game.checkWinCondition(game.players) match {
         case Some(winningFaction) =>

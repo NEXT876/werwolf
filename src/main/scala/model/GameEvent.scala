@@ -12,3 +12,5 @@ enum GameEvent:
   case requestPlayerNames
   case GameOver
   case printErrorMSG(msg : String)
+  case switchPhase(phase : String)
+  case InitialthingsDone
