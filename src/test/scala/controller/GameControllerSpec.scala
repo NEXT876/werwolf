@@ -122,6 +122,16 @@ class GameControllerSpec extends AnyWordSpec with Matchers {
       mockObserver.receivedEvents should contain(GameEvent.printText(s"Die ${Faction._Werwolf} haben gewonnen!!!", 120))
     }
 
+    "handle win condition in two games" in {
+      val players = Map("p1" -> Werwolf("p1"), "p2" -> Villager("p2"),  "p3" -> Villager("p3"))
+      val game = Game(players = players, phase = Phase.Night, isRunning = true)
+      val controller = new GameController(game)
+      val mockObserver = new MockObserver
+      controller.addObserver(mockObserver)
+      controller.runGame()
+      mockObserver.receivedEvents should contain(GameEvent.printText(s"Die ${Faction._Werwolf} haben gewonnen!!!", 120))
+    }
+
     "handle no win condition" in {
       val players = Map("p1" -> Werwolf("p1"), "p2" -> Villager("p2"))
       val game = Game(players = players, phase = Phase.Night, isRunning = true)

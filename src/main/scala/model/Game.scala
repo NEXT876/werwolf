@@ -154,11 +154,11 @@ case class Game (
     updatedGame
   }
 
-  def runDayPhase(): Unit = {
+  def runDayPhase(): Game = {
      val updatedGame = players.foldLeft(this) { case (g, (name, player)) =>
       player.nightAction.performAction(player, g)
     }
-    updatedGame
+      updatedGame
   }
 
 
