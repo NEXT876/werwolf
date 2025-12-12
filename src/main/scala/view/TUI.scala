@@ -1,9 +1,64 @@
 // src/main/scala/view/TUI.scala
 package de.htwg.werwolf.view
 
+import de.htwg.werwolf.model.GameEvent
+import de.htwg.werwolf.controller.*
+import de.htwg.werwolf.util.Observer
+
+
 import scala.io.StdIn.readLine
 
-class TUI() extends GameView {
+class TUI(controller : GameController) extends Observer[GameEvent] {
+
+
+
+  override def update(event: GameEvent): Unit =
+  event match
+    case GameEvent.printGameState(players) =>
+      clearScreen()
+      showLogo()
+      printPlayerRoles(players.map { case (name, player) =>
+        (name, player.role.toString(), player.isAlive)
+      }.toVector)
+
+    case GameEvent.printnarratorText(text) =>
+      showLogo()
+      tiping(text)
+    
+    case GameEvent.printText(text,wait) =>
+      tiping(text,wait)
+
+    case GameEvent.showLogo =>
+      showLogo()
+
+    case GameEvent.clearScreen =>
+      clearScreen()
+
+    case GameEvent.requestPlayerNames =>
+      
+
+    case GameEvent.GameOver =>
+      clearScreen()
+      showGameOver()
+
+    case GameEvent.printErrorMSG(msg) =>
+      printErrorMsg(msg)
+
+    case _ =>
+
+
+  def start(): Unit = 
+    clearScreen()
+    tiping("Willkommen zu Werwolf", 100)
+    showLogo()
+    controller.saveGameState()
+
+    val names = getPlayerNames(getPlayerAmount())
+    clearScreen()
+    controller.addRoles(names)
+
+    controller.runGame()
+  
 
   def getPlayerAmount(): Int = {
     val input = readLine("Wie viele Spieler? (mind. 2, max. 6): ")
@@ -66,4 +121,8 @@ class TUI() extends GameView {
 
   def showGameOver(): Unit =
     println("Das Game ist vorbei")
-  }
+
+  def printErrorMsg(msg: String): Unit =
+    println(msg)
+  
+}

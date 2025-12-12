@@ -2,89 +2,79 @@
 package de.htwg.werwolf.controller
 
 import de.htwg.werwolf.model.*
-import de.htwg.werwolf.view.GameView
 
+import de.htwg.werwolf.util.Subject
+
+
+import scala.util.{Try, Success, Failure}
 import scala.util.Random
-import de.htwg.werwolf.util.Observer
 
-class GameController(private var _game: Game, val view: GameView) extends Observer[GameEvent] {
+class GameController(private var _game: Game) extends Subject[GameEvent] {
   private var savedMemento: Option[GameMemento] = None
   def game: Game = _game
   def updateGame(newGame: Game): Game =
-    _game.removeObserver(this)
     _game = newGame
-    _game.addObserver(this)
     game
 
-  private def saveGameState(): Unit =
+  def saveGameState(): Unit =
     savedMemento = Some(game.createMemento())
 
   def undoFull(): Unit = savedMemento match
     case Some(memento) =>
       val restoredGame = game.restoreFromMemento(memento)
       updateGame(restoredGame)
-      view.tiping("↶ Vollständiges Undo – alles zurückgesetzt!", 70)
+      notifyObservers(GameEvent.printText("↶ Vollständiges Undo – alles zurückgesetzt!", 70))
     case None =>
-      view.tiping("Kein gespeicherter Spielstand zum Wiederherstellen.", 70)
+      notifyObservers(GameEvent.printText("Kein gespeicherter Spielstand zum Wiederherstellen.", 70))
 
   def executeCommand(cmd: GameCommand): Game =
     saveGameState()
     updateGame(game.executeCommand(cmd))
 
-  def undoCommand(): Game =
-    saveGameState()
-    updateGame(game.undoLast())
-
-  def start(): Unit = {
-    view.clearScreen()
-    view.tiping("Willkommen zu Werwolf", 100)
-    view.showLogo()
-
-    saveGameState()
-    val names = view.getPlayerNames(view.getPlayerAmount())
-
-    view.clearScreen()
-
-    saveGameState()
+  def undoCommand(): Game = 
+    saveGameState()  
+    game.undoLast() match {  
+      case Success(newGame) =>
+        updateGame(newGame)  
+        newGame  
+      case Failure(_) =>
+        notifyObservers(GameEvent.printErrorMSG("Nichts zum Rückgängigmachen!"))  
+        game
+      }
+  
+  def addRoles(names : Vector[String]) : Unit =  
     updateGame(game.addRoles(names))
-    runGame()
-  }
+ 
 
   def runGame(): Unit =
+    notifyObservers(GameEvent.InitialthingsDone)
     while (game.isRunning) {
-      view.clearScreen()
+      notifyObservers(GameEvent.clearScreen)
 
       game.phase match {
-        case Phase.Night => updateGame(game.runNightPhase())
-        case Phase.Day   => game.runDayPhase()
+        case Phase.Night => 
+          notifyObservers(GameEvent.printnarratorText(game.NarratorService.randomNarratorText("Start", game.narratorData())))
+          notifyObservers(GameEvent.printGameState(game.players))
+          updateGame(game.runNightPhase())
+          notifyObservers(GameEvent.printGameState(game.players))
+        case Phase.Day   => 
+          notifyObservers(GameEvent.printGameState(game.players))
+          updateGame(game.runNightPhase())
+          notifyObservers(GameEvent.printGameState(game.players))
       }
-
-      /*game.players.foreach { case (name, player) =>
-        println(player.vote(player))   // das ist nur eine Methode, die einen String zurückgibt
-      }*/
+      notifyObservers(GameEvent.switchPhase(game.switchPhase().phase.toString()))
 
       game.checkWinCondition(game.players) match {
         case Some(winningFaction) =>
           saveGameState()
           executeCommand(GameEndCommand(Some(winningFaction)))
-          view.tiping(s"Die $winningFaction haben gewonnen!!!", 120)
+          notifyObservers(GameEvent.printText(s"Die $winningFaction haben gewonnen!!!", 120))
         case None =>
       }
 
     }
-    view.showGameOver()
+    notifyObservers(GameEvent.GameOver)
 
-  override def update(event: GameEvent): Unit =
-    event match
-      case GameEvent.printGameState(players) =>
-        view.clearScreen()
-        view.showLogo()
-        view.printPlayerRoles(players.map { case (name, player) =>
-          (name, player.role.toString(), player.isAlive)
-        }.toVector)
-
-      case GameEvent.printnarratorText(text) =>
-        view.showLogo()
-        view.tiping(text)
+ 
 
 }
