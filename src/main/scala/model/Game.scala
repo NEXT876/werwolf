@@ -63,6 +63,7 @@ case class Game (
   isRunning: Boolean = true,
   commandHistory: Vector[GameCommand] = Vector.empty
 )  {
+  override def toString(): String = players.values.mkString("\n")+"\n"
 
   def narratorData () : Root =
     NarratorService.loadNarratorJson(os.pwd  / "src" / "main"/ "resources" / "narrator.json")
@@ -125,14 +126,14 @@ case class Game (
 
     // 2. decorater greift ein
     val updatedPlayers: Map[String, Player] = basePlayers.collectFirst {
-      case (name, p) if !p.isInstanceOf[Werwolf] =>         
-        name -> DoubleVoteDecorator(p)                       
-    }.fold(basePlayers) { case (name, decoratedPlayer) =>     
+      case (name, p) if !p.isInstanceOf[Werwolf] =>
+        name -> DoubleVoteDecorator(p)
+    }.fold(basePlayers) { case (name, decoratedPlayer) =>
       basePlayers.updated(name, decoratedPlayer)
     }
 
     copy(players = updatedPlayers)
-    
+
   def getRoles(playeramount: Int): Vector[Roles] =
     if playeramount == 2 then Vector(Roles.werwolf, Roles.villager)
     else

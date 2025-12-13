@@ -60,6 +60,22 @@ class GameSpec extends AnyWordSpec with Matchers with BeforeAndAfter {
       state.votes shouldBe Votes()
     }
 
+    "toString" should {
+      "return the String version of the players map" in {
+        val p1 = Villager("Berta")
+        val p2 = Amor("Bernt")
+        val p3 = Werwolf("Hansi")
+        val p4 = Witch("Jannik")
+        val players = Map("Berta" -> p1,
+          "Bernt" -> p2,
+          "Hansi" -> p3,
+          "Jannik" -> p4)
+        val game = Game(players)
+        val result_toString = game.toString()
+        result_toString should be(p1.toString() + "\n" + p2.toString + "\n" + p3.toString() + "\n" + p4.toString() + "\n")
+      }
+    }
+
 /* // TODO: fix observer, lauscht nicht dem alten obj, sollte über konstruktor an das neue
       Game obj weitergegeben werden
     "switch phase correctly and notify observer" in {
