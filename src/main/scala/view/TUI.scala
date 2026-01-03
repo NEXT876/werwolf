@@ -10,16 +10,12 @@ import scala.io.StdIn.readLine
 
 class TUI(controller : GameController) extends Observer[GameEvent] {
 
-
-
   override def update(event: GameEvent): Unit =
   event match
     case GameEvent.printGameState(players) =>
       clearScreen()
       showLogo()
-      printPlayerRoles(players.map { case (name, player) =>
-        (name, player.role.toString(), player.isAlive)
-      }.toVector)
+      printPlayerRoles(players)
 
     case GameEvent.printnarratorText(text) =>
       showLogo()
@@ -38,8 +34,10 @@ class TUI(controller : GameController) extends Observer[GameEvent] {
       
 
     case GameEvent.GameOver =>
+      readLine("Press any key to end the game")
       clearScreen()
       showGameOver()
+      javafx.application.Platform.exit()
 
     case GameEvent.printErrorMSG(msg) =>
       printErrorMsg(msg)
@@ -76,23 +74,11 @@ class TUI(controller : GameController) extends Observer[GameEvent] {
     }.toVector
   }
 
-  def printPlayerRoles(playerRoles: Vector[AnyRef]): Unit = {
-    val header = "\n================ Spieler & Rollen ================\n"
+  def printPlayerRoles(playerRoles: String): Unit = {
+    val header = "\n================ Spieler & Rollen ==================\n\n"
+    val footer = "\n====================================================\n"
 
-    val body = playerRoles
-      .map {
-        case (name: String, role: String, isAlive: Boolean) =>
-          val state = if isAlive then "lebt" else "tot"
-          f"• ${name}%-15s | Rolle: ${role}%-10s | Status: ${state}%-7s"
-
-        case other =>
-          s"• Unbekanntes Objekt: ${other.getClass.getSimpleName}"
-      }
-      .mkString("\n")
-
-    val footer = "\n==================================================\n"
-
-    println(header + body + footer)
+    println(header + playerRoles + footer)
   }
 
   def tiping(text: String, waitTime_ms: Int = 30): Unit = {

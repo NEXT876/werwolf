@@ -31,10 +31,8 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
   private val FactionAmountText = StringProperty("Werwolf : \n Villager : ")
   private val SpecialInformationText = StringProperty("No Special Informations")
 
-
   def init(c: GameController): Unit = {
     controller = c
-    controller.addObserver(this) // GUI als Observer registrieren
   }
 
   override def start(): Unit = {
@@ -288,55 +286,21 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
   override def update(event: GameEvent): Unit =
     event match
       case GameEvent.printGameState(players) =>
-        printPlayerRoles(players.map { case (name, player) =>
-          (name, player.role.toString(), player.isAlive)
-        }.toVector)
+        printPlayerRoles(players)
 
       case GameEvent.switchPhase(phase) =>
         Platform.runLater {NightDayCycleText.value = phase} 
 
-      case GameEvent.InitialthingsDone => 
-
       case _ =>
 
-  def printPlayerRoles(playerRoles: Vector[AnyRef]): Unit = 
-    val header = "\n================ Spieler & Rollen ================\n"
-
-    val body = playerRoles
-      .map {
-        case (name: String, role: String, isAlive: Boolean) =>
-          val state = if isAlive then "lebt" else "tot"
-          f"• ${name}%-15s | Rolle: ${role}%-10s | Status: ${state}%-7s"
-
-        case other =>
-          s"• Unbekanntes Objekt: ${other.getClass.getSimpleName}"
-      }
-      .mkString("\n")
-
+  def printPlayerRoles(playerRoles: String): Unit = 
+    val header = "\n================ Spieler & Rollen ================\n\n"
     val footer = "\n==================================================\n"
+    val (aliveWerwolves,aliveVillagers) =  controller.countAlivePlayer()
 
      // WICHTIG: Platform.runLater für UI-Thread
     Platform.runLater {
-      rollenInfoText.value = header + body + footer
-    }
-    countAlivePlayer(playerRoles)
-  
-  def countAlivePlayer(playerRoles: Vector[AnyRef]): Unit =
-    // Count Werwölfe und Dorfbewohner die noch leben
-    val aliveWerwolves = playerRoles.count {
-      case (name: String, role: String, isAlive: Boolean) =>
-        role.toLowerCase.contains("werwolf") && isAlive
-      case _ => false
-    }
-
-    val aliveVillagers = playerRoles.count {
-      case (name: String, role: String, isAlive: Boolean) =>
-        !role.toLowerCase.contains("werwolf") && isAlive
-      case _ => false
-    }
-
-    Platform.runLater {
+      rollenInfoText.value = header + playerRoles + footer
       FactionAmountText.value = s"Werwölfe : ${aliveWerwolves} \nDorfbewohner : ${aliveVillagers}"
-    }
-  
+    } 
 }

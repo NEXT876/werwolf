@@ -13,7 +13,7 @@ trait Player:
   def nightAction: NightActionStrategy
 
   override def toString(): String =
-    f"• ${name}%-15s | Rolle: ${role}%-10s | Status: ${if (isAlive) "lebt" else "tot"}%-7s"
+    f"• ${name}%-15s | Rolle: ${role}%-10s | Status: ${if (isAlive) "lebt" else "tot"}%-7s\n"
 
 abstract class PlayerDecorator(inner: Player) extends Player:
   def name: String = inner.name

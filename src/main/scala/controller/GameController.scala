@@ -5,7 +5,6 @@ import de.htwg.werwolf.model.*
 
 import de.htwg.werwolf.util.Subject
 
-
 import scala.util.{Try, Success, Failure}
 import scala.util.Random
 
@@ -25,26 +24,34 @@ class GameController(private var _game: Game) extends Subject[GameEvent] {
       updateGame(restoredGame)
       notifyObservers(GameEvent.printText("↶ Vollständiges Undo – alles zurückgesetzt!", 70))
     case None =>
-      notifyObservers(GameEvent.printText("Kein gespeicherter Spielstand zum Wiederherstellen.", 70))
+      notifyObservers(
+        GameEvent.printText("Kein gespeicherter Spielstand zum Wiederherstellen.", 70)
+      )
 
   def executeCommand(cmd: GameCommand): Game =
     saveGameState()
     updateGame(game.executeCommand(cmd))
 
-  def undoCommand(): Game = 
-    saveGameState()  
-    game.undoLast() match {  
+  def undoCommand(): Game =
+    saveGameState()
+    game.undoLast() match {
       case Success(newGame) =>
-        updateGame(newGame)  
-        newGame  
+        updateGame(newGame)
+        newGame
       case Failure(_) =>
-        notifyObservers(GameEvent.printErrorMSG("Nichts zum Rückgängigmachen!"))  
+        notifyObservers(GameEvent.printErrorMSG("Nichts zum Rückgängigmachen!"))
         game
-      }
-  
-  def addRoles(names : Vector[String]) : Unit =  
+    }
+
+  def countAlivePlayer(): (Int,Int) =
+    val alivePlayers = game.players.values.filter(_.isAlive)
+    (
+      alivePlayers.count(_.role == Roles.werwolf),
+      alivePlayers.count(_.role != Roles.werwolf)
+    )
+
+  def addRoles(names: Vector[String]): Unit =
     updateGame(game.addRoles(names))
- 
 
   def runGame(): Unit =
     notifyObservers(GameEvent.InitialthingsDone)
@@ -52,15 +59,19 @@ class GameController(private var _game: Game) extends Subject[GameEvent] {
       notifyObservers(GameEvent.clearScreen)
 
       game.phase match {
-        case Phase.Night => 
-          notifyObservers(GameEvent.printnarratorText(game.NarratorService.randomNarratorText("Start", game.narratorData())))
-          notifyObservers(GameEvent.printGameState(game.players))
+        case Phase.Night =>
+          notifyObservers(
+            GameEvent.printnarratorText(
+              game.NarratorService.randomNarratorText("Start", game.narratorData())
+            )
+          )
+          notifyObservers(GameEvent.printGameState(game.players.values.mkString("")))
           updateGame(game.runNightPhase())
-          notifyObservers(GameEvent.printGameState(game.players))
-        case Phase.Day   => 
-          notifyObservers(GameEvent.printGameState(game.players))
+          notifyObservers(GameEvent.printGameState(game.players.values.mkString("")))
+        case Phase.Day =>
+          notifyObservers(GameEvent.printGameState(game.players.values.mkString("")))
           updateGame(game.runNightPhase())
-          notifyObservers(GameEvent.printGameState(game.players))
+          notifyObservers(GameEvent.printGameState(game.players.values.mkString("")))
       }
       notifyObservers(GameEvent.switchPhase(game.switchPhase().phase.toString()))
 
@@ -74,7 +85,5 @@ class GameController(private var _game: Game) extends Subject[GameEvent] {
 
     }
     notifyObservers(GameEvent.GameOver)
-
- 
 
 }

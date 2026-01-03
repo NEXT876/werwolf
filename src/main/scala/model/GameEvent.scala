@@ -2,9 +2,7 @@
 package de.htwg.werwolf.model
 
 enum GameEvent:
-  case printGameState(players : Map[String, Player])
-//case phaseSwitch(phase: Phase)
-//case gameEnd(isRunning: Boolean)
+  case printGameState(players : String)
   case printnarratorText(text : String)
   case printText(text : String, waitTime : Int)
   case clearScreen
