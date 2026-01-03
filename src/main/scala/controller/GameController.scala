@@ -65,13 +65,13 @@ class GameController(private var _game: Game) extends Subject[GameEvent] {
               game.NarratorService.randomNarratorText("Start", game.narratorData())
             )
           )
-          notifyObservers(GameEvent.printGameState(game.players.values.mkString("")))
+          notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
           updateGame(game.runNightPhase())
-          notifyObservers(GameEvent.printGameState(game.players.values.mkString("")))
+          notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
         case Phase.Day =>
-          notifyObservers(GameEvent.printGameState(game.players.values.mkString("")))
+          notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
           updateGame(game.runNightPhase())
-          notifyObservers(GameEvent.printGameState(game.players.values.mkString("")))
+          notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
       }
       notifyObservers(GameEvent.switchPhase(game.switchPhase().phase.toString()))
 
