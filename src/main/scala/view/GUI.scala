@@ -31,11 +31,20 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
   private val FactionAmountText = StringProperty("Werwolf : \n Villager : ")
   private val SpecialInformationText = StringProperty("No Special Informations")
 
-  def init(c: GameController): Unit = {
+  def init(c: GameController): Unit = 
     controller = c
-  }
+  
+  override def update(event: GameEvent): Unit =
+    event match
+      case GameEvent.printGameState(players) =>
+        printPlayerRoles(players)
 
-  override def start(): Unit = {
+      case GameEvent.switchPhase(phase) =>
+        Platform.runLater {NightDayCycleText.value = phase} 
+
+      case _ =>
+
+  override def start(): Unit = 
 
     println("[GUI] JavaFX Thread gestartet – Fenster wird jetzt gebaut...")
     // --- Helper: Box mit Rahmen, Schatten & Hover-Effekt ---
@@ -281,20 +290,9 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
         stylesheets.add("style.css")
       }
     }
-  }
-
-  override def update(event: GameEvent): Unit =
-    event match
-      case GameEvent.printGameState(players) =>
-        printPlayerRoles(players)
-
-      case GameEvent.switchPhase(phase) =>
-        Platform.runLater {NightDayCycleText.value = phase} 
-
-      case _ =>
-
+  
   def printPlayerRoles(playerRoles: String): Unit = 
-    val header = "\n================ Spieler & Rollen ================\n\n"
+    val header = "\n================ Spieler & Rollen ================\n"
     val footer = "\n==================================================\n"
     val (aliveWerwolves,aliveVillagers) =  controller.countAlivePlayer()
 
