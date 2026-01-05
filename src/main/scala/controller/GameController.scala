@@ -2,13 +2,13 @@
 package de.htwg.werwolf.controller
 
 import de.htwg.werwolf.model.*
-
+import de.htwg.werwolf.narrator.Narrator
 import de.htwg.werwolf.util.Subject
 
 import scala.util.{Try, Success, Failure}
 import scala.util.Random
 
-class GameController(private var _game: Game) extends Subject[GameEvent] {
+class GameController(private var _game: Game)(using narrator : Narrator) extends Subject[GameEvent] {
   private var savedMemento: Option[GameMemento] = None
   def game: Game = _game
   def updateGame(newGame: Game): Game =
@@ -62,7 +62,7 @@ class GameController(private var _game: Game) extends Subject[GameEvent] {
         case Phase.Night =>
           notifyObservers(
             GameEvent.printnarratorText(
-              game.NarratorService.randomNarratorText("Start", game.narratorData())
+              narrator.randomNarratorText("Start")
             )
           )
           notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))

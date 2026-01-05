@@ -1,14 +1,11 @@
 // src/main/model/Game.scala
 package de.htwg.werwolf.model
 
-import de.htwg.werwolf.narrator.*
 import de.htwg.werwolf.util.Subject
 
-import upickle.default.*
-import scala.util.Random
-import scala.collection.immutable.Vector
+//import scala.collection.immutable.Vector
 import scala.util.{Try, Success, Failure}
-
+import scala.util.Random
 
 enum Phase:
   case Night, Day
@@ -65,26 +62,6 @@ case class Game (
 )  {
   override def toString(): String = players.values.mkString("\n")+"\n"
 
-
-//Componente Narrator
-  def narratorData () : Root =
-    NarratorService.loadNarratorJson(os.pwd  / "src" / "main"/ "resources" / "narrator.json")
-
-  object NarratorService:
-    def loadNarratorJson(path: os.Path): Root =
-      val jsonString = os.read(path)
-      read[Root](jsonString)
-
-    // Random ist jetzt Parameter!
-    def randomNarratorText(role: String, root: Root) /*(using rnd: Random)*/: String =
-      val list = role match
-        case "Start"   => root.Night.Start
-        case "Werwolf" => root.Night.Werwolf
-        case "Witch"   => root.Night.Witch
-        case "Amor"    => root.Night.Amor
-        case _         => List("")
-      /*rnd.*/
-      Random.shuffle(list).headOption.getOrElse("")
 
 
 

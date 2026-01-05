@@ -5,7 +5,13 @@ import controller.GameController
 import model.Game
 import de.htwg.werwolf.view.*
 import de.htwg.werwolf.util.*
+import de.htwg.werwolf.narrator.*
 @main def Main(): Unit =
+
+  given Narrator =
+      new JsonNarrator(
+        os.pwd / "src" / "main" / "resources" / "narrator.json"
+      )
 
   // 1. Controller erzeugen
   val controller = GameController(Game())
