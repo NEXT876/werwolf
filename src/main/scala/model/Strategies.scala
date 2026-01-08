@@ -1,14 +1,15 @@
 package de.htwg.werwolf.model
 import de.htwg.werwolf.model.roleUtils.Player
-import de.htwg.werwolf.model.Command.KillCommand
+import de.htwg.werwolf.model.commands.KillCommand
+import de.htwg.werwolf.model.commands.CommandInterface
 
 trait NightActionStrategy {
-  def performAction(player: Player, game: Game): Game
+  def performAction(player: Player, game: Game)(using ci : CommandInterface): Game
   def canAct(player: Player): Boolean = player.isAlive
 }
 
 case object WerwolfAction extends NightActionStrategy {
-  def performAction(player: Player, game: Game): Game = {
+  def performAction(player: Player, game: Game)(using ci: CommandInterface): Game = {
     println(s"${player.name} (Werwolf) darf jetzt töten...")
     val possibleTargets = game.players.collect {
       case (name, p) if p.isAlive && name != player.name => name
@@ -17,7 +18,7 @@ case object WerwolfAction extends NightActionStrategy {
     else
       val targetName = possibleTargets.head
       val cmd = KillCommand(player.name, targetName)
-      game.executeCommand(cmd)
+      ci.executeCommand(cmd, game)
   }
 }
 

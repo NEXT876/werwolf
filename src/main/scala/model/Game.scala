@@ -2,8 +2,8 @@
 package de.htwg.werwolf.model
 
 import de.htwg.werwolf.util.Subject
-import de.htwg.werwolf.model.Command
-//import scala.collection.immutable.Vector
+import de.htwg.werwolf.model.commands.GameCommand
+import de.htwg.werwolf.model.commands.CommandInterface
 import scala.util.{Try, Success, Failure}
 import scala.util.Random
 import de.htwg.werwolf.model.roleUtils.{Amor, Player, Terrorist, Villager, Werwolf, Witch}
@@ -73,13 +73,13 @@ case class Game (
 
   def runNightPhase(): Game =
     val updatedGame = players.foldLeft(this) { case (g, (name, player)) =>
-      player.nightAction.performAction(player, g)
+      player.nightAction.performAction(player, g)(using ci: CommandInterface)
     }
     updatedGame
 
   def runDayPhase(): Game =
      val updatedGame = players.foldLeft(this) { case (g, (name, player)) =>
-      player.nightAction.performAction(player, g)
+      player.nightAction.performAction(player, g)(using ci: CommandInterface)
     }
       updatedGame
 

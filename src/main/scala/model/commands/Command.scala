@@ -1,4 +1,4 @@
-package de.htwg.werwolf.model.command
+package de.htwg.werwolf.model.commands
 import de.htwg.werwolf.model.Game
 import de.htwg.werwolf.model.Faction
 
@@ -7,7 +7,6 @@ trait GameCommand {
   def execute(game: Game): Game
   def undo( game: Game): Game
 }
-
 
 case class KillCommand(killerName: String, targetName: String) extends GameCommand {
 

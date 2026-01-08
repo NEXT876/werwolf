@@ -2,16 +2,18 @@
 package de.htwg.werwolf.controller
 
 import de.htwg.werwolf.model.*
+import de.htwg.werwolf.model.commands.CommandInterface
 import de.htwg.werwolf.narrator.Narrator
 import de.htwg.werwolf.util.Subject
 import scala.util.{Try, Success, Failure}
 import scala.util.Random
-import de.htwg.werwolf.model.RoleUtils.PlayerInterface
-import de.htwg.werwolf.model.Command.{GameCommand, GameEndCommand}
+import de.htwg.werwolf.model.roleUtils.PlayerInterface
+import de.htwg.werwolf.model.commands.{GameCommand, GameEndCommand}
 
 class GameController(private var _game: Game)(using
     narrator: Narrator,
-    roleAd: PlayerInterface
+    roleAd: PlayerInterface,
+    ci: CommandInterface
 ) extends Subject[GameEvent] {
   private var savedMemento: Option[GameMemento] = None
   def game: Game = _game
@@ -34,11 +36,11 @@ class GameController(private var _game: Game)(using
 
   def executeCommand(cmd: GameCommand): Game =
     saveGameState()
-    updateGame(game.executeCommand(cmd))
+    updateGame(ci.executeCommand(cmd, game))
 
   def undoCommand(): Game =
     saveGameState()
-    game.undoLast() match {
+    ci.undoLast(game) match {
       case Success(newGame) =>
         updateGame(newGame)
         newGame
@@ -50,8 +52,8 @@ class GameController(private var _game: Game)(using
   def countAlivePlayer(): (Int, Int) =
     val alivePlayers = game.players.values.filter(_.isAlive)
     (
-      alivePlayers.count(_.role == RoleUtils.Roles.werwolf),
-      alivePlayers.count(_.role != RoleUtils.Roles.werwolf)
+      alivePlayers.count(_.role == roleUtils.Roles.werwolf),
+      alivePlayers.count(_.role != roleUtils.Roles.werwolf)
     )
 
   def addRoles(names: Vector[String]): Unit =

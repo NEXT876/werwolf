@@ -1,8 +1,10 @@
 // Datei: src/main/scala/de/htwg/werwolf/Main.scala
 package de.htwg.werwolf
 
-import controller.GameController
-import model.Game
+import de.htwg.werwolf.controller.GameController
+import de.htwg.werwolf.model.commands.ExecuteC
+import de.htwg.werwolf.model.commands.CommandInterface
+import de.htwg.werwolf.model.Game
 import de.htwg.werwolf.view.*
 import de.htwg.werwolf.util.*
 import de.htwg.werwolf.narrator.*
@@ -15,6 +17,7 @@ import de.htwg.werwolf.model.roleUtils.PlayerInitializer
       os.pwd / "src" / "main" / "resources" / "narrator.json"
     )
   given PlayerInterface = new PlayerInitializer
+  given CommandInterface = new ExecuteC()
 
   // 1. Controller erzeugen
   val controller = GameController(Game())
