@@ -6,15 +6,15 @@ import model.Game
 import de.htwg.werwolf.view.*
 import de.htwg.werwolf.util.*
 import de.htwg.werwolf.narrator.*
-import de.htwg.werwolf.model.RoleUtils.PlayerInitializer
-import de.htwg.werwolf.model.RoleUtils.RoleAdminstration
+import de.htwg.werwolf.model.roleUtils.PlayerInterface
+import de.htwg.werwolf.model.roleUtils.PlayerInitializer
 @main def Main(): Unit =
 
   given Narrator =
     new JsonNarrator(
       os.pwd / "src" / "main" / "resources" / "narrator.json"
     )
-  given PlayerInitializer = new RoleAdminstration
+  given PlayerInterface = new PlayerInitializer
 
   // 1. Controller erzeugen
   val controller = GameController(Game())

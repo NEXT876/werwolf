@@ -2,10 +2,11 @@
 package de.htwg.werwolf.model
 
 import de.htwg.werwolf.util.Subject
-
+import de.htwg.werwolf.model.Command
 //import scala.collection.immutable.Vector
 import scala.util.{Try, Success, Failure}
 import scala.util.Random
+import de.htwg.werwolf.model.roleUtils.{Amor, Player, Terrorist, Villager, Werwolf, Witch}
 
 enum Phase:
   case Night, Day
@@ -23,25 +24,6 @@ enum Faction:
   override def toString(): String = this match
     case Faction._Werwolf  => "Werwölfe"
     case Faction._Villager => "Villager"
-
-
-enum Roles:
-  case werwolf, villager, terrorist, witch, amor
-  def toPlayer(name: String): Player = this match
-    case Roles.werwolf   => Werwolf(name)
-    case Roles.villager  => Villager(name)
-    case Roles.terrorist => Terrorist(name)
-    case Roles.witch     => Witch(name)
-    case Roles.amor      => Amor(name)
-
-  override def toString(): String = this match
-    case Roles.werwolf   => "Werwolf"
-    case Roles.villager  => "Villager"
-    case Roles.terrorist => "Terrorist"
-    case Roles.witch     => "Witch"
-    case Roles.amor      => "Amor"
-
-case object NothingToUndo extends RuntimeException("Nichts zum Rückgängigmachen!")
 
 case class GameMemento(
   players: Map[String, Player],
@@ -61,27 +43,6 @@ case class Game (
   commandHistory: Vector[GameCommand] = Vector.empty
 )  {
   override def toString(): String = players.values.mkString("\n")+"\n"
-
-
-
-
-//componente execution and save game state
-  def executeCommand(cmd: GameCommand): Game =
-    val updatedGame = cmd.execute(this)
-    updatedGame.copy(commandHistory = commandHistory :+ cmd)
-
-  def undoLast(): Try[Game] = Try {
-    if (commandHistory.isEmpty) Failure(NothingToUndo)
-    val cmd = commandHistory.last
-    val revertedGame = cmd.undo(this)
-    revertedGame.copy(commandHistory = commandHistory.init)
-  }
-
-  def replay(): Unit =
-    println("=== REPLAY ===")
-    commandHistory.reverse.foreach { cmd =>
-      //println(s"• ${cmd.description}")
-    }
 
   def createMemento(): GameMemento =
     GameMemento(

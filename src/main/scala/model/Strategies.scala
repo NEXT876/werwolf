@@ -1,4 +1,6 @@
 package de.htwg.werwolf.model
+import de.htwg.werwolf.model.roleUtils.Player
+import de.htwg.werwolf.model.Command.KillCommand
 
 trait NightActionStrategy {
   def performAction(player: Player, game: Game): Game

@@ -1,8 +1,8 @@
-package de.htwg.werwolf.model.RoleUtils
+package de.htwg.werwolf.model.roleUtils
 import scala.util.Random
 import de.htwg.werwolf.model.*
-//componente Rollen verwaltung
-class RoleAdminstration extends PlayerInitializer {
+
+class PlayerInitializer extends PlayerInterface {
     def addRoles(playerNames: Vector[String], game: Game): Game =
         val roles = getRoles(playerNames.size)
 

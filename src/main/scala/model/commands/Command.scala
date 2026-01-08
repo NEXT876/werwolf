@@ -1,4 +1,6 @@
-package de.htwg.werwolf.model
+package de.htwg.werwolf.model.command
+import de.htwg.werwolf.model.Game
+import de.htwg.werwolf.model.Faction
 
 trait GameCommand {
   def description: String
