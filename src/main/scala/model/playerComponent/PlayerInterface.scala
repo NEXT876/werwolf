@@ -1,4 +1,6 @@
-package de.htwg.werwolf.model.roleUtils
+// de.htwg.werwolf.model.roleUtils.PlayerInterface.scala
+package de.htwg.werwolf.model.playerComponent
+
 import de.htwg.werwolf.model.Game
 
 enum Roles:

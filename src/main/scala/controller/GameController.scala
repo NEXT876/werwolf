@@ -1,19 +1,23 @@
 // src/main/scala/controller/GameController.scala
 package de.htwg.werwolf.controller
 
-import de.htwg.werwolf.model.*
-import de.htwg.werwolf.model.commands.CommandInterface
-import de.htwg.werwolf.narrator.Narrator
 import de.htwg.werwolf.util.Subject
+import de.htwg.werwolf.model.playerComponent.{PlayerInterface, Roles}
+import de.htwg.werwolf.model.commandComponent.{CommandInterface, GameCommand, GameEndCommand}
+import de.htwg.werwolf.model.narratorComponent.NarratorInterface
+import de.htwg.werwolf.model.{GameEvent, Game}
+import de.htwg.werwolf.model.commandComponent.GameMemento
+import de.htwg.werwolf.model.phaseComponent.Phase
+import de.htwg.werwolf.model.phaseComponent.PhaseComponentInterface
+
 import scala.util.{Try, Success, Failure}
 import scala.util.Random
-import de.htwg.werwolf.model.roleUtils.PlayerInterface
-import de.htwg.werwolf.model.commands.{GameCommand, GameEndCommand}
 
 class GameController(private var _game: Game)(using
-    narrator: Narrator,
+    narrator: NarratorInterface,
     roleAd: PlayerInterface,
-    ci: CommandInterface
+    ci: CommandInterface,
+    pc: PhaseComponentInterface
 ) extends Subject[GameEvent] {
   private var savedMemento: Option[GameMemento] = None
   def game: Game = _game
@@ -22,11 +26,11 @@ class GameController(private var _game: Game)(using
     game
 
   def saveGameState(): Unit =
-    savedMemento = Some(game.createMemento())
+    savedMemento = Some(ci.createMemento(game))
 
   def undoFull(): Unit = savedMemento match
     case Some(memento) =>
-      val restoredGame = game.restoreFromMemento(memento)
+      val restoredGame = ci.restoreFromMemento(memento, game)
       updateGame(restoredGame)
       notifyObservers(GameEvent.printText("↶ Vollständiges Undo – alles zurückgesetzt!", 70))
     case None =>
@@ -52,8 +56,8 @@ class GameController(private var _game: Game)(using
   def countAlivePlayer(): (Int, Int) =
     val alivePlayers = game.players.values.filter(_.isAlive)
     (
-      alivePlayers.count(_.role == roleUtils.Roles.werwolf),
-      alivePlayers.count(_.role != roleUtils.Roles.werwolf)
+      alivePlayers.count(_.role == Roles.werwolf),
+      alivePlayers.count(_.role != Roles.werwolf)
     )
 
   def addRoles(names: Vector[String]): Unit =
@@ -72,14 +76,14 @@ class GameController(private var _game: Game)(using
             )
           )
           notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
-          updateGame(game.runNightPhase())
+          updateGame(pc.runNightPhase(game))
           notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
         case Phase.Day =>
           notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
-          updateGame(game.runNightPhase())
+          updateGame(pc.runNightPhase(game))
           notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
       }
-      notifyObservers(GameEvent.switchPhase(game.switchPhase().phase.toString()))
+      notifyObservers(GameEvent.switchPhase(pc.switchPhase(game).phase.toString()))
 
       game.checkWinCondition(game.players) match {
         case Some(winningFaction) =>

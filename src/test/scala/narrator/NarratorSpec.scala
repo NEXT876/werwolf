@@ -3,6 +3,7 @@ package de.htwg.werwolf.narrator
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import upickle.default.*
+import de.htwg.werwolf.model.narrator.{Night, Root}
 
 class NarratorModelSpec extends AnyWordSpec with Matchers {
 

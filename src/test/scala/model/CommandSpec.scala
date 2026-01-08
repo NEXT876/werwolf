@@ -2,6 +2,7 @@ package de.htwg.werwolf.model
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import de.htwg.werwolf.strategies.NightActionStrategy
 
 class CommandSpec extends AnyWordSpec with Matchers {
 

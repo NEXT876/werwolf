@@ -1,23 +1,24 @@
 // Datei: src/main/scala/de/htwg/werwolf/Main.scala
 package de.htwg.werwolf
 
+import de.htwg.werwolf.view.{GUI, TUI}
+import de.htwg.werwolf.util.Subject
 import de.htwg.werwolf.controller.GameController
-import de.htwg.werwolf.model.commands.ExecuteC
-import de.htwg.werwolf.model.commands.CommandInterface
 import de.htwg.werwolf.model.Game
-import de.htwg.werwolf.view.*
-import de.htwg.werwolf.util.*
-import de.htwg.werwolf.narrator.*
-import de.htwg.werwolf.model.roleUtils.PlayerInterface
-import de.htwg.werwolf.model.roleUtils.PlayerInitializer
+import model.phaseComponent.{PhaseComponentInterface, PhaseComponent}
+import model.playerComponent.{PlayerInterface, PlayerInitializer}
+import model.commandComponent.{CommandInterface, ExecuteC}
+import model.narratorComponent.{NarratorInterface, JsonNarrator}
+
 @main def Main(): Unit =
 
-  given Narrator =
+  given NarratorInterface =
     new JsonNarrator(
       os.pwd / "src" / "main" / "resources" / "narrator.json"
     )
   given PlayerInterface = new PlayerInitializer
-  given CommandInterface = new ExecuteC()
+  given CommandInterface = new ExecuteC
+  given PhaseComponentInterface = new PhaseComponent
 
   // 1. Controller erzeugen
   val controller = GameController(Game())

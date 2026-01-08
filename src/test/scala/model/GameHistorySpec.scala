@@ -1,3 +1,4 @@
+import de.htwg.werwolf.model.voting.Votes
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.werwolf.model.*

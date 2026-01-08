@@ -45,6 +45,7 @@ class TUI(controller : GameController) extends Observer[GameEvent] {
     case _ =>
 
   def start(): Unit = 
+    Thread.sleep(1000)
     clearScreen()
     tiping("Willkommen zu Werwolf", 100)
     showLogo()

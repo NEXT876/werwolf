@@ -3,6 +3,7 @@ package de.htwg.werwolf
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 import de.htwg.werwolf.model.*
+import de.htwg.werwolf.strategies.NightActionStrategy
 
 object DummyNightAction extends NightActionStrategy:
   def performAction(player: Player, game: Game): Game = (game)

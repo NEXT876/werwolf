@@ -1,11 +1,10 @@
-package de.htwg.werwolf.narrator
-
-import de.htwg.werwolf.narrator.*
+// src/main/scala/model/narrator/JsonNarrator.scala
+package de.htwg.werwolf.model.narratorComponent
 
 import scala.util.Random
 import upickle.default.*
 
-class JsonNarrator(path: os.Path) extends Narrator {
+class JsonNarrator(path: os.Path) extends NarratorInterface {
   private val root = read[Root](os.read(path))
 
   def randomNarratorText(role: String): String = {

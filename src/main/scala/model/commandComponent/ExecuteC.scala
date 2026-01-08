@@ -1,11 +1,12 @@
-package de.htwg.werwolf.model.commands
+// src/main/scala/model/commands/ExecuteC.scala
+package de.htwg.werwolf.model.commandComponent
+
 import de.htwg.werwolf.model.Game
 import scala.util.{Try, Success, Failure}
 
 case object NothingToUndo extends RuntimeException("Nichts zum Rückgängigmachen!")
 
 case class ExecuteC() extends CommandInterface {
-//componente execution and save game state
   def executeCommand(cmd: GameCommand, game : Game): Game =
     val updatedGame = cmd.execute(game)
     updatedGame.copy(commandHistory = updatedGame.commandHistory :+ cmd)
@@ -22,4 +23,25 @@ case class ExecuteC() extends CommandInterface {
     game.commandHistory.reverse.foreach { cmd =>
       //println(s"• ${cmd.description}")
     }
+
+  def createMemento(game : Game): GameMemento =
+    GameMemento(
+      players = game.players,
+      phase = game.phase ,
+      day = game.day ,
+      votes = game.votes ,
+      isRunning = game.isRunning,
+      commandHistory = game.commandHistory.reverse
+    )
+
+  def restoreFromMemento(m: GameMemento, game : Game): Game =
+      game.copy(
+        players = m.players,
+        phase = m.phase,
+        day = m.day,
+        votes = m.votes,
+        isRunning = m.isRunning,
+        commandHistory = m.commandHistory
+      )
+
 }

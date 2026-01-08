@@ -1,6 +1,9 @@
-package de.htwg.werwolf.model.roleUtils
+// de.htwg.werwolf.model.roleUtils.PlayerInitializer.scala
+package de.htwg.werwolf.model.playerComponent
+
+import de.htwg.werwolf.model.Game
+
 import scala.util.Random
-import de.htwg.werwolf.model.*
 
 class PlayerInitializer extends PlayerInterface {
     def addRoles(playerNames: Vector[String], game: Game): Game =

@@ -1,12 +1,8 @@
-package de.htwg.werwolf.model.commands
+// src/main/scala/model/commands/Command.scala
+package de.htwg.werwolf.model.commandComponent
+
 import de.htwg.werwolf.model.Game
 import de.htwg.werwolf.model.Faction
-
-trait GameCommand {
-  def description: String
-  def execute(game: Game): Game
-  def undo( game: Game): Game
-}
 
 case class KillCommand(killerName: String, targetName: String) extends GameCommand {
 

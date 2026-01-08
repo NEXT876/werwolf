@@ -1,6 +1,8 @@
-// src/main/scala/model/Roles.scala
-package de.htwg.werwolf.model.roleUtils
+// de.htwg.werwolf.model.roleUtils.PlayerInitializer.scala
+package de.htwg.werwolf.model.playerComponent
+
 import de.htwg.werwolf.model.*
+import de.htwg.werwolf.strategiesComponent.{AmorAction, NightActionStrategy, TerroristAction, VillagerAction, WerwolfAction, WitchAction}
 
 trait Player:
   def name: String

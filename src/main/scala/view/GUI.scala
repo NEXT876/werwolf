@@ -46,7 +46,6 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
 
   override def start(): Unit = 
 
-    println("[GUI] JavaFX Thread gestartet – Fenster wird jetzt gebaut...")
     // --- Helper: Box mit Rahmen, Schatten & Hover-Effekt ---
     def box(label: String, w: Double = 150, h: Double = 60): VBox = {
       val b = new VBox {

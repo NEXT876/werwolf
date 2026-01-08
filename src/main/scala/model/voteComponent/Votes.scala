@@ -1,7 +1,7 @@
 // src/main/scala/model/Votes.scala
-package de.htwg.werwolf.model
+package de.htwg.werwolf.model.voteComponent
 
-case class Votes(votes: Map[String, Int] = Map.empty):
+case class Votes(votes: Map[String, Int] = Map.empty) extends votesInterface:
 
   def addVote(player: String): Votes =
     val current = votes.getOrElse(player, 0)

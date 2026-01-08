@@ -1,3 +1,4 @@
+import de.htwg.werwolf.strategies.{AmorAction, NightActionStrategy, NoAction, TerroristAction, VillagerAction, WerwolfAction, WitchAction}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.werwolf.model._

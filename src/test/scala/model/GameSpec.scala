@@ -1,7 +1,7 @@
 // src/test/scala/de/htwg/werwolf/model/GameSpec.scala
 package de.htwg.werwolf.model
 
-import de.htwg.werwolf.narrator.*
+import de.htwg.werwolf.model.narrator.*
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.BeforeAndAfter
