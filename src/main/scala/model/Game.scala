@@ -71,15 +71,15 @@ case class Game (
     val newDay = day + 1
     copy(phase = newPhase, day = newDay, votes = Votes())
 
-  def runNightPhase(): Game =
+  def runNightPhase()(using ci: CommandInterface): Game =
     val updatedGame = players.foldLeft(this) { case (g, (name, player)) =>
-      player.nightAction.performAction(player, g)(using ci: CommandInterface)
+      player.nightAction.performAction(player, g)
     }
     updatedGame
 
-  def runDayPhase(): Game =
+  def runDayPhase()(using ci: CommandInterface): Game =
      val updatedGame = players.foldLeft(this) { case (g, (name, player)) =>
-      player.nightAction.performAction(player, g)(using ci: CommandInterface)
+      player.nightAction.performAction(player, g)
     }
       updatedGame
 

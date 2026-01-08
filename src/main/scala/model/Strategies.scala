@@ -23,35 +23,35 @@ case object WerwolfAction extends NightActionStrategy {
 }
 
 case object WitchAction extends NightActionStrategy {
-  def performAction(player: Player, game: Game): Game = {
+  def performAction(player: Player, game: Game)(using ci: CommandInterface): Game = {
     println(s"${player.name} (Hexe) darf heilen oder vergiften...")
     game
   }
 }
 
 case object TerroristAction extends NightActionStrategy {
-  def performAction(player: Player, game: Game): Game = {
+  def performAction(player: Player, game: Game)(using ci: CommandInterface): Game = {
     println(s"${player.name} (Terorist) darf jetzt explodieren...")
     game
   }
 }
 
 case object AmorAction extends NightActionStrategy {
-  def performAction(player: Player, game: Game): Game = {
+  def performAction(player: Player, game: Game)(using ci: CommandInterface): Game = {
     println(s"${player.name} (Amor) darf jetzt verlieben...")
     game
   }
 }
 
 case object VillagerAction extends NightActionStrategy {
-  def performAction(player: Player, game: Game): Game = {
+  def performAction(player: Player, game: Game)(using ci: CommandInterface): Game = {
     println(s"${player.name} (Villager) darf jetzt leben...")
     game
   }
 }
 
 case object NoAction extends NightActionStrategy {
-  def performAction(player: Player, game: Game): Game = {
+  def performAction(player: Player, game: Game)(using ci: CommandInterface): Game = {
     println(s"${player.name} hat heute Nacht nichts zu tun.")
     game
   }
