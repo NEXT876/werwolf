@@ -4,11 +4,13 @@ package de.htwg.werwolf.controller
 import de.htwg.werwolf.model.*
 import de.htwg.werwolf.narrator.Narrator
 import de.htwg.werwolf.util.Subject
+import de.htwg.werwolf.model.RoleUtils.PlayerInitializer
 
 import scala.util.{Try, Success, Failure}
 import scala.util.Random
 
-class GameController(private var _game: Game)(using narrator : Narrator) extends Subject[GameEvent] {
+class GameController(private var _game: Game)(using narrator: Narrator, roleAd: PlayerInitializer)
+    extends Subject[GameEvent] {
   private var savedMemento: Option[GameMemento] = None
   def game: Game = _game
   def updateGame(newGame: Game): Game =
@@ -43,7 +45,7 @@ class GameController(private var _game: Game)(using narrator : Narrator) extends
         game
     }
 
-  def countAlivePlayer(): (Int,Int) =
+  def countAlivePlayer(): (Int, Int) =
     val alivePlayers = game.players.values.filter(_.isAlive)
     (
       alivePlayers.count(_.role == Roles.werwolf),
@@ -51,7 +53,7 @@ class GameController(private var _game: Game)(using narrator : Narrator) extends
     )
 
   def addRoles(names: Vector[String]): Unit =
-    updateGame(game.addRoles(names))
+    updateGame(roleAd.addRoles(names, game))
 
   def runGame(): Unit =
     notifyObservers(GameEvent.InitialthingsDone)

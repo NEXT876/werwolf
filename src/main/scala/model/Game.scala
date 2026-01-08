@@ -66,10 +66,10 @@ case class Game (
 
 
 //componente execution and save game state
-  def executeCommand(cmd: GameCommand): Game = 
+  def executeCommand(cmd: GameCommand): Game =
     val updatedGame = cmd.execute(this)
     updatedGame.copy(commandHistory = commandHistory :+ cmd)
-  
+
   def undoLast(): Try[Game] = Try {
     if (commandHistory.isEmpty) Failure(NothingToUndo)
     val cmd = commandHistory.last
@@ -103,40 +103,6 @@ case class Game (
         commandHistory = m.commandHistory
       )
 
-
-
-//componente Rollen verwaltung
-  def addRoles(playerNames: Vector[String]): Game =
-    val roles = getRoles(playerNames.size)
-
-    val basePlayers: Map[String, Player] = Random
-      .shuffle(playerNames)
-      .zip(roles)
-      .map { case (name, role) =>
-        val player = role.toPlayer(name)
-        name -> player
-      }
-      .toMap
-
-    //decorater
-    val updatedPlayers: Map[String, Player] = basePlayers.collectFirst {
-      case (name, p) if !p.isInstanceOf[Werwolf] =>
-        name -> DoubleVoteDecorator(p)
-    }.fold(basePlayers) { case (name, decoratedPlayer) =>
-      basePlayers.updated(name, decoratedPlayer)
-    }
-
-    copy(players = updatedPlayers)
-
-  def getRoles(playeramount: Int): Vector[Roles] =
-    if playeramount == 2 then Vector(Roles.werwolf, Roles.villager)
-    else
-      Vector.fill(playeramount / 3)(Roles.werwolf) ++ Random.shuffle(
-        Vector(Roles.villager, Roles.witch, Roles.amor, Roles.terrorist)
-      )
-
-
-
 //componente Util
   def switchPhase(): Game =
     createMemento()
@@ -144,18 +110,18 @@ case class Game (
     val newDay = day + 1
     copy(phase = newPhase, day = newDay, votes = Votes())
 
-  def runNightPhase(): Game = 
+  def runNightPhase(): Game =
     val updatedGame = players.foldLeft(this) { case (g, (name, player)) =>
       player.nightAction.performAction(player, g)
     }
     updatedGame
-  
-  def runDayPhase(): Game = 
+
+  def runDayPhase(): Game =
      val updatedGame = players.foldLeft(this) { case (g, (name, player)) =>
       player.nightAction.performAction(player, g)
     }
       updatedGame
-  
+
   def checkWinCondition(players: Map[String, Player]): Option[Faction] =
     val winners =
       Faction.values.filter(_.winCondition(players))
