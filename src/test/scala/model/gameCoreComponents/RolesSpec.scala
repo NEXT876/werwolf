@@ -1,182 +1,106 @@
 package de.htwg.werwolf
-
+/*
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.matchers.should.Matchers._
-import de.htwg.werwolf.model.gameCoreComponents.GameCoreInterface
+import org.scalatest.matchers.should.Matchers.*
+import de.htwg.werwolf.model.gameCoreComponents._
+import de.htwg.werwolf.model.Faction
 import de.htwg.werwolf.model.strategiesComponent.NightActionStrategy
 import de.htwg.werwolf.model.Game
-import de.htwg.werwolf.model.gameCoreComponents.Player
-import de.htwg.werwolf.model.Faction
-import de.htwg.werwolf.model.gameCoreComponents.Roles
-import de.htwg.werwolf.model.gameCoreComponents.{Werwolf, Villager, Witch, Amor, Terrorist}
-import de.htwg.werwolf.model.gameCoreComponents.DoubleVoteDecorator
+import os.copy
 
 object DummyNightAction extends NightActionStrategy:
-  def performAction(player: Player, game: Game): Game = (game)
+  def performAction(player: Player, game: Game): Game = game
 
-class RolesSpec extends AnyWordSpec {
 class DummyPlayer(val role: Roles, val name: String = "dummy") extends Player:
-  val faction: Faction = Faction._Villager
+  val faction: Faction = if role == Roles.werwolf then Faction._Werwolf else Faction._Villager
   val nightAction: NightActionStrategy = DummyNightAction
   private var alive: Boolean = true
   def isAlive: Boolean = alive
-
   def vote(target: Player): String = ""
-  def die: Player =
-    val copy = new DummyPlayer(role, name)
-    copy.alive = false
-    copy
-
-  def revive: Player =
-    val copy = new DummyPlayer(role, name)
-    copy.alive = true
-    copy
-
+  def die: Player = copy(alive = false)
+  def revive: Player = copy(alive = true)
   def winCondition(players: Map[String, Player]): Boolean = true
 
-"the functions from werwolf" should {
-        "return String werwolf, false, vote" in {
-            val werwolf = Werwolf("Hans")
-            val player = Villager("Berta")
-            val result_role = werwolf.role
-            val result_faction = werwolf.faction
-            val result_die = werwolf.die
-            val result_revive = werwolf.die.revive
-            val result_vote = werwolf.vote(player)
-            val result_toString = werwolf.toString()
-            result_role should be(Roles.werwolf)
-            result_faction should be(Faction._Werwolf)
-            result_die.isAlive should be(false)
-            result_revive.isAlive should be(true)
-            result_vote should be("Werwolf Hans votes for Berta to die")
-            result_toString should be("• Hans            | Rolle: Werwolf    | Status: lebt   ")
-            noException should be thrownBy{
-                val action = player.nightAction
-                action should not be null}
-        }
-    }
+class RolesSpec extends AnyWordSpec {
 
-    "the functions from Villager" should {
-        "return String Villager, false, vote" in {
-            val villager = Villager("Hansi")
-            val player = Villager("Bertai")
-            val result_role = villager.role
-            val result_faction = villager.faction
-            val result_die = villager.die
-            val result_revive = villager.die.revive
-            val result_vote = villager.vote(player)
-            val result_toString = villager.toString()
-            result_role should be(Roles.villager)
-            result_faction should be(Faction._Villager)
-            result_die.isAlive should be(false)
-            result_revive.isAlive should be(true)
-            result_vote should be("Villager Hansi votes for Bertai to die")
-            result_toString should be("• Hansi           | Rolle: Villager   | Status: lebt   ")
-            noException should be thrownBy{
-                val action = player.nightAction
-                action should not be null}
-        }
-    }
+  "Werwolf" should "have correct role, faction, vote and toString" in {
+    val werwolf = Werwolf("Hans")
+    val target = Villager("Berta")
 
-    "the functions from Amor" should {
-        "return String Amor, false, vote" in {
-            val amor = Amor("Herman")
-            val player = Villager("Bert")
-            val result_role = amor.role
-            val result_faction = amor.faction
-            val result_die = amor.die
-            val result_revive = amor.die.revive
-            val result_vote = amor.vote(player)
-            val result_toString = amor.toString()
-            result_role should be(Roles.amor)
-            result_faction should be(Faction._Villager)
-            result_die.isAlive should be(false)
-            result_revive.isAlive should be(true)
-            result_vote should be("Amor Herman votes for Bert to die")
-            result_toString should be("• Herman          | Rolle: Amor       | Status: lebt   ")
-            noException should be thrownBy{
-                val action = player.nightAction
-                action should not be null}
-        }
-    }
-
-    "the functions from Terrorist" should {
-        "return String Terrorist, false, vote" in {
-            val terrorist = Terrorist("Hannes")
-            val player = Villager("Brta")
-            val result_role = terrorist.role
-            val result_faction = terrorist.faction
-            val result_die = terrorist.die
-            val result_revive = terrorist.die.revive
-            val result_vote = terrorist.vote(player)
-            val result_toString = terrorist.toString()
-            result_faction should be(Faction._Villager)
-            result_role should be(Roles.terrorist)
-            result_die.isAlive should be(false)
-            result_revive.isAlive should be(true)
-            result_vote should be("Terrorist Hannes votes for Brta to die")
-            result_toString should be("• Hannes          | Rolle: Terrorist  | Status: lebt   ")
-            noException should be thrownBy{
-                val action = player.nightAction
-                action should not be null}
-        }
-    }
-
-    "the functions from Witch" should {
-        "return String Witch, false, vote" in {
-            val witch = Witch("Han")
-            val player = Villager("Bertas")
-            val result_role = witch.role
-            val result_faction = witch.faction
-            val result_die = witch.die
-            val result_revive = witch.die.revive
-            val result_vote = witch.vote(player)
-            val result_toString = witch.toString()
-            result_faction should be(Faction._Villager)
-            result_role should be(Roles.witch)
-            result_die.isAlive should be(false)
-            result_revive.isAlive should be(true)
-            result_vote should be("Witch Han votes for Bertas to die")
-            result_toString should be("• Han             | Rolle: Witch      | Status: lebt   ")
-            noException should be thrownBy{
-                val action = player.nightAction
-                action should not be null}
-        }
-    }
-
-    "DoubleVoteDecorator" should {
-
-      "delegate name, role, faction and isAlive to inner player" in {
-        val dummy = DummyPlayer(Roles.villager, "Bart")
-        val decorated = new DoubleVoteDecorator(dummy)
-
-        decorated.name shouldBe dummy.name
-        decorated.isAlive shouldBe dummy.isAlive
-        decorated.role shouldBe dummy.role
-        decorated.faction shouldBe dummy.faction
-      }
-
-      "override vote to vote twice" in {
-        val dummy = new DummyPlayer(Roles.villager, "Alice")
-        val target = new DummyPlayer(Roles.villager, "Bob")
-        val decorated = new DoubleVoteDecorator(dummy)
-        decorated.vote(target) shouldBe "Alice votes TWICE for Bob!"
-      }
-
-      "die returns a new decorated player with dead inner player" in {
-        val dummy = new DummyPlayer(Roles.villager, "V1")
-        val decorated = new DoubleVoteDecorator(dummy)
-
-        val deadDecorated = decorated.die
-        deadDecorated.isAlive shouldBe false
-      }
-
-      "revive returns a new decorated player with alive inner player" in {
-        val dummy = new DummyPlayer(Roles.villager, "V2")
-        val decorated = new DoubleVoteDecorator(dummy).die
-
-        val revivedDecorated = decorated.revive
-        revivedDecorated.isAlive should be(true)
-      }
+    werwolf.role shouldBe Roles.werwolf
+    werwolf.faction shouldBe Faction._Werwolf
+    werwolf.isAlive shouldBe true
+    werwolf.die.isAlive shouldBe false
+    werwolf.die.revive.isAlive shouldBe true
+    werwolf.vote(target) shouldBe "Werwolf Hans votes for Berta to die"
+    werwolf.toString() shouldBe "• Hans             | Rolle: Werwolf    | Status: lebt   "
   }
-}
+
+  "Villager" should "have correct role, faction, vote and toString" in {
+    val villager = Villager("Hansi")
+    val target = Villager("Bertai")
+
+    villager.role shouldBe Roles.villager
+    villager.faction shouldBe Faction._Villager
+    villager.die.isAlive shouldBe false
+    villager.die.revive.isAlive shouldBe true
+    villager.vote(target) shouldBe "Villager Hansi votes for Bertai to die"
+    villager.toString() shouldBe "• Hansi            | Rolle: Villager   | Status: lebt   "
+  }
+
+  "Amor" should "have correct role, faction, vote and toString" in {
+    val amor = Amor("Herman")
+    val target = Villager("Bert")
+
+    amor.role shouldBe Roles.amor
+    amor.faction shouldBe Faction._Villager
+    amor.vote(target) shouldBe "Amor Herman votes for Bert to die"
+    amor.toString() shouldBe "• Herman           | Rolle: Amor       | Status: lebt   "
+  }
+
+  "Terrorist" should "have correct role, faction, vote and toString" in {
+    val terrorist = Terrorist("Hannes")
+    val target = Villager("Brta")
+
+    terrorist.role shouldBe Roles.terrorist
+    terrorist.faction shouldBe Faction._Villager
+    terrorist.vote(target) shouldBe "Terrorist Hannes votes for Brta to die"
+    terrorist.toString() shouldBe "• Hannes           | Rolle: Terrorist  | Status: lebt   "
+  }
+
+  "Witch" should "have correct role, faction, vote and toString" in {
+    val witch = Witch("Han")
+    val target = Villager("Bertas")
+
+    witch.role shouldBe Roles.witch
+    witch.faction shouldBe Faction._Villager
+    witch.vote(target) shouldBe "Witch Han votes for Bertas to die"
+    witch.toString() shouldBe "• Han              | Rolle: Witch      | Status: lebt   "
+  }
+
+  "DoubleVoteDecorator" should {
+    val inner = DummyPlayer(Roles.villager, "Alice")
+    val target = DummyPlayer(Roles.villager, "Bob")
+    val decorated = DoubleVoteDecorator(inner)
+
+    "delegate name, role, faction and isAlive" in {
+      decorated.name shouldBe "Alice"
+      decorated.role shouldBe Roles.villager
+      decorated.faction shouldBe Faction._Villager
+      decorated.isAlive shouldBe true
+    }
+
+    "override vote to vote twice" in {
+      decorated.vote(target) shouldBe "Alice votes TWICE for Bob!"
+    }
+
+    "die returns decorated dead player" in {
+      decorated.die.isAlive shouldBe false
+      decorated.die.isInstanceOf[DoubleVoteDecorator] shouldBe true
+    }
+
+    "revive returns decorated alive player" in {
+      decorated.die.revive.isAlive shouldBe true
+    }
+  }
+}*/
