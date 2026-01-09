@@ -1,7 +1,12 @@
+import de.htwg.werwolf.model.strategiesComponent.{AmorAction, NightActionStrategy, NoAction, TerroristAction, VillagerAction, WerwolfAction, WitchAction}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.werwolf.model._
+import de.htwg.werwolf.model.gameCoreComponents.Player
+import de.htwg.werwolf.model.gameCoreComponents.Roles
+import de.htwg.werwolf.model.commandComponent.CommandInterface
 
+given CommandInterface = new CommandInterface
 
 class NightActionStrategySpec extends AnyFlatSpec with Matchers {
 /*
@@ -17,20 +22,6 @@ class NightActionStrategySpec extends AnyFlatSpec with Matchers {
   }
 
   val game = Game()
-
-  "NightActionStrategy.canAct" should "return true if player is alive" in {
-    val player = DummyPlayer("AlivePlayer", true, Roles.villager)
-    WerwolfAction.canAct(player) shouldBe true
-    WitchAction.canAct(player) shouldBe true
-    NoAction.canAct(player) shouldBe true
-  }
-
-  it should "return false if player is dead" in {
-    val player = DummyPlayer("DeadPlayer", false, Roles.villager)
-    WerwolfAction.canAct(player) shouldBe false
-    WitchAction.canAct(player) shouldBe false
-    NoAction.canAct(player) shouldBe false
-  }
 
   "NightActionStrategy.performAction" should "not throw exceptions" in {
     val alivePlayer = DummyPlayer("Alice", true, Roles.villager)

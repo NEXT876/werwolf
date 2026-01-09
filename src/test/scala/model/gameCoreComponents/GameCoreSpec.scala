@@ -4,6 +4,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 import de.htwg.werwolf.model.gameCoreComponents.Votes
 import de.htwg.werwolf.model.Game
+
 class VotesSpec extends AnyWordSpec {
   "the function addVote" should {
     "return the new votes Map" in {
