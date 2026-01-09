@@ -1,4 +1,4 @@
-package de.htwg.werwolf.model
+package de.htwg.werwolf.model.commandComponent
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers

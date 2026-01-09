@@ -2,8 +2,14 @@ package de.htwg.werwolf
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
-import de.htwg.werwolf.model.*
-import de.htwg.werwolf.strategies.NightActionStrategy
+import de.htwg.werwolf.model.gameCoreComponents.GameCoreInterface
+import de.htwg.werwolf.model.strategiesComponent.NightActionStrategy
+import de.htwg.werwolf.model.Game
+import de.htwg.werwolf.model.gameCoreComponents.Player
+import de.htwg.werwolf.model.Faction
+import de.htwg.werwolf.model.gameCoreComponents.Roles
+import de.htwg.werwolf.model.gameCoreComponents.{Werwolf, Villager, Witch, Amor, Terrorist}
+import de.htwg.werwolf.model.gameCoreComponents.DoubleVoteDecorator
 
 object DummyNightAction extends NightActionStrategy:
   def performAction(player: Player, game: Game): Game = (game)
