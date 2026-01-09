@@ -1,4 +1,4 @@
-// src/main/scala/de/htwg/werwolf/model/commands/GameMemento
+// src/main/scala/de/htwg/werwolf/model/commandComponent/GameMemento
 package de.htwg.werwolf.model.commandComponent
 
 import de.htwg.werwolf.model.gameCoreComponents.{Player, Phase, Votes}

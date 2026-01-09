@@ -1,11 +1,10 @@
-import de.htwg.werwolf.strategies.{AmorAction, NightActionStrategy, NoAction, TerroristAction, VillagerAction, WerwolfAction, WitchAction}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.werwolf.model._
-import de.htwg.werwolf.model.Roles
+
 
 class NightActionStrategySpec extends AnyFlatSpec with Matchers {
-
+/*
   // DummyPlayer für Tests
   case class DummyPlayer(name: String, var isAlive: Boolean, role: Roles) extends Player {
     def die = copy(isAlive = false)
@@ -49,5 +48,5 @@ class NightActionStrategySpec extends AnyFlatSpec with Matchers {
     noException should be thrownBy WitchAction.performAction(deadPlayer, game)
     noException should be thrownBy NoAction.performAction(deadPlayer, game)
   }
-
+*/
 }

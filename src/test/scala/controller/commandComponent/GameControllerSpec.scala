@@ -15,6 +15,8 @@ import de.htwg.werwolf.model.gameCoreComponents.GameCoreInterface
 import de.htwg.werwolf.model.gameCoreComponents.Villager
 import de.htwg.werwolf.model.gameCoreComponents.Werwolf
 import de.htwg.werwolf.model.gameCoreComponents.Phase
+import de.htwg.werwolf.controller.gameControllerComponent.GameController
+import de.htwg.werwolf.controller.gameControllerComponent.GameCommand
 
 class GameControllerSpec extends AnyWordSpec with Matchers {
 
