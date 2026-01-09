@@ -4,7 +4,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.werwolf.model.Faction
 import de.htwg.werwolf.model.Game
-import de.htwg.werwolf.model.gameCoreComponents.Roles
+import de.htwg.werwolf.model.Roles
 import de.htwg.werwolf.model.strategiesComponent.NightActionStrategy
 import de.htwg.werwolf.model.gameCoreComponents.Player
 import de.htwg.werwolf.controller.gameControllerComponent.KillCommand

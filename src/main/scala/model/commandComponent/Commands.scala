@@ -4,7 +4,8 @@ package de.htwg.werwolf.model.commandComponent
 import de.htwg.werwolf.model.Game
 import scala.util.{Try, Success, Failure}
 import de.htwg.werwolf.controller.gameControllerComponent.GameCommand
-import de.htwg.werwolf.model.gameCoreComponents.{Votes, VotesInterface}
+import de.htwg.werwolf.model.gameCoreComponents.Votes
+import de.htwg.werwolf.model.CommandInterface
 
 case object NothingToUndo extends RuntimeException("Nichts zum Rückgängigmachen!")
 

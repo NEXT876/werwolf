@@ -19,7 +19,7 @@ import scala.compiletime.uninitialized
 
 import de.htwg.werwolf.util.*
 import de.htwg.werwolf.model.GameEvent
-import de.htwg.werwolf.controller.gameControllerComponent.*
+import de.htwg.werwolf.controller.*
 import scalafx.beans.property.StringProperty
 import scalafx.application.Platform
 
@@ -31,8 +31,9 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
   private val FactionAmountText = StringProperty("Werwolf : \n Villager : ")
   private val SpecialInformationText = StringProperty("No Special Informations")
 
-  def init(c: GameControllerInterface): Unit =
+  def init()(using c : GameControllerInterface): Unit =
     controller = c
+    controller.addObserver(this)
 
   override def update(event: GameEvent): Unit =
     event match

@@ -1,9 +1,10 @@
 // src/main/scala/model/commands/CommandInterface.scala
-package de.htwg.werwolf.model.commandComponent
+package de.htwg.werwolf.model
 
 import de.htwg.werwolf.model.Game
 import scala.util.{Try, Success, Failure}
 import de.htwg.werwolf.controller.gameControllerComponent.GameCommand
+import de.htwg.werwolf.model.commandComponent.GameMemento
 
 
 trait CommandInterface {

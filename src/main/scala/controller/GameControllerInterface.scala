@@ -1,9 +1,10 @@
-package de.htwg.werwolf.controller.gameControllerComponent
+package de.htwg.werwolf.controller
 
 import de.htwg.werwolf.model.Game
 import de.htwg.werwolf.util.Observer
 import de.htwg.werwolf.model.GameEvent
 import de.htwg.werwolf.util.Subject
+import de.htwg.werwolf.controller.gameControllerComponent.GameCommand
 
 trait GameControllerInterface extends Subject[GameEvent]:
     def saveGameState(): Unit

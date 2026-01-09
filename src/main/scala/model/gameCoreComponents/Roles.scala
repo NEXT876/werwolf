@@ -2,7 +2,9 @@
 package de.htwg.werwolf.model.gameCoreComponents
 
 import de.htwg.werwolf.model.*
-import de.htwg.werwolf.model.strategiesComponent.{AmorAction, NightActionStrategy, TerroristAction, VillagerAction, WerwolfAction, WitchAction}
+import de.htwg.werwolf.model.strategiesComponent.{AmorAction, TerroristAction, VillagerAction, WerwolfAction, WitchAction}
+import de.htwg.werwolf.model.NightActionStrategy
+import de.htwg.werwolf.model.Roles
 
 trait Player:
   def name: String

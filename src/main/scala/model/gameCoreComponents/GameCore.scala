@@ -1,7 +1,9 @@
 package de.htwg.werwolf.model.gameCoreComponents
 
 import de.htwg.werwolf.model.Game
-import de.htwg.werwolf.model.commandComponent.CommandInterface
+import de.htwg.werwolf.model.CommandInterface
+import de.htwg.werwolf.model.{VotesInterface,GameCoreInterface}
+import de.htwg.werwolf.model.{Roles, Phase}
 import scala.util.Random
 
 case class Votes(votes: Map[String, Int] = Map.empty)extends VotesInterface:

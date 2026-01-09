@@ -2,11 +2,12 @@
 package de.htwg.werwolf.controller.gameControllerComponent
 
 import de.htwg.werwolf.util.Subject
-import de.htwg.werwolf.model.commandComponent.{CommandInterface}
-import de.htwg.werwolf.model.narratorComponent.NarratorInterface
+import de.htwg.werwolf.model.CommandInterface
+import de.htwg.werwolf.model.NarratorInterface
 import de.htwg.werwolf.model.{GameEvent, Game}
 import de.htwg.werwolf.model.commandComponent.GameMemento
-import de.htwg.werwolf.model.gameCoreComponents.{GameCoreInterface, Roles, Phase}
+import de.htwg.werwolf.model.{Roles, Phase, GameCoreInterface}
+import de.htwg.werwolf.controller.GameControllerInterface
 
 import scala.util.{Try, Success, Failure}
 import scala.util.Random

@@ -3,7 +3,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.werwolf.model.*
 import de.htwg.werwolf.model.commandComponent.GameMemento
-import de.htwg.werwolf.model.gameCoreComponents.Phase
+import de.htwg.werwolf.model.Phase
 import de.htwg.werwolf.model.gameCoreComponents.Votes
 import de.htwg.werwolf.model.commandComponent.CommandInterface
 import de.htwg.werwolf.model.commandComponent.ExecuteC

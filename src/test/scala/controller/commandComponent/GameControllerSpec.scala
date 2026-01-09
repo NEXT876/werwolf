@@ -6,7 +6,7 @@ import de.htwg.werwolf.util.Observer
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import scala.util.{Success, Failure}
-import de.htwg.werwolf.model.commandComponent.CommandInterface
+import de.htwg.werwolf.model.CommandInterface
 import de.htwg.werwolf.model.narratorComponent.NarratorInterface
 import de.htwg.werwolf.model.narratorComponent.JsonNarrator
 import de.htwg.werwolf.model.commandComponent.ExecuteC

@@ -5,7 +5,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.*
 import de.htwg.werwolf.model._
 import de.htwg.werwolf.model.gameCoreComponents.{Player, Roles, Phase}
-import de.htwg.werwolf.model.commandComponent.{CommandInterface, ExecuteC}
+import de.htwg.werwolf.model.commandComponent.{ExecuteC}
+import de.htwg.werwolf.model.CommandInterface
 
 class NightActionStrategySpec extends AnyFlatSpec {
 

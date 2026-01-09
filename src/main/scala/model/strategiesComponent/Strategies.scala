@@ -2,9 +2,10 @@
 package de.htwg.werwolf.model.strategiesComponent
 
 import de.htwg.werwolf.model.gameCoreComponents.Player
-import de.htwg.werwolf.model.commandComponent.{CommandInterface}
+import de.htwg.werwolf.model.CommandInterface
 import de.htwg.werwolf.controller.gameControllerComponent.KillCommand
 import de.htwg.werwolf.model.Game
+import de.htwg.werwolf.model.NightActionStrategy
 
 case object WerwolfAction extends NightActionStrategy {
   def performAction(player: Player, game: Game)(using ci: CommandInterface): Game = {

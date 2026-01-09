@@ -2,13 +2,13 @@
 package de.htwg.werwolf.view
 
 import de.htwg.werwolf.model.GameEvent
-import de.htwg.werwolf.controller.gameControllerComponent.GameControllerInterface
+import de.htwg.werwolf.controller.GameControllerInterface
 import de.htwg.werwolf.util.Observer
 
 
 import scala.io.StdIn.readLine
 
-class TUI(controller : GameControllerInterface) extends Observer[GameEvent] {
+class TUI()(using controller : GameControllerInterface) extends Observer[GameEvent] {
 
   override def update(event: GameEvent): Unit =
   event match
@@ -46,6 +46,7 @@ class TUI(controller : GameControllerInterface) extends Observer[GameEvent] {
 
   def start(): Unit = 
     Thread.sleep(1000)
+    controller.addObserver(this)
     clearScreen()
     tiping("Willkommen zu Werwolf", 100)
     showLogo()

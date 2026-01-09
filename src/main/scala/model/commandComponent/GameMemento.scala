@@ -1,9 +1,11 @@
 // src/main/scala/de/htwg/werwolf/model/commandComponent/GameMemento
 package de.htwg.werwolf.model.commandComponent
 
-import de.htwg.werwolf.model.gameCoreComponents.{Player, Phase, Votes}
+import de.htwg.werwolf.model.gameCoreComponents.{Player, Votes}
 import de.htwg.werwolf.controller.gameControllerComponent.GameCommand
 import de.htwg.werwolf.model.Game
+import de.htwg.werwolf.model.CommandInterface
+import de.htwg.werwolf.model.Phase
 
 case class GameMemento(
     players: Map[String, Player],

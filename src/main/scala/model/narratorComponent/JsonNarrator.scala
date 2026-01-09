@@ -3,6 +3,7 @@ package de.htwg.werwolf.model.narratorComponent
 
 import scala.util.Random
 import upickle.default.*
+import de.htwg.werwolf.model.NarratorInterface
 
 class JsonNarrator(path: os.Path) extends NarratorInterface {
   private val root = read[Root](os.read(path))

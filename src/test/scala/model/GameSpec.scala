@@ -3,7 +3,7 @@ package de.htwg.werwolf.model
 
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.werwolf.model.gameCoreComponents.{Player, Phase, Votes, Roles}
+import de.htwg.werwolf.model.gameCoreComponents.{Player, Votes}
 
 class GameSpec extends AnyWordSpec {
 
