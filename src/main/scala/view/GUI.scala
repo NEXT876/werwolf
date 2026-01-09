@@ -24,14 +24,14 @@ import scalafx.beans.property.StringProperty
 import scalafx.application.Platform
 
 object GUI extends JFXApp3 with Observer[GameEvent] {
-  var controller: GameController = uninitialized // Controller injizieren
+  var controller: GameControllerInterface = uninitialized // Controller injizieren
 
   private val rollenInfoText = StringProperty("No Player with Roles at the moment")
   private val NightDayCycleText = StringProperty("Nacht")
   private val FactionAmountText = StringProperty("Werwolf : \n Villager : ")
   private val SpecialInformationText = StringProperty("No Special Informations")
 
-  def init(c: GameController): Unit =
+  def init(c: GameControllerInterface): Unit =
     controller = c
 
   override def update(event: GameEvent): Unit =

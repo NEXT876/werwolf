@@ -15,7 +15,7 @@ class GameController(private var _game: Game)(using
     narrator: NarratorInterface,
     ci: CommandInterface,
     GC : GameCoreInterface
-) extends Subject[GameEvent] {
+) extends GameControllerInterface {
   private var savedMemento: Option[GameMemento] = None
   def game: Game = _game
   def updateGame(newGame: Game): Game =

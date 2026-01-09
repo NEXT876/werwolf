@@ -8,6 +8,7 @@ import de.htwg.werwolf.model.Game
 import model.commandComponent.{CommandInterface, ExecuteC}
 import model.narratorComponent.{NarratorInterface, JsonNarrator}
 import model.gameCoreComponents.{GameCoreInterface, GameCore}
+import de.htwg.werwolf.controller.GameControllerInterface
 
 @main def Main(): Unit =
 
@@ -19,17 +20,17 @@ import model.gameCoreComponents.{GameCoreInterface, GameCore}
   given GameCoreInterface = new GameCore
   
   
+  // 1. Controller erzeugen (konkrete Instanz!)
+  val controller: GameControllerInterface = GameController(Game())
 
-  // 1. Controller erzeugen
-  val controller = GameController(Game())
-
-  // 2. TUI erzeugen und als Observer registrieren
+  // 2. TUI erzeugen und registrieren
   val tui = TUI(controller)
   controller.addObserver(tui)
 
-  // 3. GUI initialisieren und als Observer registrieren
+  // 3. GUI initialisieren und registrieren
   GUI.init(controller)
   controller.addObserver(GUI)
+
 
   // 4. TUI parallel starten
   new Thread(() => tui.start()).start()
