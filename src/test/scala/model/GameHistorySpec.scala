@@ -1,7 +1,12 @@
-import de.htwg.werwolf.model.voting.Votes
+
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.werwolf.model.*
+import de.htwg.werwolf.model.commandComponent.GameMemento
+import de.htwg.werwolf.model.phaseComponent.Phase
+import de.htwg.werwolf.model.voteComponent.Votes
+import de.htwg.werwolf.model.gameHistoryComponent.GameHistory
+import de.htwg.werwolf.model.gameHistoryComponent.gameHistoryInterface
 
 class GameHistorySpec extends AnyWordSpec with Matchers {
 
@@ -46,6 +51,8 @@ class GameHistorySpec extends AnyWordSpec with Matchers {
     }
 
     "undo pops the last memento and restores the game" in {
+      given gameHistoryInterface = GameHistory
+      
       val hist = new GameHistory
       val game = new TestGame
 

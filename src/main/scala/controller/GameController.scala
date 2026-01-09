@@ -2,22 +2,19 @@
 package de.htwg.werwolf.controller
 
 import de.htwg.werwolf.util.Subject
-import de.htwg.werwolf.model.playerComponent.{PlayerInterface, Roles}
-import de.htwg.werwolf.model.commandComponent.{CommandInterface, GameCommand, GameEndCommand}
+import de.htwg.werwolf.model.commandComponent.{CommandInterface}
 import de.htwg.werwolf.model.narratorComponent.NarratorInterface
 import de.htwg.werwolf.model.{GameEvent, Game}
 import de.htwg.werwolf.model.commandComponent.GameMemento
-import de.htwg.werwolf.model.phaseComponent.Phase
-import de.htwg.werwolf.model.phaseComponent.PhaseComponentInterface
+import de.htwg.werwolf.model.gameCoreComponents.{GameCoreInterface, Roles, Phase}
 
 import scala.util.{Try, Success, Failure}
 import scala.util.Random
 
 class GameController(private var _game: Game)(using
     narrator: NarratorInterface,
-    roleAd: PlayerInterface,
     ci: CommandInterface,
-    pc: PhaseComponentInterface
+    GC : GameCoreInterface
 ) extends Subject[GameEvent] {
   private var savedMemento: Option[GameMemento] = None
   def game: Game = _game
@@ -38,7 +35,7 @@ class GameController(private var _game: Game)(using
         GameEvent.printText("Kein gespeicherter Spielstand zum Wiederherstellen.", 70)
       )
 
-  def executeCommand(cmd: GameCommand): Game =
+  def executeCommand(cmd: GameCommand, game : Game): Game =
     saveGameState()
     updateGame(ci.executeCommand(cmd, game))
 
@@ -61,7 +58,7 @@ class GameController(private var _game: Game)(using
     )
 
   def addRoles(names: Vector[String]): Unit =
-    updateGame(roleAd.addRoles(names, game))
+    updateGame(GC.addRoles(names, game))
 
   def runGame(): Unit =
     notifyObservers(GameEvent.InitialthingsDone)
@@ -76,19 +73,19 @@ class GameController(private var _game: Game)(using
             )
           )
           notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
-          updateGame(pc.runNightPhase(game))
+          updateGame(GC.runNightPhase(game))
           notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
         case Phase.Day =>
           notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
-          updateGame(pc.runNightPhase(game))
+          updateGame(GC.runNightPhase(game))
           notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
       }
-      notifyObservers(GameEvent.switchPhase(pc.switchPhase(game).phase.toString()))
+      notifyObservers(GameEvent.switchPhase(GC.switchPhase(game).phase.toString()))
 
       game.checkWinCondition(game.players) match {
         case Some(winningFaction) =>
           saveGameState()
-          executeCommand(GameEndCommand(Some(winningFaction)))
+          executeCommand(GameEndCommand(Some(winningFaction)), game)
           notifyObservers(GameEvent.printText(s"Die $winningFaction haben gewonnen!!!", 120))
         case None =>
       }

@@ -3,6 +3,7 @@ package de.htwg.werwolf.model.commandComponent
 
 import de.htwg.werwolf.model.Game
 import scala.util.{Try, Success, Failure}
+import de.htwg.werwolf.controller.GameCommand
 
 
 trait CommandInterface {

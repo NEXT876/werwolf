@@ -5,10 +5,9 @@ import de.htwg.werwolf.view.{GUI, TUI}
 import de.htwg.werwolf.util.Subject
 import de.htwg.werwolf.controller.GameController
 import de.htwg.werwolf.model.Game
-import model.phaseComponent.{PhaseComponentInterface, PhaseComponent}
-import model.playerComponent.{PlayerInterface, PlayerInitializer}
 import model.commandComponent.{CommandInterface, ExecuteC}
 import model.narratorComponent.{NarratorInterface, JsonNarrator}
+import model.gameCoreComponents.{GameCoreInterface, GameCore}
 
 @main def Main(): Unit =
 
@@ -16,9 +15,10 @@ import model.narratorComponent.{NarratorInterface, JsonNarrator}
     new JsonNarrator(
       os.pwd / "src" / "main" / "resources" / "narrator.json"
     )
-  given PlayerInterface = new PlayerInitializer
   given CommandInterface = new ExecuteC
-  given PhaseComponentInterface = new PhaseComponent
+  given GameCoreInterface = new GameCore
+  
+  
 
   // 1. Controller erzeugen
   val controller = GameController(Game())

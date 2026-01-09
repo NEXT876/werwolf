@@ -1,6 +1,6 @@
 package de.htwg.werwolf.model
 
-import de.htwg.werwolf.model.playerComponent.Player
+import de.htwg.werwolf.model.gameCoreComponents.Player
 
 enum Faction:
   case _Werwolf, _Villager

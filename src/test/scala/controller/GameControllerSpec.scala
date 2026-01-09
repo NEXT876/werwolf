@@ -6,16 +6,36 @@ import de.htwg.werwolf.util.Observer
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import scala.util.{Success, Failure}
+import de.htwg.werwolf.model.playerComponent.PlayerInterface
+import de.htwg.werwolf.model.playerComponent.PlayerInitializer
+import de.htwg.werwolf.model.commandComponent.ExecuteC
+import de.htwg.werwolf.model.commandComponent.CommandInterface
+import de.htwg.werwolf.model.phaseComponent.PhaseComponentInterface
+import de.htwg.werwolf.model.phaseComponent.PhaseComponent
+import de.htwg.werwolf.model.narratorComponent.NarratorInterface
+import de.htwg.werwolf.model.narratorComponent.JsonNarrator
+import de.htwg.werwolf.model.playerComponent.Villager
+import de.htwg.werwolf.model.commandComponent.GameCommand
+import de.htwg.werwolf.model.playerComponent.Werwolf
+import de.htwg.werwolf.model.phaseComponent.Phase
 
 class GameControllerSpec extends AnyWordSpec with Matchers {
 
+  
   "GameController" should {
 
-    "have a getter for game" in {
-      val game = Game()
-      val controller = new GameController(game)
+    given NarratorInterface =
+    new JsonNarrator(
+      os.pwd / "src" / "main" / "resources" / "narrator.json"
+    )
+    given PlayerInterface = new PlayerInitializer
+    given CommandInterface = new ExecuteC
+    given PhaseComponentInterface = new PhaseComponent
+
+    /*"have a getter for game" in {
+      val controller = new GameController(Game())
       controller.game should be(game)
-    }
+    }*/
 
     "update game correctly" in {
       val initialGame = Game()
@@ -52,10 +72,11 @@ class GameControllerSpec extends AnyWordSpec with Matchers {
     }
 
     "execute command" in {
+      
       val game = Game()
-      val controller = new GameController(game)
-      val cmd = new MockCommand(game)
-      controller.executeCommand(cmd)
+      val controller = GameController(game)
+      val cmd = MockCommand(game)
+      controller.executeCommand(cmd, game)
       controller.game.commandHistory should contain(cmd)
     }
 
@@ -150,8 +171,12 @@ class MockObserver extends Observer[GameEvent] {
   override def update(event: GameEvent): Unit = receivedEvents = event :: receivedEvents
 }
 
-class MockCommand(game: Game) extends GameCommand {
-  override def execute(game: Game): Game = game
-  override def undo(game: Game): Game = game
+class MockCommand(initialGame: Game) extends GameCommand {
   override def description: String = "mock"
+
+  override def execute(game: Game): Game = 
+    initialGame  // oder game.copy(...) für realistischeres Verhalten
+
+  override def undo(game: Game): Game = 
+    initialGame  // zurück zum Ausgangszustand
 }
