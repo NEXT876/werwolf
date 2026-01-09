@@ -2,7 +2,7 @@
 package de.htwg.werwolf.view
 
 import de.htwg.werwolf.model.GameEvent
-import de.htwg.werwolf.controller.GameControllerInterface
+import de.htwg.werwolf.controller.gameControllerComponent.GameControllerInterface
 import de.htwg.werwolf.util.Observer
 
 

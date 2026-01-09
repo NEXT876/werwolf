@@ -1,4 +1,4 @@
-package de.htwg.werwolf.controller
+package de.htwg.werwolf.controller.gameControllerComponent
 
 import de.htwg.werwolf.model.Game
 import de.htwg.werwolf.util.Observer

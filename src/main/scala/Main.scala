@@ -3,12 +3,11 @@ package de.htwg.werwolf
 
 import de.htwg.werwolf.view.{GUI, TUI}
 import de.htwg.werwolf.util.Subject
-import de.htwg.werwolf.controller.GameController
+import de.htwg.werwolf.controller.gameControllerComponent.{GameController,GameControllerInterface}
 import de.htwg.werwolf.model.Game
 import model.commandComponent.{CommandInterface, ExecuteC}
 import model.narratorComponent.{NarratorInterface, JsonNarrator}
 import model.gameCoreComponents.{GameCoreInterface, GameCore}
-import de.htwg.werwolf.controller.GameControllerInterface
 
 @main def Main(): Unit =
 

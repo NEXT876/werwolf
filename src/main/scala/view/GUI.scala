@@ -19,7 +19,7 @@ import scala.compiletime.uninitialized
 
 import de.htwg.werwolf.util.*
 import de.htwg.werwolf.model.GameEvent
-import de.htwg.werwolf.controller.*
+import de.htwg.werwolf.controller.gameControllerComponent.*
 import scalafx.beans.property.StringProperty
 import scalafx.application.Platform
 

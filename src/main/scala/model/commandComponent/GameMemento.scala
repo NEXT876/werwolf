@@ -2,7 +2,7 @@
 package de.htwg.werwolf.model.commandComponent
 
 import de.htwg.werwolf.model.gameCoreComponents.{Player, Phase, Votes}
-import de.htwg.werwolf.controller.GameCommand
+import de.htwg.werwolf.controller.gameControllerComponent.GameCommand
 import de.htwg.werwolf.model.Game
 
 case class GameMemento(

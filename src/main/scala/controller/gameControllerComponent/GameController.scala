@@ -1,5 +1,5 @@
 // src/main/scala/controller/GameController.scala
-package de.htwg.werwolf.controller
+package de.htwg.werwolf.controller.gameControllerComponent
 
 import de.htwg.werwolf.util.Subject
 import de.htwg.werwolf.model.commandComponent.{CommandInterface}

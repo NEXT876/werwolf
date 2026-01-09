@@ -2,7 +2,7 @@
 package de.htwg.werwolf.model
 
 import de.htwg.werwolf.util.Subject
-import de.htwg.werwolf.controller.GameCommand
+import de.htwg.werwolf.controller.gameControllerComponent.GameCommand
 import de.htwg.werwolf.model.gameCoreComponents.{Player, Phase, VotesInterface, Votes}
 
 import scala.util.{Try, Success, Failure}

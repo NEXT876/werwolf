@@ -1,23 +1,20 @@
 // src/test/scala/controller/GameControllerSpec.scala
-package de.htwg.werwolf.controller
+package de.htwg.werwolf.controller.commandComponent
 
 import de.htwg.werwolf.model._
 import de.htwg.werwolf.util.Observer
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import scala.util.{Success, Failure}
-import de.htwg.werwolf.model.playerComponent.PlayerInterface
-import de.htwg.werwolf.model.playerComponent.PlayerInitializer
-import de.htwg.werwolf.model.commandComponent.ExecuteC
 import de.htwg.werwolf.model.commandComponent.CommandInterface
-import de.htwg.werwolf.model.phaseComponent.PhaseComponentInterface
-import de.htwg.werwolf.model.phaseComponent.PhaseComponent
 import de.htwg.werwolf.model.narratorComponent.NarratorInterface
 import de.htwg.werwolf.model.narratorComponent.JsonNarrator
-import de.htwg.werwolf.model.playerComponent.Villager
-import de.htwg.werwolf.model.commandComponent.GameCommand
-import de.htwg.werwolf.model.playerComponent.Werwolf
-import de.htwg.werwolf.model.phaseComponent.Phase
+import de.htwg.werwolf.model.commandComponent.ExecuteC
+import de.htwg.werwolf.model.gameCoreComponents.GameCore
+import de.htwg.werwolf.model.gameCoreComponents.GameCoreInterface
+import de.htwg.werwolf.model.gameCoreComponents.Villager
+import de.htwg.werwolf.model.gameCoreComponents.Werwolf
+import de.htwg.werwolf.model.gameCoreComponents.Phase
 
 class GameControllerSpec extends AnyWordSpec with Matchers {
 
@@ -25,12 +22,11 @@ class GameControllerSpec extends AnyWordSpec with Matchers {
   "GameController" should {
 
     given NarratorInterface =
-    new JsonNarrator(
-      os.pwd / "src" / "main" / "resources" / "narrator.json"
+      new JsonNarrator(
+        os.pwd / "src" / "main" / "resources" / "narrator.json"
     )
-    given PlayerInterface = new PlayerInitializer
     given CommandInterface = new ExecuteC
-    given PhaseComponentInterface = new PhaseComponent
+    given GameCoreInterface = new GameCore
 
     /*"have a getter for game" in {
       val controller = new GameController(Game())

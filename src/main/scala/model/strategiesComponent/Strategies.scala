@@ -3,7 +3,7 @@ package de.htwg.werwolf.model.strategiesComponent
 
 import de.htwg.werwolf.model.gameCoreComponents.Player
 import de.htwg.werwolf.model.commandComponent.{CommandInterface}
-import de.htwg.werwolf.controller.KillCommand
+import de.htwg.werwolf.controller.gameControllerComponent.KillCommand
 import de.htwg.werwolf.model.Game
 
 case object WerwolfAction extends NightActionStrategy {
