@@ -31,20 +31,20 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
   private val FactionAmountText = StringProperty("Werwolf : \n Villager : ")
   private val SpecialInformationText = StringProperty("No Special Informations")
 
-  def init(c: GameController): Unit = 
+  def init(c: GameController): Unit =
     controller = c
-  
+
   override def update(event: GameEvent): Unit =
     event match
       case GameEvent.printGameState(players) =>
         printPlayerRoles(players)
 
       case GameEvent.switchPhase(phase) =>
-        Platform.runLater {NightDayCycleText.value = phase} 
+        Platform.runLater { NightDayCycleText.value = phase }
 
       case _ =>
 
-  override def start(): Unit = 
+  override def start(): Unit =
 
     // --- Helper: Box mit Rahmen, Schatten & Hover-Effekt ---
     def box(label: String, w: Double = 150, h: Double = 60): VBox = {
@@ -75,7 +75,6 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
       // Box rückgabe
       b
     }
-
 
     // --- Chatbox zuerst definieren ---
     val chatArea = new TextArea {
@@ -123,7 +122,7 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
 
     // --- Spieler-Boxen auf Oval ---
     val players = Seq(box("player1"), box("player2"), box("player3"), box("player4"))
-    ovalGroup.children.addAll(players.map(_.delegate): _*)
+    ovalGroup.children.addAll(players.map(_.delegate)*)
 
     // Spielerpositionierung
     var currentAngle = 0.0
@@ -164,7 +163,7 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
       }
 
       animTimeline.onFinished = _ => {
-        currentAngle = Math.round(currentAngle / 90) * 90
+        currentAngle = Math.round(currentAngle / 90).toDouble * 90
         positionPlayers(currentAngle)
       }
 
@@ -182,12 +181,12 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
 
     // --- Top Bar ---
     val FactionAmountField = new TextArea {
-    text <== FactionAmountText // Automatisches Binding
-    editable = false
-    wrapText = true
-    prefRowCount = 8
-    prefColumnCount = 40
-  }
+      text <== FactionAmountText // Automatisches Binding
+      editable = false
+      wrapText = true
+      prefRowCount = 8
+      prefColumnCount = 40
+    }
     val topLeft = new VBox {
       padding = Insets(10)
       children = Seq(
@@ -195,15 +194,14 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
         FactionAmountField
       )
     }
-    
 
     val DayNightCycleField = new TextArea {
-    text <== NightDayCycleText // Automatisches Binding
-    editable = false
-    wrapText = true
-    prefRowCount = 8
-    prefColumnCount = 40
-  }
+      text <== NightDayCycleText // Automatisches Binding
+      editable = false
+      wrapText = true
+      prefRowCount = 8
+      prefColumnCount = 40
+    }
     val topCenter = new VBox {
       padding = Insets(10)
       children = Seq(
@@ -211,15 +209,14 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
         DayNightCycleField
       )
     }
-    
 
     val SpecialInformationField = new TextArea {
-    text <== SpecialInformationText // Automatisches Binding
-    editable = false
-    wrapText = true
-    prefRowCount = 8
-    prefColumnCount = 40
-  }
+      text <== SpecialInformationText // Automatisches Binding
+      editable = false
+      wrapText = true
+      prefRowCount = 8
+      prefColumnCount = 40
+    }
     val topRight = new VBox {
       padding = Insets(10)
       children = Seq(
@@ -227,7 +224,6 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
         SpecialInformationField
       )
     }
-    
 
     val topPane = new BorderPane {
       left = topLeft
@@ -243,7 +239,6 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
       prefRowCount = 8
     }
 
-
     // --- Bottom Pane ---
     val bottomPane = new BorderPane {
       left = chatBox
@@ -254,11 +249,10 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
           new Text("rollen info"),
           rollenInfoField
         )
-      
+
       }
       padding = Insets(10)
     }
-
 
     // --- Root Layout ---
     val root = new BorderPane {
@@ -289,15 +283,15 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
         stylesheets.add("style.css")
       }
     }
-  
-  def printPlayerRoles(playerRoles: String): Unit = 
+
+  def printPlayerRoles(playerRoles: String): Unit =
     val header = "\n================ Spieler & Rollen ================\n"
     val footer = "\n==================================================\n"
-    val (aliveWerwolves,aliveVillagers) =  controller.countAlivePlayer()
+    val (aliveWerwolves, aliveVillagers) = controller.countAlivePlayer()
 
-     // WICHTIG: Platform.runLater für UI-Thread
+    // WICHTIG: Platform.runLater für UI-Thread
     Platform.runLater {
       rollenInfoText.value = header + playerRoles + footer
       FactionAmountText.value = s"Werwölfe : ${aliveWerwolves} \nDorfbewohner : ${aliveVillagers}"
-    } 
+    }
 }
