@@ -5,7 +5,14 @@ lazy val root = project
   .settings(
     name := "scalafx-test",
 
-    scalacOptions += "-Wconf:msg=Implicit parameters should be provided with a `using` clause:s",
+    scalacOptions ++= Seq(
+      "-Wconf:msg=Implicit parameters should be provided with a `using` clause:s",
+      "-deprecation",
+      "-explain",
+      "-feature",
+      "-unchecked"
+    ),
+
 
     // Aktuelle ScalaFX (für JavaFX 21)
     libraryDependencies ++= Seq(
@@ -15,8 +22,12 @@ lazy val root = project
       "com.lihaoyi" %% "upickle" % "4.0.0",
       "com.lihaoyi" %% "os-lib" % "0.9.1",
       "org.scalafx" %% "scalafx" % "20.0.0-R31",
-      "net.codingwell" %% "scala-guice" % "7.0.0"
-    ),
+      "com.google.inject" % "guice" % "7.0.0",
+      "net.codingwell" %% "scala-guice" % "7.0.0",
+      "io.circe" %% "circe-core"    % "0.14.6",
+      "io.circe" %% "circe-generic" % "0.14.6",
+      "io.circe" %% "circe-parser"  % "0.14.6",
+      "org.scala-lang.modules" %% "scala-xml" % "2.4.0"    ),
     libraryDependencies ++= {
       val os = System.getProperty("os.name").toLowerCase match {
         case mac if mac.contains("mac") => "mac"
