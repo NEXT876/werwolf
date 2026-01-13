@@ -2,6 +2,7 @@
 package de.htwg.werwolf.model
 
 trait NarratorInterface:
-    def randomNarratorText(role: String): String
+    def randomNightNarratorTexte(role: String): String
+    def randomDayNarratorTexte(role: String): String
 
 

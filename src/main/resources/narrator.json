@@ -20,5 +20,13 @@
       "Hexe, öffne deine Augen. Der Zauberkessel brodelt. Eine Person liegt im Sterben — willst du heilen? Und falls du willst… wen möchtest du verfluchen?",
       "Der Duft dunkler Kräuter erfüllt die Luft. Hexe, es ist deine Stunde. Greifst du ein… oder lässt du die Nacht ihren Lauf nehmen?"
     ]
+  },
+  
+  "Day": {
+    "Start":[
+      "Die Sonne erhebt sich langsam über dem Dorf und vertreibt die Schatten der Nacht.\n\nTüren öffnen sich vorsichtig, Blicke werden ausgetauscht.\n\nJeder fragt sich dasselbe: Wer hat die Nacht nicht überlebt?",
+      "Mit dem ersten Licht des Tages erwacht das Dorf.\n\nFlüsternde Stimmen füllen die Straßen, Misstrauen liegt in der Luft.\n\nDie Nacht ist vorbei – doch ihre Folgen sind noch spürbar.",
+      "Der Morgen bringt keine Ruhe.\n\nGesichter sind angespannt, Worte werden mit Bedacht gewählt.\n\nHeute entscheidet sich, wem man trauen kann … und wem nicht."
+    ]
   }
 }

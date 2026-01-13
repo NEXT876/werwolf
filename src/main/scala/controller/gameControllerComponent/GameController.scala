@@ -68,7 +68,7 @@ class GameController(private var _game: Game)(using
         case Phase.Night =>
           notifyObservers(
             GameEvent.printnarratorText(
-              narrator.randomNarratorText("Start")
+              narrator.randomNightNarratorTexte("Start")
             )
           )
           notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
