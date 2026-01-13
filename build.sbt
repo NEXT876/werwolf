@@ -14,7 +14,8 @@ lazy val root = project
       "org.scalatest" %% "scalatest" % "3.2.18" % Test,
       "com.lihaoyi" %% "upickle" % "4.0.0",
       "com.lihaoyi" %% "os-lib" % "0.9.1",
-      "org.scalafx" %% "scalafx" % "20.0.0-R31"
+      "org.scalafx" %% "scalafx" % "20.0.0-R31",
+      "net.codingwell" %% "scala-guice" % "7.0.0"
     ),
     libraryDependencies ++= {
       val os = System.getProperty("os.name").toLowerCase match {
