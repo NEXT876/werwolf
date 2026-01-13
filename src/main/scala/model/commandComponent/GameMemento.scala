@@ -6,6 +6,7 @@ import de.htwg.werwolf.controller.gameControllerComponent.GameCommand
 import de.htwg.werwolf.model.Game
 import de.htwg.werwolf.model.CommandInterface
 import de.htwg.werwolf.model.Phase
+import play.api.libs.json._
 
 case class GameMemento(
     players: Map[String, Player],
@@ -13,18 +14,22 @@ case class GameMemento(
     day: Int,
     votes: Votes,
     isRunning: Boolean,
-    commandHistory: Vector[GameCommand]
+    @transient commandHistory: Vector[GameCommand] = Vector.empty
 ) {
+  // ignored by Play JSON
+  @transient
   private val saves = scala.collection.mutable.Stack[GameMemento]()
 
   def save(game: Game)(using ci: CommandInterface): Unit = {
     saves.push(ci.createMemento(game))
     // println(s"Spielstand ${saves.size} gespeichert")
+    // TODO write into file
   }
 
   def undo(game: Game)(using ci: CommandInterface): Unit = if (saves.nonEmpty) {
     ci.restoreFromMemento(saves.pop(), game)
     // println("Zurück zum letzten Savepoint!")
+    // read from file if needed
   }
 
   def list(): Unit = saves.zipWithIndex.reverse.foreach { case (m, i) => // println(s"$i: ${m}")

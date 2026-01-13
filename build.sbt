@@ -24,9 +24,7 @@ lazy val root = project
       "org.scalafx" %% "scalafx" % "20.0.0-R31",
       "com.google.inject" % "guice" % "7.0.0",
       "net.codingwell" %% "scala-guice" % "7.0.0",
-      "io.circe" %% "circe-core"    % "0.14.6",
-      "io.circe" %% "circe-generic" % "0.14.6",
-      "io.circe" %% "circe-parser"  % "0.14.6",
+      "com.typesafe.play" %% "play-json" % "2.10.0",
       "org.scala-lang.modules" %% "scala-xml" % "2.4.0"    ),
     libraryDependencies ++= {
       val os = System.getProperty("os.name").toLowerCase match {

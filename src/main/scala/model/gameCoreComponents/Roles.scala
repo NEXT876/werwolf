@@ -19,7 +19,9 @@ trait Player:
   override def toString(): String =
     f"• ${name}%-15s | Rolle: ${role}%-10s | Status: ${if (isAlive) "lebt" else "tot"}%-7s"
 
-abstract class PlayerDecorator(inner: Player) extends Player:
+abstract class PlayerDecorator(protected val inner: Player) extends Player:
+  // for filesave
+  def decorated: Player = inner
   def name: String = inner.name
   def isAlive: Boolean = inner.isAlive
   def role: Roles = inner.role
@@ -77,8 +79,9 @@ final case class Witch(name: String, isAlive: Boolean = true) extends Player:
   def revive = copy(isAlive = true)
   def nightAction: NightActionStrategy = WitchAction
 
-final case class DoubleVoteDecorator(inner: Player)
+final case class DoubleVoteDecorator(override val inner: Player)
   extends PlayerDecorator(inner):
+  override def decorated: Player = inner
 
   override def vote(target: Player): String =
     s"${inner.name} votes TWICE for ${target.name}!"
