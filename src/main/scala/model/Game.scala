@@ -2,13 +2,13 @@
 package de.htwg.werwolf.model
 
 import de.htwg.werwolf.util.Subject
-import de.htwg.werwolf.controller.gameControllerComponent.GameCommand
+import de.htwg.werwolf.model.commandComponent.GameCommand
 import de.htwg.werwolf.model.gameCoreComponents.{Player, Votes}
 
 import scala.util.{Try, Success, Failure}
 
 
-import scala.util.{Try, Success, Failure}
+
 import scala.util.Random
 
 case class Game(

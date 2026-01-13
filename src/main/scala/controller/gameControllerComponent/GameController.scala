@@ -1,21 +1,20 @@
 // src/main/scala/controller/GameController.scala
 package de.htwg.werwolf.controller.gameControllerComponent
 
-import de.htwg.werwolf.util.Subject
-import de.htwg.werwolf.model.CommandInterface
-import de.htwg.werwolf.model.NarratorInterface
-import de.htwg.werwolf.model.{GameEvent, Game}
-import de.htwg.werwolf.model.commandComponent.GameMemento
-import de.htwg.werwolf.model.{Roles, Phase, GameCoreInterface}
 import de.htwg.werwolf.controller.GameControllerInterface
+import de.htwg.werwolf.util.Subject
+import de.htwg.werwolf.model.{CommandInterface, NarratorInterface, GameCoreInterface}
+import de.htwg.werwolf.model.commandComponent.{GameMemento, GameCommand}
+import de.htwg.werwolf.model.{Roles, Phase, GameEvent, Game, Faction}
 
 import scala.util.{Try, Success, Failure}
 import scala.util.Random
+import de.htwg.werwolf.view.GUI.update
 
 class GameController(private var _game: Game)(using
     narrator: NarratorInterface,
     ci: CommandInterface,
-    GC : GameCoreInterface
+    GC: GameCoreInterface
 ) extends GameControllerInterface {
   private var savedMemento: Option[GameMemento] = None
   def game: Game = _game
@@ -35,10 +34,9 @@ class GameController(private var _game: Game)(using
       notifyObservers(
         GameEvent.printText("Kein gespeicherter Spielstand zum Wiederherstellen.", 70)
       )
-
-  def executeCommand(cmd: GameCommand, game : Game): Game =
+  def executeCommand(cmd: String, UEP: Option[Faction], game: Game): Game =
     saveGameState()
-    updateGame(ci.executeCommand(cmd, game))
+    updateGame(ci.executeCommand(cmd, UEP, null, null, game))
 
   def undoCommand(): Game =
     saveGameState()
@@ -86,7 +84,8 @@ class GameController(private var _game: Game)(using
       game.checkWinCondition(game.players) match {
         case Some(winningFaction) =>
           saveGameState()
-          executeCommand(GameEndCommand(Some(winningFaction)), game)
+          updateGame(executeCommand("GameEndCommand", Some(winningFaction), game))
+          // executeCommand(GameEndCommand(Some(winningFaction)), game)
           notifyObservers(GameEvent.printText(s"Die $winningFaction haben gewonnen!!!", 120))
         case None =>
       }

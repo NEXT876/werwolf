@@ -2,11 +2,7 @@
 package de.htwg.werwolf
 
 import de.htwg.werwolf.view.{GUI, TUI}
-import de.htwg.werwolf.util.Subject
-import de.htwg.werwolf.controller.gameControllerComponent.GameController
-import de.htwg.werwolf.model.Game
-import de.htwg.werwolf.controller.GameControllerInterface
-import de.htwg.werwolf.config.given_GameControllerInterface
+import de.htwg.werwolf.config.given
 
 @main def Main(): Unit =
 

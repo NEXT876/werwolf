@@ -7,8 +7,8 @@ import de.htwg.werwolf.model.Game
 import de.htwg.werwolf.model.Roles
 import de.htwg.werwolf.model.strategiesComponent.NightActionStrategy
 import de.htwg.werwolf.model.gameCoreComponents.Player
-import de.htwg.werwolf.controller.gameControllerComponent.KillCommand
-import de.htwg.werwolf.controller.gameControllerComponent.GameEndCommand
+import de.htwg.werwolf.model.commandComponent.KillCommand
+import de.htwg.werwolf.model.commandComponent.GameEndCommand
 
 class CommandSpec extends AnyWordSpec with Matchers {
 

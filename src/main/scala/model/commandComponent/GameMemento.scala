@@ -2,11 +2,9 @@
 package de.htwg.werwolf.model.commandComponent
 
 import de.htwg.werwolf.model.gameCoreComponents.{Player, Votes}
-import de.htwg.werwolf.controller.gameControllerComponent.GameCommand
-import de.htwg.werwolf.model.Game
-import de.htwg.werwolf.model.CommandInterface
 import de.htwg.werwolf.model.Phase
 import play.api.libs.json._
+
 
 case class GameMemento(
     players: Map[String, Player],
