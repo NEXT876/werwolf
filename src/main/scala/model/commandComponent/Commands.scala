@@ -1,8 +1,7 @@
 // src/main/scala/model/commands/ExecuteC.scala
 package de.htwg.werwolf.model.commandComponent
 
-import de.htwg.werwolf.model.Game
-import de.htwg.werwolf.model.{GameCoreInterface, CommandInterface}
+import de.htwg.werwolf.model.{Game, GameCoreInterface, CommandInterface}
 
 import scala.util.{Try, Success, Failure}
 import de.htwg.werwolf.model.Faction
@@ -15,7 +14,6 @@ case class ExecuteC() extends CommandInterface {
 
   def save(game: Game)(using ci: CommandInterface): Unit = {
     saves.push(ci.createMemento(game))
-    // println(s"Spielstand ${saves.size} gespeichert")
   }
 
   def undo(game: Game)(using ci: CommandInterface): Unit = if (saves.nonEmpty) {
@@ -26,16 +24,9 @@ case class ExecuteC() extends CommandInterface {
   def list(): Unit = saves.zipWithIndex.reverse.foreach { case (m, i) => // println(s"$i: ${m}")
   }
 
-  def executeCommand(cmd: String, winner : Option[Faction],killer : String, target : String, game: Game): Game = cmd match
-    case "GameEndCommand" =>
-      val updatedGame = GameEndCommand(winner).execute(game)
-      updatedGame.copy(commandHistory = updatedGame.commandHistory :+ GameEndCommand(winner))
-    case "KillCommand" =>
-      KillCommand(killer, target).execute(game)
-    case _ =>
-      val updatedGame = game
-      game
-
+  def executeCommand(cmd: GameCommand, game: Game): Game =
+    val updatedGame = cmd.execute(game)
+    updatedGame.copy(commandHistory = updatedGame.commandHistory :+ cmd)
 
   def undoLast(game: Game): Try[Game] = Try {
     if (game.commandHistory.isEmpty) Failure(NothingToUndo)

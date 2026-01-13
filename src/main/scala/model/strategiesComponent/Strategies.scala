@@ -4,6 +4,7 @@ package de.htwg.werwolf.model.strategiesComponent
 import de.htwg.werwolf.model.gameCoreComponents.Player
 import de.htwg.werwolf.model.CommandInterface
 import de.htwg.werwolf.model.{Game, NightActionStrategy}
+import de.htwg.werwolf.model.commandComponent.KillCommand
 
 case object WerwolfAction extends NightActionStrategy {
   def performAction(player: Player, game: Game)(using ci: CommandInterface): Game = {
@@ -14,7 +15,7 @@ case object WerwolfAction extends NightActionStrategy {
     if possibleTargets.isEmpty then game
     else
       val targetName = possibleTargets.head
-      ci.executeCommand("KillCommand", null, player.name, targetName, game)
+      ci.executeCommand(KillCommand(player.name, targetName), game)
   }
 }
 
