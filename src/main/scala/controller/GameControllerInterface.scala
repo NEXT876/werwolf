@@ -14,3 +14,5 @@ trait GameControllerInterface extends Subject[GameEvent]:
     def countAlivePlayer(): (Int, Int)
     def addRoles(names: Vector[String]): Unit
     def runGame(): Unit
+    def submitNightChoice(playerName: String, target: String): Unit 
+    def runNightPhase(): Unit

@@ -72,7 +72,7 @@ final case class Terrorist(name: String, isAlive: Boolean = true) extends Player
 
 final case class Witch(name: String, isAlive: Boolean = true) extends Player:
   def role = Roles.witch
-  def faction = Faction._Villager
+  def faction = Faction._Werwolf
   def vote(target: Player) = s"${role} $name votes for ${target.name} to die"
   def die = copy(isAlive = false)
   def revive = copy(isAlive = true)

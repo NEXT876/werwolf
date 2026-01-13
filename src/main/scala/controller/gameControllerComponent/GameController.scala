@@ -10,7 +10,6 @@ import de.htwg.werwolf.model.{Roles, Phase, GameEvent, Game, Faction}
 import scala.util.{Try, Success, Failure}
 import scala.util.Random
 
-
 class GameController(private var _game: Game)(using
     narrator: NarratorInterface,
     ci: CommandInterface,
@@ -59,6 +58,25 @@ class GameController(private var _game: Game)(using
   def addRoles(names: Vector[String]): Unit =
     updateGame(GC.addRoles(names, game))
 
+  def runNightPhase(): Unit =
+    val actors = game.players.values
+      .filter(p => p.nightAction.canAct(p, game))
+      .filter(p => p.faction == Faction._Werwolf)
+
+    actors.foreach { player =>
+      val targets = player.nightAction.possibleTargets(player, game)
+      notifyObservers(
+        GameEvent.askForTarget(player.name, player.role, targets)
+      )
+    }
+
+  def submitNightChoice(playerName: String, target: String): Unit =
+    val player = game.players(playerName)
+
+    updateGame(
+      player.nightAction.execute(player, target, game)
+    )
+
   def runGame(): Unit =
     notifyObservers(GameEvent.InitialthingsDone)
     while (game.isRunning) {
@@ -72,11 +90,11 @@ class GameController(private var _game: Game)(using
             )
           )
           notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
-          updateGame(GC.runNightPhase(game))
+          runNightPhase()
           notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
         case Phase.Day =>
           notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
-          updateGame(GC.runNightPhase(game))
+          runNightPhase()
           notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
       }
       notifyObservers(GameEvent.switchPhase(GC.switchPhase(game).phase.toString()))
@@ -85,7 +103,7 @@ class GameController(private var _game: Game)(using
         case Some(winningFaction) =>
           saveGameState()
           updateGame(executeCommand(GameEndCommand(Some(winningFaction)), game))
-          
+
           notifyObservers(GameEvent.printText(s"Die $winningFaction haben gewonnen!!!", 120))
         case None =>
       }

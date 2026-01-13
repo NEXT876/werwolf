@@ -1,6 +1,8 @@
 // src/main/scala/de/htwg/werwolf/model/GameEvents.scala
 package de.htwg.werwolf.model
 
+import de.htwg.werwolf.model.gameCoreComponents.Player
+
 enum GameEvent:
   case printGameState(players : String)
   case printnarratorText(text : String)
@@ -12,3 +14,4 @@ enum GameEvent:
   case printErrorMSG(msg : String)
   case switchPhase(phase : String)
   case InitialthingsDone
+  case askForTarget(name : String, role : Roles, targets : Vector[String])

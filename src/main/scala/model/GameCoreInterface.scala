@@ -29,8 +29,8 @@ enum Phase:
 
 trait GameCoreInterface:
     def switchPhase(game : Game): Game
-    def runNightPhase(game : Game)(using ci: CommandInterface): Game
-    def runDayPhase(game : Game)(using ci: CommandInterface): Game
+    //def runNightPhase(game : Game)(using ci: CommandInterface): Game
+    //def runDayPhase(game : Game)(using ci: CommandInterface): Game
     def addRoles(playerNames: Vector[String], game: Game): Game
     def getRoles(playeramount: Int): Vector[Roles]
     def addVote(player: String, game : Game): Votes

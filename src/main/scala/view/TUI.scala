@@ -5,46 +5,73 @@ import de.htwg.werwolf.model.GameEvent
 import de.htwg.werwolf.controller.GameControllerInterface
 import de.htwg.werwolf.util.Observer
 
+import scala.io.StdIn.{readLine, readInt}
+import de.htwg.werwolf.model.Roles
 
-import scala.io.StdIn.readLine
-
-class TUI()(using controller : GameControllerInterface) extends Observer[GameEvent] {
+class TUI()(using controller: GameControllerInterface) extends Observer[GameEvent] {
 
   override def update(event: GameEvent): Unit =
-  event match
-    case GameEvent.printGameState(players) =>
-      clearScreen()
-      showLogo()
-      printPlayerRoles(players)
+    event match
+      case GameEvent.printGameState(players) =>
+        clearScreen()
+        showLogo()
+        printPlayerRoles(players)
 
-    case GameEvent.printnarratorText(text) =>
-      showLogo()
-      tiping(text)
-    
-    case GameEvent.printText(text,wait) =>
-      tiping(text,wait)
+      case GameEvent.printnarratorText(text) =>
+        showLogo()
+        tiping(text)
 
-    case GameEvent.showLogo =>
-      showLogo()
+      case GameEvent.printText(text, wait) =>
+        tiping(text, wait)
 
-    case GameEvent.clearScreen =>
-      clearScreen()
+      case GameEvent.showLogo =>
+        showLogo()
 
-    case GameEvent.requestPlayerNames =>
-      
+      case GameEvent.clearScreen =>
+        clearScreen()
 
-    case GameEvent.GameOver =>
-      readLine("Press any key to end the game")
-      clearScreen()
-      showGameOver()
-      javafx.application.Platform.exit()
+      case GameEvent.requestPlayerNames =>
 
-    case GameEvent.printErrorMSG(msg) =>
-      printErrorMsg(msg)
+      case GameEvent.GameOver =>
+        readLine("Press any key to end the game")
+        clearScreen()
+        showGameOver()
+        javafx.application.Platform.exit()
 
-    case _ =>
+      case GameEvent.printErrorMSG(msg) =>
+        printErrorMsg(msg)
 
-  def start(): Unit = 
+      case GameEvent.askForTarget(name, role, targets) =>
+        role match
+          case Roles.werwolf => println(s"$name, welches Opfer reist du diese Nacht:")
+          case Roles.witch =>
+            println(s"$name, möchtest du in dieser nacht jemanden heilen oder töten ?")
+          case Roles.amor =>
+            println(s"$name, welche 2 glücklichen möchtest du heute Nacht bis zum Tode verbinden")
+            amorInput(name, targets)
+            return
+
+          case _ =>
+
+        targets.zipWithIndex.foreach { case (t, i) =>
+          println(s"$i: $t")
+        }
+
+        val choice = readInt()
+        controller.submitNightChoice(name, targets(choice))
+
+      case _ =>
+
+  def amorInput(name : String, targets: Vector[String]) =
+    targets.zipWithIndex.foreach { case (t, i) =>
+      println(s"$i: $t")
+    }
+    val choice1 = readInt()
+    val choice2 = readInt()
+    //controller.submitNightChoiceAmor(name, targets(choice1), targets(choice2))
+
+
+  def start(): Unit =
     Thread.sleep(1000)
     controller.addObserver(this)
     clearScreen()
@@ -57,28 +84,28 @@ class TUI()(using controller : GameControllerInterface) extends Observer[GameEve
     controller.addRoles(names)
 
     controller.runGame()
-  
-  def getPlayerAmount(): Int = 
+
+  def getPlayerAmount(): Int =
     val input = readLine("Wie viele Spieler? (mind. 2, max. 6): ")
     input.toIntOption match {
       case Some(n) => n.min(6).max(2)
       case None    => 5
     }
-  
-  def getPlayerNames(playerAmount: Int): Vector[String] = 
+
+  def getPlayerNames(playerAmount: Int): Vector[String] =
     (0 until playerAmount).map { i =>
       readLine(s"Spieler${i + 1} wie heißen sie:").trim match
         case "" => s"Spieler${i + 1}"
         case n  => n
     }.toVector
-  
-  def printPlayerRoles(playerRoles: String): Unit = 
+
+  def printPlayerRoles(playerRoles: String): Unit =
     val header = "\n================ Spieler & Rollen ==================\n"
     val footer = "\n====================================================\n"
 
     println(header + playerRoles + footer)
-  
-  def tiping(text: String, waitTime_ms: Int = 30): Unit = 
+
+  def tiping(text: String, waitTime_ms: Int = 30): Unit =
     text.foreach { buchstabe =>
       if (buchstabe == '.') {
         Thread.sleep(waitTime_ms * 4)
@@ -89,16 +116,16 @@ class TUI()(using controller : GameControllerInterface) extends Observer[GameEve
       }
     }
     println()
-  
-  def showLogo(): Unit = 
+
+  def showLogo(): Unit =
     import scala.io.Source
     println(Source.fromResource("logo.txt").mkString)
 
-  def clearScreen(): Unit = 
+  def clearScreen(): Unit =
     import sys.process._
     if (sys.props("os.name").toLowerCase.contains("win")) "cls".!
     else "clear".! // clear Screen for WIndows and Linux/Mac
-  
+
   def showGameOver(): Unit =
     println("Das Game ist vorbei")
 
