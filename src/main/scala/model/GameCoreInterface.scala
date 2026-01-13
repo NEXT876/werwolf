@@ -2,13 +2,8 @@ package de.htwg.werwolf.model
 
 import de.htwg.werwolf.model.Game
 import de.htwg.werwolf.model.CommandInterface
-import de.htwg.werwolf.model.gameCoreComponents.Votes
-import de.htwg.werwolf.model.gameCoreComponents.Player
-import de.htwg.werwolf.model.gameCoreComponents.Werwolf
-import de.htwg.werwolf.model.gameCoreComponents.Villager
-import de.htwg.werwolf.model.gameCoreComponents.Terrorist
-import de.htwg.werwolf.model.gameCoreComponents.Witch
-import de.htwg.werwolf.model.gameCoreComponents.Amor
+import de.htwg.werwolf.model.gameCoreComponents.*
+
 
 
 
