@@ -42,34 +42,53 @@ class TUI()(using controller: GameControllerInterface) extends Observer[GameEven
         printErrorMsg(msg)
 
       case GameEvent.askForTarget(name, role, targets) =>
-        role match
-          case Roles.werwolf => println(s"$name, welches Opfer reist du diese Nacht:")
-          case Roles.witch =>
-            println(s"$name, möchtest du in dieser nacht jemanden heilen oder töten ?")
-          case Roles.amor =>
-            println(s"$name, welche 2 glücklichen möchtest du heute Nacht bis zum Tode verbinden")
-            amorInput(name, targets)
-            return
-
-          case _ =>
-
-        targets.zipWithIndex.foreach { case (t, i) =>
-          println(s"$i: $t")
-        }
-
-        val choice = readInt()
-        controller.submitNightChoice(name, targets(choice))
+        if targets.nonEmpty then
+          role match
+            case Roles.amor =>
+              amorAction(name, targets)
+            case Roles.werwolf =>
+              werwolfAction(name, targets)
+            case Roles.witch =>
+              witchAction(name, targets)
+            case _ =>
 
       case _ =>
 
-  def amorInput(name : String, targets: Vector[String]) =
+  def werwolfAction(name: String, targets: Vector[String]): Unit =
+    println(s"$name, welches Opfer reißt du diese Nacht?")
     targets.zipWithIndex.foreach { case (t, i) =>
       println(s"$i: $t")
     }
-    val choice1 = readInt()
-    val choice2 = readInt()
-    //controller.submitNightChoiceAmor(name, targets(choice1), targets(choice2))
+    val choice = readValidChoice(targets)
+    controller.submitNightChoice(name, targets(choice))
 
+  def witchAction(name: String, targets: Vector[String]): Unit =
+    println(s"$name, möchtest du in dieser Nacht jemanden heilen oder töten? (tippe 'Yes' für Action)")
+    targets.zipWithIndex.foreach { case (t, i) =>
+      println(s"$i: $t")
+    }
+    val choice1 = readLine()
+    if choice1 == "Yes" then
+      val choice = readValidChoice(targets)
+      controller.submitNightChoice(name, targets(choice))
+
+  def readValidChoice(targets: Vector[String]): Int =
+    val c = readInt()
+    if c >= 0 && c < targets.size then c
+    else
+      println("Ungültige Auswahl")
+      readValidChoice(targets)
+
+  def amorAction(name: String, targets: Vector[String]) =
+    if targets.size >= 2 then
+      println(s"$name, welche 2 Glücklichen möchtest du heute Nacht bis zum Tode verbinden?")
+      targets.zipWithIndex.foreach { case (t, i) =>
+        println(s"$i: $t")
+      }
+
+      val choice1 = readValidChoice(targets)
+      val choice2 = readValidChoice(targets)
+      //controller.submitNightChoiceAmor(name, targets(choice1), targets(choice2))
 
   def start(): Unit =
     Thread.sleep(1000)

@@ -21,8 +21,9 @@ case object WerwolfAction extends NightActionStrategy {
   override def execute(player: Player, target: String, game: Game)(using
       ci: CommandInterface
   ): Game =
-    ci.executeCommand(KillCommand(player.name, target), game)
-
+    game.votes.addVote(target, game) 
+    game
+    
 }
 
 case object WitchAction extends NightActionStrategy {

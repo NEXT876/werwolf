@@ -1,12 +1,12 @@
 package de.htwg.werwolf.model.gameCoreComponents
 
-import de.htwg.werwolf.model.{VotesInterface, GameCoreInterface, CommandInterface}
+import de.htwg.werwolf.model.{GameCoreInterface, CommandInterface}
 import de.htwg.werwolf.model.{Roles, Phase, Game}
 
 import scala.util.Random
 import de.htwg.werwolf.model.Faction
 
-case class Votes(votes: Map[String, Int] = Map.empty) extends VotesInterface:
+case class Votes(votes: Map[String, Int] = Map.empty):
   def addVote(player: String, game: Game): Votes =
     val current = votes.getOrElse(player, 0)
     copy(votes = votes.updated(player, current + 1))
@@ -22,23 +22,7 @@ case class GameCore()(using ci: CommandInterface) extends GameCoreInterface {
     val newDay = game.day + 1
     game.copy(phase = newPhase, day = newDay, votes = Votes())
 
-  /*def runNightPhase(game: Game)(using ci: CommandInterface): Game =
-    val updatedGame = game.players.foldLeft(game) { case (g, (name, player)) =>
-      player.nightAction.performAction(player, g)
-    }
-    updatedGame
-
-  def runDayPhase(game: Game)(using ci: CommandInterface): Game =
-    val werwolves = game.players.values
-      .filter(p => p.isAlive && p.faction == Faction._Werwolf)
-
-    val updatedGame =
-      werwolves.foldLeft(game) { (g, player) =>
-      player.nightAction.performAction(player, g)
-    }
-
-    updatedGame
-*/
+  
   def addRoles(playerNames: Vector[String], game: Game): Game =
     val roles = getRoles(playerNames.size)
 
@@ -75,5 +59,8 @@ case class GameCore()(using ci: CommandInterface) extends GameCoreInterface {
 
   def getVotedPlayer(game: Game): Option[String] =
     game.votes.getVotedPlayer(game)
+
+  def resetVotes() : Votes =
+    Votes()
 
 }

@@ -35,8 +35,9 @@ trait GameCoreInterface:
     def getRoles(playeramount: Int): Vector[Roles]
     def addVote(player: String, game : Game): Votes
     def getVotedPlayer(game : Game): Option[String]
+    def resetVotes() : Votes
 
-
+/*
 trait VotesInterface:
     def addVote(player: String, game : Game): Votes
-    def getVotedPlayer(game : Game): Option[String]
+    def getVotedPlayer(game : Game): Option[String]*/

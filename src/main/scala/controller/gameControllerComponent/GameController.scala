@@ -9,6 +9,9 @@ import de.htwg.werwolf.model.{Roles, Phase, GameEvent, Game, Faction}
 
 import scala.util.{Try, Success, Failure}
 import scala.util.Random
+import de.htwg.werwolf.model.gameCoreComponents.Player
+import de.htwg.werwolf.view.GUI.update
+import de.htwg.werwolf.model.commandComponent.KillCommand
 
 class GameController(private var _game: Game)(using
     narrator: NarratorInterface,
@@ -59,20 +62,44 @@ class GameController(private var _game: Game)(using
     updateGame(GC.addRoles(names, game))
 
   def runNightPhase(): Unit =
-    val actors = game.players.values
-      .filter(p => p.nightAction.canAct(p, game))
-      .filter(p => p.faction == Faction._Werwolf)
+    val werwolves = game.players.values
+      .filter(_.faction == Faction._Werwolf)
+      .filter(_.role == Roles.werwolf)
 
-    actors.foreach { player =>
-      val targets = player.nightAction.possibleTargets(player, game)
-      notifyObservers(
-        GameEvent.askForTarget(player.name, player.role, targets)
-      )
+    val nonWerwolves = game.players.values
+      .filter(_.faction == Faction._Werwolf)
+      .filter(_.role != Roles.werwolf)
+
+    updateGame(game.copy(votes = GC.resetVotes()))
+
+    werwolves.foreach { player =>
+      if player.nightAction.canAct(player, game) then
+        val targets = player.nightAction.possibleTargets(player, game)
+        notifyObservers(
+          GameEvent.askForTarget(player.name, player.role, targets)
+        )
+    }
+    game.votes.getVotedPlayer(game) match
+      case Some(name) =>
+        ci.executeCommand(
+          KillCommand("die werwölfe", name),
+          game
+        )
+      case None =>
+        println("Niemand wurde gewählt")
+
+    nonWerwolves.foreach { player =>
+      if player.nightAction.canAct(player, game) then
+        val targets = player.nightAction.possibleTargets(player, game)
+        notifyObservers(
+          GameEvent.askForTarget(player.name, player.role, targets)
+        )
     }
 
   def submitNightChoice(playerName: String, target: String): Unit =
+    
     val player = game.players(playerName)
-
+    
     updateGame(
       player.nightAction.execute(player, target, game)
     )
