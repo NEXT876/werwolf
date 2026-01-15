@@ -13,7 +13,8 @@ case class Game(
     day: Int = 1,
     votes: Votes = Votes(),
     isRunning: Boolean = true,
-    commandHistory: Vector[GameCommand] = Vector.empty
+    commandHistory: Vector[GameCommand] = Vector.empty,
+    pendingNightActors: Set[String] = Set()
 ) {
   override def toString(): String = players.values.mkString("\n") + "\n"
 

@@ -10,4 +10,3 @@ trait NightActionStrategy:
   def possibleTargets(player: Player, game: Game): Vector[String]
   def execute(player: Player, target: String, game: Game)
              (using ci: CommandInterface): Game
-

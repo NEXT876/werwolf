@@ -41,16 +41,24 @@ class TUI()(using controller: GameControllerInterface) extends Observer[GameEven
       case GameEvent.printErrorMSG(msg) =>
         printErrorMsg(msg)
 
-      case GameEvent.askForTarget(name, role, targets) =>
+      case GameEvent.askForTargetNight(name, role, targets) =>
         if targets.nonEmpty then
           role match
             case Roles.amor =>
-              amorAction(name, targets)
+              //amorAction(name, targets)
             case Roles.werwolf =>
               werwolfAction(name, targets)
             case Roles.witch =>
               witchAction(name, targets)
             case _ =>
+
+      case GameEvent.askForTargetDay(name, targets) =>
+        println(s"$name, für wen votest du")
+        targets.zipWithIndex.foreach { case (t, i) =>
+          println(s"$i: $t")
+        }
+        val choice = readValidChoice(targets)
+        controller.submitvoting(name, targets(choice))
 
       case _ =>
 
@@ -60,10 +68,12 @@ class TUI()(using controller: GameControllerInterface) extends Observer[GameEven
       println(s"$i: $t")
     }
     val choice = readValidChoice(targets)
-    controller.submitNightChoice(name, targets(choice))
+    controller.submitvoting(name, targets(choice))
 
   def witchAction(name: String, targets: Vector[String]): Unit =
-    println(s"$name, möchtest du in dieser Nacht jemanden heilen oder töten? (tippe 'Yes' für Action)")
+    println(
+      s"$name, möchtest du in dieser Nacht jemanden heilen oder töten? (tippe 'Yes' für Action)"
+    )
     targets.zipWithIndex.foreach { case (t, i) =>
       println(s"$i: $t")
     }
@@ -88,7 +98,7 @@ class TUI()(using controller: GameControllerInterface) extends Observer[GameEven
 
       val choice1 = readValidChoice(targets)
       val choice2 = readValidChoice(targets)
-      //controller.submitNightChoiceAmor(name, targets(choice1), targets(choice2))
+      // controller.submitNightChoiceAmor(name, targets(choice1), targets(choice2))
 
   def start(): Unit =
     Thread.sleep(1000)

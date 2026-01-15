@@ -14,4 +14,5 @@ enum GameEvent:
   case printErrorMSG(msg : String)
   case switchPhase(phase : String)
   case InitialthingsDone
-  case askForTarget(name : String, role : Roles, targets : Vector[String])
+  case askForTargetNight(name : String, role : Roles, targets : Vector[String])
+  case askForTargetDay(name : String, targets : Vector[String])

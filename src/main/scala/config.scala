@@ -17,3 +17,5 @@ object config:
   given CommandInterface = new ExecuteC
   given GameCoreInterface = new GameCore
   given GameControllerInterface = new GameController(Game())
+
+
