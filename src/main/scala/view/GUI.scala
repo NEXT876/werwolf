@@ -31,7 +31,7 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
   private val FactionAmountText = StringProperty("Werwolf : \n Villager : ")
   private val SpecialInformationText = StringProperty("No Special Informations")
 
-  def init()(using c : GameControllerInterface): Unit =
+  def init()(using c: GameControllerInterface): Unit =
     controller = c
     controller.addObserver(this)
 
@@ -46,6 +46,25 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
       case _ =>
 
   override def start(): Unit =
+
+    // --- Menu Bar (Save / Restore) ---
+    val saveItem = new MenuItem("Save Game")
+    saveItem.onAction = _ => {
+      controller.saveGameState() // LOGIK MACHST DU
+    }
+
+    val restoreItem = new MenuItem("Restore Game")
+    restoreItem.onAction = _ => {
+      controller.undoFull() // LOGIK MACHST DU
+    }
+
+    val fileMenu = new Menu("Game") {
+      items = List(saveItem, restoreItem)
+    }
+
+    val menuBar = new MenuBar {
+      menus = List(fileMenu)
+    }
 
     // --- Helper: Box mit Rahmen, Schatten & Hover-Effekt ---
     def box(label: String, w: Double = 150, h: Double = 60): VBox = {
@@ -257,7 +276,12 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
 
     // --- Root Layout ---
     val root = new BorderPane {
-      top = topPane
+      top = new VBox {
+        children = Seq(
+          menuBar, // 👈 NEU
+          topPane // 👈 dein bestehendes Top-Panel
+        )
+      }
       bottom = bottomPane
       center = new StackPane {
         children = Seq(ovalGroup)
@@ -279,10 +303,18 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
     // --- Scene & CSS ---
     stage = new JFXApp3.PrimaryStage {
       title = "Werwolf GUI"
-      scene = new Scene(root, 1200, 800) {
+      import scalafx.stage.Screen
+
+      val bounds = Screen.primary.visualBounds
+
+      scene = new Scene(root) {
         fill = Color.rgb(153, 146, 146, 1)
         stylesheets.add("style.css")
       }
+
+      width = bounds.width * 0.9
+      height = bounds.height * 0.9
+
     }
 
   def printPlayerRoles(playerRoles: String): Unit =
