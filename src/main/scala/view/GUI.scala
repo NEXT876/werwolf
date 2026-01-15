@@ -52,9 +52,11 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
 
   override def start(): Unit =
 
-    // --- Menüleiste ---
-    val saveItem = new MenuItem("Spiel speichern")
-    saveItem.onAction = _ => controller.saveGameState()
+    // --- Menu Bar (Save / Restore) ---
+    val saveItem = new MenuItem("Save Game")
+    saveItem.onAction = _ => {
+      controller.saveIntoFile("test_1")
+    }
 
     val restoreItem = new MenuItem("Spiel wiederherstellen")
     restoreItem.onAction = _ => controller.undoFull()

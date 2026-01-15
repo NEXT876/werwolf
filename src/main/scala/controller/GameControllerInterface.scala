@@ -7,6 +7,8 @@ import de.htwg.werwolf.model.commandComponent.GameCommand
 
 
 trait GameControllerInterface extends Subject[GameEvent]:
+    def saveIntoFile(name: String): Unit
+    def loadFromFile(name: String): Unit
     def saveGameState(): Unit
     def undoFull(): Unit
     def executeCommand(cmd: GameCommand, game : Game): Game
@@ -14,6 +16,6 @@ trait GameControllerInterface extends Subject[GameEvent]:
     def countAlivePlayer(): (Int, Int)
     def addRoles(names: Vector[String]): Unit
     def runGame(): Unit
-    def submitNightChoice(playerName: String, target: String): Unit 
-    def submitvoting(playerName: String, target: String): Unit 
+    def submitNightChoice(playerName: String, target: String): Unit
+    def submitvoting(playerName: String, target: String): Unit
 

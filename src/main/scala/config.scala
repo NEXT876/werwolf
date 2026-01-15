@@ -16,7 +16,7 @@ object config:
     new JsonNarrator(
       os.pwd / "src" / "main" / "resources" / "narrator.json"
     )
-  given IOInterface = new JsonIO()
+  given IOInterface = new XmlIO() //new JsonIO()
   given CommandInterface = new ExecuteC
   given GameCoreInterface = new GameCore
   given GameControllerInterface = new GameController(Game())
