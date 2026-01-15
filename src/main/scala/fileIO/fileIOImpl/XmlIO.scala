@@ -27,7 +27,6 @@ class XmlIO extends IOInterface:
               <isAlive>{player.isAlive}</isAlive>
               <role>{player.role.toString}</role>
               <faction>{player.faction.toString}</faction>
-              <!-- NightActionStrategy könnte man hier optional serialisieren -->
             </player>
           }
         }
@@ -48,11 +47,11 @@ class XmlIO extends IOInterface:
         val isAlive = (p \ "isAlive").text.toBoolean
 
         val player: Player = role match
-          case "werwolf" => Werwolf(name, isAlive)
-          case "villager" => Villager(name, isAlive)
-          case "witch" => Witch(name, isAlive)
-          case "amor" => Amor(name, isAlive)
-          case "terrorist" => Terrorist(name, isAlive)
+          case "Werwolf" => Werwolf(name, isAlive)
+          case "Villager" => Villager(name, isAlive)
+          case "Witch" => Witch(name, isAlive)
+          case "Amor" => Amor(name, isAlive)
+          case "Terrorist" => Terrorist(name, isAlive)
           case _ => throw new RuntimeException(s"Unknown role: $role")
 
         name -> player
