@@ -1,13 +1,14 @@
-package de.htwg.werwolf.fileIO
+package de.htwg.werwolf.fileIO.fileIOImpl
 
-import scala.xml._
+import scala.xml.*
 import java.nio.file.Path
 import de.htwg.werwolf.model.commandComponent.GameMemento
 import de.htwg.werwolf.model.Phase
 import de.htwg.werwolf.model.gameCoreComponents.*
+import de.htwg.werwolf.fileIO.IOInterface
 
 class XmlIO extends IOInterface:
-
+  override val extension: String = ".xml"
   override def write(path: Path, data: GameMemento): Unit =
     XML.save(path.toString, gameToXml(data), "UTF-8", xmlDecl = true)
 

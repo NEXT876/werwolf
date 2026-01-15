@@ -4,6 +4,8 @@ package de.htwg.werwolf.controller.gameControllerComponent
 import de.htwg.werwolf.controller.GameControllerInterface
 import de.htwg.werwolf.util.Subject
 import de.htwg.werwolf.model.{CommandInterface, NarratorInterface, GameCoreInterface}
+import de.htwg.werwolf.fileIO.IOInterface
+import java.nio.file.Paths
 import de.htwg.werwolf.model.commandComponent.{
   GameMemento,
   GameCommand,
@@ -18,8 +20,18 @@ import scala.util.Random
 class GameController(private var _game: Game)(using
     narrator: NarratorInterface,
     ci: CommandInterface,
-    GC: GameCoreInterface
+    GC: GameCoreInterface,
+    io: IOInterface
 ) extends GameControllerInterface {
+
+  def save(slot: String, game: GameMemento): Unit =
+    val path = Paths.get("saves", slot + io.extension)
+    io.write(path, game)
+
+  def load(slot: String): GameMemento =
+    val path = Paths.get("saves", slot + io.extension)
+    io.read(path)
+
   private var savedMemento: Option[GameMemento] = None
   def game: Game = _game
   def updateGame(newGame: Game): Game =

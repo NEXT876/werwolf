@@ -138,7 +138,7 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
 
     // --- Steuer-Buttons unten Mitte ---
     val nextButton = new Button("nächster")
-    val skipButton = new Button("skip")
+    val skipButton = new Button("save_game")
 
     nextButton.onAction = _ => {
       val steps = 5
@@ -172,7 +172,7 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
     }
 
     skipButton.onAction = _ => {
-      // keine Aktion
+      // TODO BEN WAIBEL HIER WIRD DER DSAVE BUTTTTON IMPLEMENTIERT
     }
 
     val bottomCenterButtons = new HBox(10) {

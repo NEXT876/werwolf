@@ -1,11 +1,11 @@
-package de.htwg.werwolf.fileIO
+package de.htwg.werwolf.fileIO.fileIOImpl
 
 import play.api.libs.json._
 import de.htwg.werwolf.model.gameCoreComponents.*
 import de.htwg.werwolf.model.commandComponent.GameMemento
 import de.htwg.werwolf.model.Phase
-import de.htwg.werwolf.fileIO.PhaseJson.phaseFormat
-import de.htwg.werwolf.fileIO.VotesJson.votesFormat
+import de.htwg.werwolf.fileIO.fileIOImpl.PhaseJson.phaseFormat
+import de.htwg.werwolf.fileIO.fileIOImpl.VotesJson.votesFormat
 
 object PlayerJson:
   implicit val werwolfFormat: OFormat[Werwolf] = Json.format[Werwolf]

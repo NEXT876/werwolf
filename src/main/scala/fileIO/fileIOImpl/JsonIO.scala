@@ -1,5 +1,6 @@
-package de.htwg.werwolf.fileIO
+package de.htwg.werwolf.fileIO.fileIOImpl
 
+import de.htwg.werwolf.fileIO.IOInterface
 import de.htwg.werwolf.model.commandComponent.GameMemento
 import play.api.libs.json._
 import java.nio.file.{Files, Path}
@@ -7,6 +8,7 @@ import PlayerJson._
 import GameMementoJson._
 
 class JsonIO extends IOInterface:
+  override val extension: String = ".json"
   override def write(path: Path, data: GameMemento): Unit =
     val jsonStr = Json.prettyPrint(Json.toJson(data))
     Files.writeString(path, jsonStr)
