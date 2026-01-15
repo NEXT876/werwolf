@@ -17,7 +17,7 @@ class TUI()(using controller: GameControllerInterface) extends Observer[GameEven
         showLogo()
         printPlayerRoles(players)
 
-      case GameEvent.printnarratorText(text) =>
+      case GameEvent.printNarratorText(text) =>
         showLogo()
         tiping(text)
 
@@ -32,7 +32,7 @@ class TUI()(using controller: GameControllerInterface) extends Observer[GameEven
 
       case GameEvent.requestPlayerNames =>
 
-      case GameEvent.GameOver =>
+      case GameEvent.gameOver =>
         readLine("Press any key to end the game")
         clearScreen()
         showGameOver()
@@ -123,8 +123,8 @@ class TUI()(using controller: GameControllerInterface) extends Observer[GameEven
 
   def getPlayerNames(playerAmount: Int): Vector[String] =
     (0 until playerAmount).map { i =>
-      readLine(s"Spieler${i + 1} wie heißen sie:").trim match
-        case "" => s"Spieler${i + 1}"
+      readLine(s"Spieler${i + 1} wie heißen sie: ").trim match
+        case "" => s"Spieler ${i + 1}"
         case n  => n
     }.toVector
 

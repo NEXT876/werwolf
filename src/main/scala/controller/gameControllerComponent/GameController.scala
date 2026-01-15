@@ -37,6 +37,9 @@ class GameController(private var _game: Game)(using
     val path = Paths.get("saves", name + io.extension)
     val memento = io.read(path)
     _game = ci.restoreFromMemento(memento, _game)
+    updateGame(_game)
+    //notifyObservers(GameEvent.printGameState())
+    // ignored return value
 
   private var savedMemento: Option[GameMemento] = None
   def game: Game = _game
@@ -170,7 +173,7 @@ class GameController(private var _game: Game)(using
     game.copy(phase = if game.phase == Phase.Night then Phase.Day else Phase.Night)
 
   def runGame(): Unit =
-    notifyObservers(GameEvent.InitialthingsDone)
+    notifyObservers(GameEvent.initialThingsDone)
     runCurrentPhase()
 
   def runCurrentPhase(): Unit =
@@ -179,7 +182,7 @@ class GameController(private var _game: Game)(using
     game.phase match {
       case Phase.Night =>
         notifyObservers(
-          GameEvent.printnarratorText(
+          GameEvent.printNarratorText(
             narrator.randomNightNarratorTexte("Start")
           )
         )
@@ -187,7 +190,7 @@ class GameController(private var _game: Game)(using
         runNightPhase()
       case Phase.Day =>
         notifyObservers(
-          GameEvent.printnarratorText(
+          GameEvent.printNarratorText(
             narrator.randomDayNarratorTexte("Start")
           )
         )
@@ -202,7 +205,7 @@ class GameController(private var _game: Game)(using
       updateGame(executeCommand(GameEndCommand(Some(winningFaction)), game))
 
       notifyObservers(GameEvent.printText(s"Die $winningFaction haben gewonnen!!!", 120))
-      notifyObservers(GameEvent.GameOver)
+      notifyObservers(GameEvent.gameOver)
     case None =>
 
 }
