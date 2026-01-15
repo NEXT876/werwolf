@@ -39,4 +39,4 @@ project/project/
 # =========================
 # saveGames
 # =========================
-saves/
+saves/*
