@@ -50,7 +50,7 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
     // --- Menu Bar (Save / Restore) ---
     val saveItem = new MenuItem("Save Game")
     saveItem.onAction = _ => {
-      controller.saveGameState() // LOGIK MACHST DU
+      controller.saveIntoFile("test_1")
     }
 
     val restoreItem = new MenuItem("Restore Game")

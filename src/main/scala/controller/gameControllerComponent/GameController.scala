@@ -16,6 +16,7 @@ import de.htwg.werwolf.model.{Roles, Phase, GameEvent, Game, Faction}
 
 import scala.util.{Try, Success, Failure}
 import scala.util.Random
+import java.nio.file.Files
 
 class GameController(private var _game: Game)(using
     narrator: NarratorInterface,
@@ -24,13 +25,18 @@ class GameController(private var _game: Game)(using
     io: IOInterface
 ) extends GameControllerInterface {
 
-  def save(slot: String, game: GameMemento): Unit =
-    val path = Paths.get("saves", slot + io.extension)
-    io.write(path, game)
+  def saveIntoFile(name: String): Unit =
+    val memento = ci.createMemento(_game)
+    val dir = Paths.get("saves")
+    Files.createDirectories(dir)
+    val path = dir.resolve(name + io.extension)
+    io.write(path, memento)
 
-  def load(slot: String): GameMemento =
-    val path = Paths.get("saves", slot + io.extension)
-    io.read(path)
+
+  def loadFromFile(name: String): Unit =
+    val path = Paths.get("saves", name + io.extension)
+    val memento = io.read(path)
+    _game = ci.restoreFromMemento(memento, _game)
 
   private var savedMemento: Option[GameMemento] = None
   def game: Game = _game
