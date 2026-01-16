@@ -36,9 +36,9 @@ class GameController(private var _game: Game)(using
   def loadFromFile(name: String): Unit =
     val path = Paths.get("saves", name + io.extension)
     val memento = io.read(path)
-    _game = ci.restoreFromMemento(memento, _game)
-    updateGame(_game)
-    //notifyObservers(GameEvent.printGameState())
+    val updatedGame = ci.restoreFromMemento(memento, game)
+    updateGame(updatedGame)
+    notifyObservers(GameEvent.printGameState(game.players.values.mkString("\n")))
     // ignored return value
 
   private var savedMemento: Option[GameMemento] = None

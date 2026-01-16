@@ -87,10 +87,10 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
       menus = List(new Menu("Spiel") {
         items = List(
           new MenuItem("Spiel speichern") {
-            onAction => controller.saveGameState()
+            onAction = _ => controller.saveIntoFile("savedGamestate")
           },
           new MenuItem("Wiederherstellen") {
-            onAction => controller.undoFull()
+            onAction = _ => controller.loadFromFile("savedGamestate")
           }
         )
       })
