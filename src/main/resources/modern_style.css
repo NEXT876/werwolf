@@ -1,0 +1,113 @@
+/* modern_style.css - modernes, einheitliches Theme */
+@font-face {
+  /* optional: wenn du eine lokale/mitgelieferte Schrift haben willst, hier referenzieren.
+     Sonst benutzt das System-Fallback. */
+  font-family: "AppSans";
+  src: local("Segoe UI"), local("Helvetica Neue"), local("Arial");
+}
+
+.root-pane {
+  -fx-font-family: "AppSans";
+}
+
+/* Topbar */
+.topbar {
+  -fx-background-color: linear-gradient(to bottom, #ffffff, #f7fafb);
+  -fx-padding: 8 12;
+  -fx-border-color: transparent;
+}
+
+.app-title {
+  -fx-font-size: 20px;
+  -fx-fill: #263238;
+  -fx-font-weight: 600;
+}
+
+/* Card style */
+.card {
+  -fx-background-color: white;
+  -fx-background-radius: 12;
+  -fx-border-radius: 12;
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0.0, 0, 4);
+  -fx-padding: 12;
+}
+
+/* Player small cards */
+.player-card {
+  -fx-background-color: transparent;
+  -fx-padding: 0;
+}
+.player-label {
+  -fx-font-size: 12px;
+  -fx-text-fill: #263238;
+}
+
+/* Chat */
+.chat-list {
+  -fx-background-color: transparent;
+  -fx-control-inner-background: #ffffff;
+  -fx-background-insets: 0;
+  -fx-border-color: transparent;
+}
+.chat-input {
+  -fx-background-radius: 6;
+  -fx-border-radius: 6;
+  -fx-padding: 8;
+}
+
+/* Buttons */
+.btn {
+  -fx-font-size: 13px;
+  -fx-background-radius: 10;
+  -fx-padding: 8 12 8 12;
+  -fx-cursor: hand;
+  -fx-pref-width: 110;
+}
+
+.btn-primary {
+  -fx-background-color: linear-gradient(#00bfa5, #00a38f);
+  -fx-text-fill: white;
+  -fx-font-weight: 600;
+}
+
+.btn-accent {
+  -fx-background-color: linear-gradient(#00acc1, #0097a7);
+  -fx-text-fill: white;
+  -fx-font-weight: 600;
+}
+
+.btn-outline {
+  -fx-background-color: transparent;
+  -fx-border-color: #cfd8dc;
+  -fx-text-fill: #37474f;
+}
+
+/* Phase label */
+.big-phase {
+  -fx-font-size: 18px;
+  -fx-font-weight: bold;
+  -fx-text-fill: #00796b;
+  -fx-padding: 6 0 12 0;
+}
+
+/* playfield */
+.playfield {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+}
+
+/* small polish */
+.top-menu {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+}
+
+/* ListView item style (chat messages) */
+.list-cell {
+  -fx-padding: 6 8;
+}
+
+/* responsive-ish */
+@media screen and (max-width: 1200px) {
+  .app-title { -fx-font-size: 18px; }
+}

@@ -2,52 +2,107 @@
 package de.htwg.werwolf.view
 
 import de.htwg.werwolf.model.GameEvent
-import de.htwg.werwolf.controller.*
+import de.htwg.werwolf.controller.GameControllerInterface
 import de.htwg.werwolf.util.Observer
 
+import scala.io.StdIn.{readLine, readInt}
+import de.htwg.werwolf.model.Roles
 
-import scala.io.StdIn.readLine
-
-class TUI(controller : GameController) extends Observer[GameEvent] {
-
-
+class TUI()(using controller: GameControllerInterface) extends Observer[GameEvent] {
 
   override def update(event: GameEvent): Unit =
-  event match
-    case GameEvent.printGameState(players) =>
-      clearScreen()
-      showLogo()
-      printPlayerRoles(players.map { case (name, player) =>
-        (name, player.role.toString(), player.isAlive)
-      }.toVector)
+    event match
+      case GameEvent.printGameState(players) =>
+        clearScreen()
+        showLogo()
+        printPlayerRoles(players)
 
-    case GameEvent.printnarratorText(text) =>
-      showLogo()
-      tiping(text)
-    
-    case GameEvent.printText(text,wait) =>
-      tiping(text,wait)
+      case GameEvent.printNarratorText(text) =>
+        showLogo()
+        tiping(text)
 
-    case GameEvent.showLogo =>
-      showLogo()
+      case GameEvent.printText(text, wait) =>
+        tiping(text, wait)
 
-    case GameEvent.clearScreen =>
-      clearScreen()
+      case GameEvent.showLogo =>
+        showLogo()
 
-    case GameEvent.requestPlayerNames =>
-      
+      case GameEvent.clearScreen =>
+        clearScreen()
 
-    case GameEvent.GameOver =>
-      clearScreen()
-      showGameOver()
+      case GameEvent.requestPlayerNames =>
 
-    case GameEvent.printErrorMSG(msg) =>
-      printErrorMsg(msg)
+      case GameEvent.gameOver =>
+        readLine("Press any key to end the game")
+        clearScreen()
+        showGameOver()
+        javafx.application.Platform.exit()
 
-    case _ =>
+      case GameEvent.printErrorMSG(msg) =>
+        printErrorMsg(msg)
 
+      case GameEvent.askForTargetNight(name, role, targets) =>
+        if targets.nonEmpty then
+          role match
+            case Roles.amor =>
+              //amorAction(name, targets)
+            case Roles.werwolf =>
+              werwolfAction(name, targets)
+            case Roles.witch =>
+              witchAction(name, targets)
+            case _ =>
 
-  def start(): Unit = 
+      case GameEvent.askForTargetDay(name, targets) =>
+        println(s"$name, für wen votest du")
+        targets.zipWithIndex.foreach { case (t, i) =>
+          println(s"$i: $t")
+        }
+        val choice = readValidChoice(targets)
+        controller.submitvoting(name, targets(choice))
+
+      case _ =>
+
+  def werwolfAction(name: String, targets: Vector[String]): Unit =
+    println(s"$name, welches Opfer reißt du diese Nacht?")
+    targets.zipWithIndex.foreach { case (t, i) =>
+      println(s"$i: $t")
+    }
+    val choice = readValidChoice(targets)
+    controller.submitvoting(name, targets(choice))
+
+  def witchAction(name: String, targets: Vector[String]): Unit =
+    println(
+      s"$name, möchtest du in dieser Nacht jemanden heilen oder töten? (tippe 'Yes' für Action)"
+    )
+    targets.zipWithIndex.foreach { case (t, i) =>
+      println(s"$i: $t")
+    }
+    val choice1 = readLine()
+    if choice1 == "Yes" then
+      val choice = readValidChoice(targets)
+      controller.submitNightChoice(name, targets(choice))
+
+  def readValidChoice(targets: Vector[String]): Int =
+    val c = readInt()
+    if c >= 0 && c < targets.size then c
+    else
+      println("Ungültige Auswahl")
+      readValidChoice(targets)
+
+  def amorAction(name: String, targets: Vector[String]) =
+    if targets.size >= 2 then
+      println(s"$name, welche 2 Glücklichen möchtest du heute Nacht bis zum Tode verbinden?")
+      targets.zipWithIndex.foreach { case (t, i) =>
+        println(s"$i: $t")
+      }
+
+      val choice1 = readValidChoice(targets)
+      val choice2 = readValidChoice(targets)
+      // controller.submitNightChoiceAmor(name, targets(choice1), targets(choice2))
+
+  def start(): Unit =
+    Thread.sleep(1000)
+    controller.addObserver(this)
     clearScreen()
     tiping("Willkommen zu Werwolf", 100)
     showLogo()
@@ -58,44 +113,28 @@ class TUI(controller : GameController) extends Observer[GameEvent] {
     controller.addRoles(names)
 
     controller.runGame()
-  
 
-  def getPlayerAmount(): Int = {
+  def getPlayerAmount(): Int =
     val input = readLine("Wie viele Spieler? (mind. 2, max. 6): ")
     input.toIntOption match {
       case Some(n) => n.min(6).max(2)
       case None    => 5
     }
-  }
 
-  def getPlayerNames(playerAmount: Int): Vector[String] = {
+  def getPlayerNames(playerAmount: Int): Vector[String] =
     (0 until playerAmount).map { i =>
-      readLine(s"Spieler${i + 1} wie heißen sie:").trim match
-        case "" => s"Spieler${i + 1}"
+      readLine(s"Spieler${i + 1} wie heißen sie: ").trim match
+        case "" => s"Spieler ${i + 1}"
         case n  => n
     }.toVector
-  }
 
-  def printPlayerRoles(playerRoles: Vector[AnyRef]): Unit = {
-    val header = "\n================ Spieler & Rollen ================\n"
+  def printPlayerRoles(playerRoles: String): Unit =
+    val header = "\n================ Spieler & Rollen ==================\n"
+    val footer = "\n====================================================\n"
 
-    val body = playerRoles
-      .map {
-        case (name: String, role: String, isAlive: Boolean) =>
-          val state = if isAlive then "lebt" else "tot"
-          f"• ${name}%-15s | Rolle: ${role}%-10s | Status: ${state}%-7s"
+    println(header + playerRoles + footer)
 
-        case other =>
-          s"• Unbekanntes Objekt: ${other.getClass.getSimpleName}"
-      }
-      .mkString("\n")
-
-    val footer = "\n==================================================\n"
-
-    println(header + body + footer)
-  }
-
-  def tiping(text: String, waitTime_ms: Int = 30): Unit = {
+  def tiping(text: String, waitTime_ms: Int = 30): Unit =
     text.foreach { buchstabe =>
       if (buchstabe == '.') {
         Thread.sleep(waitTime_ms * 4)
@@ -106,23 +145,19 @@ class TUI(controller : GameController) extends Observer[GameEvent] {
       }
     }
     println()
-  }
 
-  def showLogo(): Unit = {
+  def showLogo(): Unit =
     import scala.io.Source
     println(Source.fromResource("logo.txt").mkString)
-  }
 
-  def clearScreen(): Unit = {
+  def clearScreen(): Unit =
     import sys.process._
     if (sys.props("os.name").toLowerCase.contains("win")) "cls".!
     else "clear".! // clear Screen for WIndows and Linux/Mac
-  }
 
   def showGameOver(): Unit =
     println("Das Game ist vorbei")
 
   def printErrorMsg(msg: String): Unit =
     println(msg)
-  
 }

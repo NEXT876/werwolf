@@ -1,11 +1,8 @@
-package de.htwg.werwolf.model
+// src/main/scala/model/commands/Command.scala
+package de.htwg.werwolf.model.commandComponent
 
-trait GameCommand {
-  def description: String
-  def execute(game: Game): Game
-  def undo( game: Game): Game
-}
-
+import de.htwg.werwolf.model.Game
+import de.htwg.werwolf.model.Faction
 
 case class KillCommand(killerName: String, targetName: String) extends GameCommand {
 
@@ -28,6 +25,31 @@ case class KillCommand(killerName: String, targetName: String) extends GameComma
     }
   }
 }
+
+
+case class reviveCommand(targetName: String) extends GameCommand {
+
+  override def description: String = s"${targetName} wurde von der Hexe wiederbelebt"
+  override def execute(game: Game): Game = {
+    game.players.get(targetName) match {
+      case Some(target) if !target.isAlive =>
+        val revivedPlayer = target.revive
+        game.copy(players = game.players.updated(targetName, revivedPlayer))
+      case _ => game 
+    }
+  }
+
+  override def undo(game: Game): Game = {
+    game.players.get(targetName) match {
+      case Some(target) if target.isAlive =>
+        val killedPlayer = target.die
+        game.copy(players = game.players.updated(targetName, killedPlayer))
+      case _ => game
+    }
+  }
+}
+
+
 
 case class GameEndCommand(winner: Option[Faction] = None) extends GameCommand {
 
