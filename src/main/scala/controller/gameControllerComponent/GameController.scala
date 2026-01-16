@@ -48,7 +48,8 @@ class GameController(private var _game: Game)(using
     game
 
   def saveGameState(): Unit =
-    savedMemento = Some(ci.createMemento(game))
+    Some(ci.createMemento(game))
+    
 
   def undoFull(): Unit = savedMemento match
     case Some(memento) =>
