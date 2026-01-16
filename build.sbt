@@ -4,7 +4,6 @@ lazy val root = project
   .in(file("."))
   .settings(
     name := "scalafx-test",
-
     scalacOptions ++= Seq(
       "-Wconf:msg=Implicit parameters should be provided with a `using` clause:s",
       "-deprecation",
@@ -13,6 +12,7 @@ lazy val root = project
       "-unchecked"
     ),
 
+    javaOptions ++= Seq("-XX:+EnableDynamicAgentLoading"),
 
     // Aktuelle ScalaFX (für JavaFX 21)
     libraryDependencies ++= Seq(
@@ -25,7 +25,10 @@ lazy val root = project
       "com.google.inject" % "guice" % "7.0.0",
       "net.codingwell" %% "scala-guice" % "7.0.0",
       "com.typesafe.play" %% "play-json" % "2.10.0",
-      "org.scala-lang.modules" %% "scala-xml" % "2.4.0"    ),
+      "org.scala-lang.modules" %% "scala-xml" % "2.4.0",
+      "org.scalatestplus" %% "mockito-4-11" % "3.2.18.0" % Test,
+      "org.mockito" % "mockito-core" % "5.11.0" % Test
+    ),
     libraryDependencies ++= {
       val os = System.getProperty("os.name").toLowerCase match {
         case mac if mac.contains("mac") => "mac"

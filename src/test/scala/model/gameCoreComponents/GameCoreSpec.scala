@@ -26,12 +26,12 @@ class VotesSpec extends AnyWordSpec {
       val votes5 = votes4.addVote("Paula", game)
       votes5.votes should be(Map("Bob" -> 3, "Paula" -> 2))
 
-      votes5.getVotedPlayer should be(Some("Bob"))
+      votes5.getVotedPlayer(game) should be(Some("Bob"))
     }
     "return nothing for no votes" in {
       val votes = Votes()
 
-      votes.getVotedPlayer should be(None)
+      votes.getVotedPlayer(Game()) should be(None)
     }
   }
 }

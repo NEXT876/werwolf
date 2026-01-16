@@ -5,7 +5,7 @@ import de.htwg.werwolf.model.*
 import de.htwg.werwolf.model.commandComponent.GameMemento
 import de.htwg.werwolf.model.Phase
 import de.htwg.werwolf.model.gameCoreComponents.Votes
-import de.htwg.werwolf.model.commandComponent.CommandInterface
+//import de.htwg.werwolf.model.commandComponent.CommandInterface
 import de.htwg.werwolf.model.commandComponent.ExecuteC
 
 class GameHistorySpec extends AnyWordSpec with Matchers {

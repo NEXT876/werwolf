@@ -1,180 +1,258 @@
-// src/test/scala/controller/GameControllerSpec.scala
-package de.htwg.werwolf.controller.commandComponent
+package de.htwg.werwolf.controller.gameControllerComponent
+
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers
 
 import de.htwg.werwolf.model._
-import de.htwg.werwolf.util.Observer
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+import de.htwg.werwolf.fileIO.IOInterface
+import de.htwg.werwolf.model.commandComponent._
+
 import scala.util.{Success, Failure}
-import de.htwg.werwolf.model.CommandInterface
-import de.htwg.werwolf.model.narratorComponent.NarratorInterface
-import de.htwg.werwolf.model.narratorComponent.JsonNarrator
-import de.htwg.werwolf.model.commandComponent.ExecuteC
-import de.htwg.werwolf.model.gameCoreComponents.GameCore
-import de.htwg.werwolf.model.gameCoreComponents.GameCoreInterface
-import de.htwg.werwolf.model.gameCoreComponents.Villager
-import de.htwg.werwolf.model.gameCoreComponents.Werwolf
-import de.htwg.werwolf.model.gameCoreComponents.Phase
-import de.htwg.werwolf.controller.gameControllerComponent.GameController
-import de.htwg.werwolf.model.commandComponent.GameCommand
 
-class GameControllerSpec extends AnyWordSpec with Matchers {
+class GameControllerSpec extends AnyWordSpec with Matchers with MockitoSugar {
 
-  
   "GameController" should {
 
-    given NarratorInterface =
-      new JsonNarrator(
-        os.pwd / "src" / "main" / "resources" / "narrator.json"
-    )
-    given CommandInterface = new ExecuteC
-    given GameCoreInterface = new GameCore
+    "saveIntoFile calls io.write with memento" in {
+      val narrator = mock[NarratorInterface]
+      val ci       = mock[CommandInterface]
+      val gc       = mock[GameCoreInterface]
+      val io       = mock[IOInterface]
 
-    /*"have a getter for game" in {
-      val controller = new GameController(Game())
-      controller.game should be(game)
-    }*/
+      given NarratorInterface = narrator
+      given CommandInterface  = ci
+      given GameCoreInterface = gc
+      given IOInterface       = io
 
-    "update game correctly" in {
-      val initialGame = Game()
+      val initialGame = Game(
+        players        = Map.empty,
+        phase          = Phase.Day,
+        day            = 1,
+        votes          = null,
+        isRunning      = true,
+        commandHistory = Vector.empty[GameCommand]
+      )
+
+      val memento = GameMemento(
+        players        = Map.empty,
+        phase          = Phase.Day,
+        day            = 1,
+        votes          = null,
+        isRunning      = true,
+        commandHistory = Vector.empty[GameCommand]
+      )
+
+      when(ci.createMemento(initialGame)).thenReturn(memento)
+      when(io.extension).thenReturn(".json")
+
       val controller = new GameController(initialGame)
-      val newGame = Game(players = Map("test" -> Villager("test")))
-      controller.updateGame(newGame) should be(newGame)
-      controller.game should be(newGame)
+      controller.saveIntoFile("foo")
+
+      verify(io).write(any(), ArgumentMatchers.eq(memento))
     }
 
-    "save game state" in {
-      val game = Game()
-      val controller = new GameController(game)
-      controller.saveGameState()
-      // No direct assertion, but covers the line
+    "loadFromFile restores game using command interface" in {
+      val narrator = mock[NarratorInterface]
+      val ci       = mock[CommandInterface]
+      val gc       = mock[GameCoreInterface]
+      val io       = mock[IOInterface]
+
+      given NarratorInterface = narrator
+      given CommandInterface  = ci
+      given GameCoreInterface = gc
+      given IOInterface       = io
+
+      val initialGame = Game(
+        players        = Map.empty,
+        phase          = Phase.Day,
+        day            = 1,
+        votes          = null,
+        isRunning      = true,
+        commandHistory = Vector.empty[GameCommand]
+
+      )
+
+      val memento = GameMemento(
+        players        = Map.empty,
+        phase          = Phase.Night,
+        day            = 5,
+        votes          = null,
+        isRunning      = true,
+        commandHistory = Vector.empty[GameCommand]
+
+      )
+
+      val restoredGame = initialGame.copy(phase = Phase.Night, day = 5)
+
+      when(io.read(any())).thenReturn(memento)
+      when(ci.restoreFromMemento(memento, initialGame)).thenReturn(restoredGame)
+
+      val controller = new GameController(initialGame)
+      controller.loadFromFile("testSave")
+
+      controller.game.day   shouldBe 5
+      controller.game.phase shouldBe Phase.Night
+
+      verify(io).read(any())
+      verify(ci).restoreFromMemento(memento, initialGame)
     }
 
-    "undo full with saved memento" in {
-      val game = Game(players = Map("p1" -> Villager("p1")))
-      val controller = new GameController(game)
-      controller.saveGameState()
-      val mockObserver = new MockObserver
-      controller.addObserver(mockObserver)
-      controller.undoFull()
-      mockObserver.receivedEvents should contain(GameEvent.printText("↶ Vollständiges Undo – alles zurückgesetzt!", 70))
+    "executeCommand updates game" in {
+      val narrator = mock[NarratorInterface]
+      val ci       = mock[CommandInterface]
+      val gc       = mock[GameCoreInterface]
+      val io       = mock[IOInterface]
+
+      given NarratorInterface = narrator
+      given CommandInterface  = ci
+      given GameCoreInterface = gc
+      given IOInterface       = io
+
+      val initialGame = Game(
+        players        = Map.empty,
+        phase          = Phase.Day,
+        day            = 1,
+        votes          = null,
+        isRunning      = true,
+        commandHistory = Vector.empty[GameCommand]
+
+      )
+
+      val cmd         = mock[GameCommand]
+      val updatedGame = initialGame.copy(day = 2)
+
+      when(ci.executeCommand(cmd, initialGame)).thenReturn(updatedGame)
+
+      val controller = new GameController(initialGame)
+      controller.executeCommand(cmd, initialGame).day shouldBe 2
+      controller.game.day shouldBe 2
     }
 
-    "undo full without memento" in {
-      val game = Game()
-      val controller = new GameController(game)
-      val mockObserver = new MockObserver
-      controller.addObserver(mockObserver)
-      controller.undoFull()
-      mockObserver.receivedEvents should contain(GameEvent.printText("Kein gespeicherter Spielstand zum Wiederherstellen.", 70))
+    "undoCommand success and failure" in {
+      val narrator = mock[NarratorInterface]
+      val ci       = mock[CommandInterface]
+      val gc       = mock[GameCoreInterface]
+      val io       = mock[IOInterface]
+
+      given NarratorInterface = narrator
+      given CommandInterface  = ci
+      given GameCoreInterface = gc
+      given IOInterface       = io
+
+      val initialGame = Game(
+        players        = Map.empty,
+        phase          = Phase.Day,
+        day            = 1,
+        votes          = null,
+        isRunning      = true,
+        commandHistory = Vector.empty[GameCommand]
+
+      )
+
+      val undoneGame = initialGame.copy(day = 99)
+      when(ci.undoLast(initialGame)).thenReturn(Success(undoneGame))
+
+      val ctrl1 = new GameController(initialGame)
+      val r1   = ctrl1.undoCommand()
+      r1.day shouldBe 99
+      ctrl1.game.day shouldBe 99
+
+      when(ci.undoLast(any())).thenReturn(Failure(new Exception("none")))
+      val ctrl2 = new GameController(initialGame)
+      val r2   = ctrl2.undoCommand()
+      r2.day shouldBe 1
     }
 
-    "execute command" in {
-      
-      val game = Game()
-      val controller = GameController(game)
-      val cmd = MockCommand(game)
-      controller.executeCommand(cmd, game)
-      controller.game.commandHistory should contain(cmd)
+    "countAlivePlayer returns 0,0 with empty map" in {
+        given NarratorInterface = mock[NarratorInterface]
+        given CommandInterface  = mock[CommandInterface]
+        given GameCoreInterface = mock[GameCoreInterface]
+        given IOInterface       = mock[IOInterface]
+
+        val controller = new GameController(
+          Game(Map.empty, Phase.Day, 1, null, true, Vector.empty[GameCommand])
+        )
+        controller.countAlivePlayer() shouldBe (0, 0)
+      }
+
+    "addRoles updates game via GameCore" in {
+      val narrator = mock[NarratorInterface]
+      val ci       = mock[CommandInterface]
+      val gc       = mock[GameCoreInterface]
+      val io       = mock[IOInterface]
+
+      given NarratorInterface = narrator
+      given CommandInterface  = ci
+      given GameCoreInterface = gc
+      given IOInterface       = io
+
+      val initialGame = Game(Map.empty, Phase.Day, 1, null, true, Vector.empty[GameCommand]
+)
+      val gAfterRoles = initialGame.copy(day = 7)
+
+      when(gc.addRoles(Vector("a","b"), initialGame)).thenReturn(gAfterRoles)
+
+      val controller = new GameController(initialGame)
+      controller.addRoles(Vector("a","b"))
+      controller.game.day shouldBe 7
     }
 
-    "undo command with success" in {
-      val game = Game(commandHistory = Vector(new MockCommand(Game())))
-      val controller = new GameController(game)
-      val result = controller.undoCommand()
-      result.commandHistory should be(empty)
-    }
+    "switchPhase toggles and finishNightPhase runs" in {
 
-    "undo command with failure" in {
-      val game = Game()
-      val controller = new GameController(game)
-      val mockObserver = new MockObserver
-      controller.addObserver(mockObserver)
-      controller.undoCommand()
-      mockObserver.receivedEvents should contain(GameEvent.printErrorMSG("Nichts zum Rückgängigmachen!"))
-    }
 
-    "add roles" in {
-      val game = Game()
-      val controller = new GameController(game)
-      controller.addRoles(Vector("p1", "p2"))
-      controller.game.players.size should be(2)
-    }
+        given NarratorInterface = mock[NarratorInterface]
+        given CommandInterface  = mock[CommandInterface]
+        given GameCoreInterface = mock[GameCoreInterface]
+        given IOInterface       = mock[IOInterface]
 
-    "run game loop until not running" in {
-      val game = Game(isRunning = false)
-      val controller = new GameController(game)
-      val mockObserver = new MockObserver
-      controller.addObserver(mockObserver)
-      controller.runGame()
-      mockObserver.receivedEvents should contain(GameEvent.InitialthingsDone)
-      mockObserver.receivedEvents should contain(GameEvent.GameOver)
-    }
+        val controller = new GameController(
+          Game(Map.empty, Phase.Night, 1, null, true, Vector.empty[GameCommand])
+        )
 
-    "run game night phase" in {
-      val players = Map("p1" -> Werwolf("p1"), "p2" -> Villager("p2"))
-      val game = Game(players = players, phase = Phase.Night, isRunning = true)
-      val controller = new GameController(game)
-      val mockObserver = new MockObserver
-      controller.addObserver(mockObserver)
-      controller.runGame()
-      // Covers night phase, but loop may run once; adjust for coverage
-    }
+        controller.switchPhase().phase shouldBe Phase.Day
+        // finishNightPhase should not throw
+        controller.finishNightPhase()
+      }
 
-    "run game day phase" in {
-      val players = Map("p1" -> Werwolf("p1"), "p2" -> Villager("p2"))
-      val game = Game(players = players, phase = Phase.Day, isRunning = true)
-      val controller = new GameController(game)
-      val mockObserver = new MockObserver
-      controller.addObserver(mockObserver)
-      controller.runGame()
-      // Covers day phase
-    }
+    "runCurrentPhase runs for both day + night" in {
+        given NarratorInterface = mock[NarratorInterface]
+        given CommandInterface  = mock[CommandInterface]
+        given GameCoreInterface = mock[GameCoreInterface]
+        given IOInterface       = mock[IOInterface]
 
-    "handle win condition in run game" in {
-      val players = Map("p1" -> Werwolf("p1"))
-      val game = Game(players = players, phase = Phase.Night, isRunning = true)
-      val controller = new GameController(game)
-      val mockObserver = new MockObserver
-      controller.addObserver(mockObserver)
-      controller.runGame()
-      mockObserver.receivedEvents should contain(GameEvent.printText(s"Die ${Faction._Werwolf} haben gewonnen!!!", 120))
-    }
+        val controllerDay = new GameController(
+          Game(Map.empty, Phase.Day, 1, null, true, Vector.empty[GameCommand])
+        )
+        controllerDay.runCurrentPhase()
 
-    "handle win condition in two games" in {
-      val players = Map("p1" -> Werwolf("p1"), "p2" -> Villager("p2"),  "p3" -> Villager("p3"))
-      val game = Game(players = players, phase = Phase.Night, isRunning = true)
-      val controller = new GameController(game)
-      val mockObserver = new MockObserver
-      controller.addObserver(mockObserver)
-      controller.runGame()
-      mockObserver.receivedEvents should contain(GameEvent.printText(s"Die ${Faction._Werwolf} haben gewonnen!!!", 120))
-    }
+        val controllerNight = new GameController(
+          Game(Map.empty, Phase.Night, 1, null, true, Vector.empty[GameCommand])
+        )
+        controllerNight.runCurrentPhase()
+      }
 
-    "handle no win condition" in {
-      val players = Map("p1" -> Werwolf("p1"), "p2" -> Villager("p2"))
-      val game = Game(players = players, phase = Phase.Night, isRunning = true)
-      val controller = new GameController(game)
-      val mockObserver = new MockObserver
-      controller.addObserver(mockObserver)
-      // Mock to prevent infinite loop; covers else branch
-      controller.runGame() // May need to adjust game to end quickly
+    "checkIfGameEnd executes GameEndCommand" in {
+      val narrator = mock[NarratorInterface]
+      val ci       = mock[CommandInterface]
+      val gc       = mock[GameCoreInterface]
+      val io       = mock[IOInterface]
+
+      given NarratorInterface = narrator
+      given CommandInterface  = ci
+      given GameCoreInterface = gc
+      given IOInterface       = io
+
+      val initialGame = Game(Map.empty, Phase.Day, 1, null, true, Vector.empty[GameCommand]
+)
+      when(ci.executeCommand(any[GameCommand](), any[Game]())).thenReturn(initialGame.copy(isRunning = false))
+
+      val controller = new GameController(initialGame)
+      controller.checkIfGameEnd(Some(Faction._Werwolf))
+      verify(ci).executeCommand(any[GameCommand](), any[Game]())
     }
   }
-}
-
-// Mocks for coverage
-class MockObserver extends Observer[GameEvent] {
-  var receivedEvents: List[GameEvent] = Nil
-  override def update(event: GameEvent): Unit = receivedEvents = event :: receivedEvents
-}
-
-class MockCommand(initialGame: Game) extends GameCommand {
-  override def description: String = "mock"
-
-  override def execute(game: Game): Game = 
-    initialGame  // oder game.copy(...) für realistischeres Verhalten
-
-  override def undo(game: Game): Game = 
-    initialGame  // zurück zum Ausgangszustand
 }
