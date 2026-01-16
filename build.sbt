@@ -11,7 +11,6 @@ lazy val root = project
       "-feature",
       "-unchecked"
     ),
-
     javaOptions ++= Seq("-XX:+EnableDynamicAgentLoading"),
 
     // Aktuelle ScalaFX (für JavaFX 21)
@@ -29,6 +28,12 @@ lazy val root = project
       "org.scalatestplus" %% "mockito-4-11" % "3.2.18.0" % Test,
       "org.mockito" % "mockito-core" % "5.11.0" % Test
     ),
+
+    // Cross-platform (Unix + Windows) — alle Dateien im Ordner `view` und Unterordner
+    coverageExcludedFiles := """.*[/\\]view[/\\].*""",
+
+// zur Absicherung (falls Scoverage nach Paketnamen filtert)
+    coverageExcludedPackages := """.*\.?view(\..*)?""",
     libraryDependencies ++= {
       val os = System.getProperty("os.name").toLowerCase match {
         case mac if mac.contains("mac") => "mac"
