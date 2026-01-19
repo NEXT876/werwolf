@@ -45,7 +45,7 @@ class TUI()(using controller: GameControllerInterface) extends Observer[GameEven
         if targets.nonEmpty then
           role match
             case Roles.amor =>
-              //amorAction(name, targets)
+            // amorAction(name, targets)
             case Roles.werwolf =>
               werwolfAction(name, targets)
             case Roles.witch =>
@@ -77,17 +77,23 @@ class TUI()(using controller: GameControllerInterface) extends Observer[GameEven
     targets.zipWithIndex.foreach { case (t, i) =>
       println(s"$i: $t")
     }
-    val choice1 = readLine()
-    if choice1 == "Yes" then
+    val choice1 = readLine().trim
+    if choice1.equalsIgnoreCase("yes") then
       val choice = readValidChoice(targets)
       controller.submitNightChoice(name, targets(choice))
+    else controller.submitNightChoice(name, name)
 
   def readValidChoice(targets: Vector[String]): Int =
-    val c = readInt()
-    if c >= 0 && c < targets.size then c
-    else
-      println("Ungültige Auswahl")
-      readValidChoice(targets)
+    val c = readLine().trim
+    c.toIntOption match
+      case Some(input) =>
+        if input >= 0 && input < targets.size then input
+        else
+          println("Ungültige Wahl")
+          readValidChoice(targets)
+      case None =>
+        println("das ist keine Zahl")
+        readValidChoice(targets)
 
   def amorAction(name: String, targets: Vector[String]) =
     if targets.size >= 2 then
@@ -115,10 +121,16 @@ class TUI()(using controller: GameControllerInterface) extends Observer[GameEven
     controller.runGame()
 
   def getPlayerAmount(): Int =
-    val input = readLine("Wie viele Spieler? (mind. 2, max. 6): ")
+    val input = readLine("Wie viele Spieler? (mind. 2, max. 6): ").trim()
     input.toIntOption match {
-      case Some(n) => n.min(6).max(2)
-      case None    => 5
+      case Some(n) =>
+        if n >= 2 && n <= 6 then n
+        else
+          println("ungültige Spieleranzahl")
+          getPlayerAmount()
+      case None =>
+        println("ungültige Eingabe")
+        getPlayerAmount()
     }
 
   def getPlayerNames(playerAmount: Int): Vector[String] =

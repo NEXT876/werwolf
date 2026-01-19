@@ -22,23 +22,23 @@ import de.htwg.werwolf.model.GameEvent
 import de.htwg.werwolf.controller.GameControllerInterface
 import de.htwg.werwolf.util.Observer
 
-/** GUI mit Vorabbefragung der Spielerzahl + Namen
-  *
-  * Flow: 1) Setup-View (Anzahl wählen) 2) Namenseingabe-Formular (genau N Felder) 3) Bei
-  * Bestätigung -> Spiel wird gebaut (UI wechselt) und controller.addRoles(names) +
-  * controller.runGame() werden aufgerufen
-  *
-  * Hinweise:
-  *   - Diese GUI erwartet, dass ein GameControllerInterface via `init()(using controller)`
-  *     injiziert wird
-  *   - Die TUI bleibt unverändert, wird aber nicht automatisch gestartet — GUI steuert das Spiel
-  */
 object GUI extends JFXApp3 with Observer[GameEvent] {
-  // Controller wird per init injiziert (wie in deiner Umgebung)
+  
   var controller: GameControllerInterface = uninitialized
 
-  private var mainRoot: BorderPane = _
-  private var titleText: Text = _
+  override def update(event: GameEvent): Unit =
+    event match
+      case GameEvent.printGameState(players) => printPlayerRoles(players)
+      case GameEvent.switchPhase(phase) => Platform.runLater { NightDayCycleText.value = phase }
+      case _                            => ()
+
+  def init()(using c: GameControllerInterface): Unit =
+    controller = c
+    controller.addObserver(this)
+
+
+  private var mainRoot: BorderPane = uninitialized
+  private var titleText: Text = uninitialized
 
   // Observable Strings für dynamische Anzeige
   private val rollenInfoText = StringProperty("Noch keine Rolleninformationen vorhanden")
@@ -67,19 +67,9 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
     prefRowCount = 8
   }
 
-  def init()(using c: GameControllerInterface): Unit =
-    controller = c
-    controller.addObserver(this)
-
-  override def update(event: GameEvent): Unit =
-    event match
-      case GameEvent.printGameState(players) => printPlayerRoles(players)
-      case GameEvent.switchPhase(phase) => Platform.runLater { NightDayCycleText.value = phase }
-      case _                            => ()
-
-  // --- UI nodes that we will swap ---
-  private var setupPane: VBox = _
-  private var nameEntryPane: VBox = _
+  
+  private var setupPane: VBox = uninitialized
+  private var nameEntryPane: VBox = uninitialized
 
   override def start(): Unit =
     // Top menu / title (always visible)
@@ -354,7 +344,7 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
         p.layoutY = 0
         p
       }
-      centerPane.children.addAll(playerNodes.map(_.delegate): _*)
+      centerPane.children.addAll(playerNodes.map(_.delegate)*)
       positionPlayersOnOval(0)
     }
 

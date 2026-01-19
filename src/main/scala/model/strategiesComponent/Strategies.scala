@@ -21,8 +21,8 @@ case object WerwolfAction extends NightActionStrategy {
   override def execute(player: Player, target: String, game: Game)(using
       ci: CommandInterface
   ): Game =
-    game.votes.addVote(target, game)
-    game
+      val newVotes = game.votes.addVote(target, game)
+      game.copy(votes = newVotes)
 
 }
 
@@ -38,8 +38,8 @@ case object WitchAction extends NightActionStrategy {
   override def execute(player: Player, target: String, game: Game)(using
       ci: CommandInterface
   ): Game =
-    if game.players(target).isAlive then ci.executeCommand(reviveCommand(target), game)
-    else ci.executeCommand(KillCommand(player.name, target), game)
+    if game.players(target).isAlive then ci.executeCommand(KillCommand(player.name, target), game)
+    else ci.executeCommand(reviveCommand(target), game)
 
 }
 
@@ -103,6 +103,6 @@ case object voteAction extends NightActionStrategy {
   override def execute(player: Player, target: String, game: Game)(using
       ci: CommandInterface
   ): Game = 
-    game.votes.addVote(target, game)
-    game
+      val newVotes = game.votes.addVote(target, game)
+      game.copy(votes = newVotes)
 }

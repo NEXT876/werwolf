@@ -18,7 +18,7 @@ import scala.util.{Try, Success, Failure}
 import scala.util.Random
 import java.nio.file.Files
 
-class GameController(private var _game: Game)(using
+class GameController(var _game: Game)(using
     narrator: NarratorInterface,
     ci: CommandInterface,
     GC: GameCoreInterface,
@@ -31,7 +31,6 @@ class GameController(private var _game: Game)(using
     Files.createDirectories(dir)
     val path = dir.resolve(name + io.extension)
     io.write(path, memento)
-
 
   def loadFromFile(name: String): Unit =
     val path = Paths.get("saves", name + io.extension)
@@ -49,7 +48,6 @@ class GameController(private var _game: Game)(using
 
   def saveGameState(): Unit =
     Some(ci.createMemento(game))
-    
 
   def undoFull(): Unit = savedMemento match
     case Some(memento) =>
@@ -91,6 +89,7 @@ class GameController(private var _game: Game)(using
     val Players =
       game.players.values
         .filter(_.faction == Faction._Werwolf)
+        .filter(_.isAlive)
         .toSeq
         .sortBy(p => p.role != Roles.werwolf)
 
@@ -115,7 +114,7 @@ class GameController(private var _game: Game)(using
     updateGame(updatedGame)
 
     player.foreach { player =>
-      if player.nightAction.canAct(player, game) then
+      if player.dayAction.canAct(player, game) then
         val targets = game.players.values.filter(_.name != player.name).map(_.name).toVector
         notifyObservers(
           GameEvent.askForTargetDay(player.name, targets)
@@ -125,12 +124,23 @@ class GameController(private var _game: Game)(using
   def submitNightChoice(playerName: String, target: String): Unit =
     val player = game.players(playerName)
 
+    val afterActorRemoval =
+      game.copy(
+        pendingNightActors = game.pendingNightActors - playerName
+      )
+
     val updatedGame =
-      if game.phase == Phase.Night then player.nightAction.execute(player, target, game)
-      else player.dayAction.execute(player, target, game)
+      if playerName != target then
+        if afterActorRemoval.phase == Phase.Night then
+          player.nightAction.execute(player, target, afterActorRemoval)
+        else player.dayAction.execute(player, target, afterActorRemoval)
+      else afterActorRemoval
+
     updateGame(updatedGame)
 
-    checkIfGameEnd(updatedGame.checkWinCondition(game.players))
+    checkIfGameEnd(updatedGame.checkWinCondition(updatedGame.players))
+
+    if updatedGame.pendingNightActors.isEmpty then finishNightPhase()
 
   def submitvoting(playerName: String, target: String): Unit =
     val player = game.players(playerName)
@@ -152,18 +162,18 @@ class GameController(private var _game: Game)(using
         afterAction.players(name).role == Roles.werwolf
       }
 
-    if !remainingWerewolves then
-      afterAction.votes.getVotedPlayer(afterAction) match
-        case Some(name) =>
-          ci.executeCommand(KillCommand("die werwölfe", name), afterAction)
-        case None =>
-          println("Niemand wurde gewählt")
+    val finalGame =
+      if !remainingWerewolves then
+        afterAction.votes.getVotedPlayer(afterAction) match
+          case Some(name) =>
+            ci.executeCommand(KillCommand("die werwölfe", name), afterAction)
+          case None =>
+            afterAction
+      else afterAction
+    updateGame(finalGame)
 
-      finishNightPhase()
-
-    checkIfGameEnd(
-      afterAction.checkWinCondition(afterAction.players)
-    )
+    checkIfGameEnd(finalGame.checkWinCondition(finalGame.players))
+    if finalGame.pendingNightActors.isEmpty then finishNightPhase()
 
   def finishNightPhase(): Unit =
     updateGame(switchPhase())
