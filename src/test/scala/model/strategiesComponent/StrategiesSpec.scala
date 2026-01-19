@@ -10,7 +10,7 @@ import org.mockito.ArgumentMatchers
 import de.htwg.werwolf.model.gameCoreComponents.Player
 import de.htwg.werwolf.model.{Game, Faction}
 import de.htwg.werwolf.model.CommandInterface
-import de.htwg.werwolf.model.commandComponent.{KillCommand, reviveCommand}
+import de.htwg.werwolf.model.commandComponent.{KillCommand, ReviveCommand}
 import de.htwg.werwolf.model.gameCoreComponents.Votes
 
 /** ===== konkrete Test-Implementierungen ===== */
@@ -88,7 +88,7 @@ class StrategiesSpec extends AnyWordSpec with Matchers with MockitoSugar:
       WitchAction.execute(TestPlayer("w", Faction._Werwolf, true), "a", game)
 
       verify(summon[CommandInterface])
-        .executeCommand(any[reviveCommand], ArgumentMatchers.eq(game))
+        .executeCommand(any[ReviveCommand], ArgumentMatchers.eq(game))
     }
 
     "kill dead target via CommandInterface" in {

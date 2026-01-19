@@ -27,7 +27,7 @@ case class KillCommand(killerName: String, targetName: String) extends GameComma
 }
 
 
-case class reviveCommand(targetName: String) extends GameCommand {
+case class ReviveCommand(targetName: String) extends GameCommand {
 
   override def description: String = s"${targetName} wurde von der Hexe wiederbelebt"
   override def execute(game: Game): Game = {
@@ -35,7 +35,7 @@ case class reviveCommand(targetName: String) extends GameCommand {
       case Some(target) if !target.isAlive =>
         val revivedPlayer = target.revive
         game.copy(players = game.players.updated(targetName, revivedPlayer))
-      case _ => game 
+      case _ => game
     }
   }
 
