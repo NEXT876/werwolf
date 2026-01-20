@@ -4,7 +4,7 @@ package de.htwg.werwolf.model.strategiesComponent
 import de.htwg.werwolf.model.gameCoreComponents.Player
 import de.htwg.werwolf.model.CommandInterface
 import de.htwg.werwolf.model.{Game, NightActionStrategy}
-import de.htwg.werwolf.model.commandComponent.{KillCommand, reviveCommand}
+import de.htwg.werwolf.model.commandComponent.{KillCommand, ReviveCommand}
 import de.htwg.werwolf.model.Roles
 import de.htwg.werwolf.model.Faction
 
