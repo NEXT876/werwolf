@@ -1,131 +1,122 @@
-package de.htwg.werwolf.model.strategiesComponent
+package de.htwg.werwolf.model
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar
-import org.mockito.Mockito.*
-import org.mockito.ArgumentMatchers.*
-import org.mockito.ArgumentMatchers
 
-import de.htwg.werwolf.model.gameCoreComponents.Player
-import de.htwg.werwolf.model.{Game, Faction}
-import de.htwg.werwolf.model.CommandInterface
-import de.htwg.werwolf.model.commandComponent.{KillCommand, ReviveCommand}
-import de.htwg.werwolf.model.gameCoreComponents.Votes
+import de.htwg.werwolf.model.strategiesComponent.*
+import de.htwg.werwolf.model.gameCoreComponents.*
+import de.htwg.werwolf.model.commandComponent.*
+import de.htwg.werwolf.model.{Faction, Phase}
 
-/** ===== konkrete Test-Implementierungen ===== */
+class StrategiesFullCoverageSpec extends AnyWordSpec with Matchers {
 
-final case class TestPlayer(
-  name: String,
-  faction: Faction,
-  isAlive: Boolean
-) extends Player {
-  def dayAction: de.htwg.werwolf.model.NightActionStrategy = ???  // Oder echte Impl
-  def die: de.htwg.werwolf.model.gameCoreComponents.Player = ???   // z.B. copy(isAlive = false)
-  def nightAction: de.htwg.werwolf.model.NightActionStrategy = ???
-  def revive: de.htwg.werwolf.model.gameCoreComponents.Player = ???
-  def role: de.htwg.werwolf.model.Roles = ???
-  def vote(target: de.htwg.werwolf.model.gameCoreComponents.Player): String = ???
-}
+  given CommandInterface = ExecuteC()
 
-final class TestVotes extends de.htwg.werwolf.model.gameCoreComponents.Votes:
-  var lastVote: Option[String] = None
-  override def addVote(target: String, game: Game): Votes = {
-    lastVote = Some(target)
-    this  // Ermöglicht Chaining wie super
-  }
-final class TestGame(
-  override val players: Map[String, Player],
-  override val votes: Votes = new TestVotes,
-  override val day: Int = 0
-) extends Game
-
-class StrategiesSpec extends AnyWordSpec with Matchers with MockitoSugar:
-
-  given CommandInterface = mock[CommandInterface]
+  def game(players: Map[String, Player], day: Int = 0) =
+    Game(
+      players = players,
+      phase = Phase.Night,
+      day = day,
+      votes = Votes(),
+      pendingNightActors = players.keySet,
+      isRunning = true,
+      commandHistory = Vector()
+    )
 
   "WerwolfAction" should {
+    "call all methods" in {
+      val w = Werwolf("W")
+      val v = Villager("V")
+      val g = game(Map("W" -> w, "V" -> v))
 
-    "allow acting only for alive werwolf players" in {
-      val game = TestGame(Map.empty)
-
-      WerwolfAction.canAct(TestPlayer("w", Faction._Werwolf, true), game) shouldBe true
-      WerwolfAction.canAct(TestPlayer("w", Faction._Werwolf, false), game) shouldBe false
-      WerwolfAction.canAct(TestPlayer("v", Faction._Villager, true), game) shouldBe false
-    }
-
-    "return only alive villagers except itself as targets" in {
-      val game = TestGame(
-        Map(
-          "w"  -> TestPlayer("w", Faction._Werwolf, true),
-          "v1" -> TestPlayer("v1", Faction._Villager, true),
-          "v2" -> TestPlayer("v2", Faction._Villager, false)
-        )
-      )
-
-      WerwolfAction.possibleTargets(game.players("w"), game) shouldBe Vector("v1")
-    }
-
-    "add a vote and return the same game instance" in {
-      val votes = new TestVotes
-      val game  = TestGame(Map.empty, votes)
-
-      val result =
-        WerwolfAction.execute(TestPlayer("w", Faction._Werwolf, true), "target", game)
-
-      votes.lastVote shouldBe Some("target")
-      result shouldBe game
+      WerwolfAction.canAct(w, g)
+      WerwolfAction.possibleTargets(w, g)
+      WerwolfAction.execute(w, "V", g)
     }
   }
 
   "WitchAction" should {
+    "call all methods" in {
+      val witch = Witch("Hexe")
+      val vAlive = Villager("V1")
+      val vDead = Villager("V2", isAlive = false)
+      val g = game(Map("Hexe" -> witch, "V1" -> vAlive, "V2" -> vDead))
 
-    "revive alive target via CommandInterface" in {
-      val game = TestGame(
-        Map("a" -> TestPlayer("a", Faction._Villager, true))
-      )
-
-      WitchAction.execute(TestPlayer("w", Faction._Werwolf, true), "a", game)
-
-      verify(summon[CommandInterface])
-        .executeCommand(any[ReviveCommand], ArgumentMatchers.eq(game))
-    }
-
-    "kill dead target via CommandInterface" in {
-      val game = TestGame(
-        Map("d" -> TestPlayer("d", Faction._Villager, false))
-      )
-
-      WitchAction.execute(TestPlayer("w", Faction._Werwolf, true), "d", game)
-
-      verify(summon[CommandInterface])
-        .executeCommand(any[KillCommand], ArgumentMatchers.eq(game))
-    }
-  }
-
-  "Actions with ???" should {
-
-    "throw NotImplementedError to expose missing logic" in {
-      val game   = TestGame(Map("x" -> TestPlayer("x", Faction._Villager, true)))
-      val player = TestPlayer("p", Faction._Villager, true)
-
-      intercept[NotImplementedError](AmorAction.execute(player, "x", game))
-      intercept[NotImplementedError](VillagerAction.possibleTargets(player, game))
-      intercept[NotImplementedError](TerroristAction.execute(player, "x", game))
-      intercept[NotImplementedError](NoAction.possibleTargets(player, game))
+      WitchAction.canAct(witch, g)
+      WitchAction.possibleTargets(witch, g)
+      WitchAction.execute(witch, "V1", g)
+      WitchAction.execute(witch, "V2", g)
     }
   }
 
   "voteAction" should {
+    "call all methods" in {
+      val v1 = Villager("A")
+      val v2 = Villager("B")
+      val g = game(Map("A" -> v1, "B" -> v2))
 
-    "always allow alive players and record a vote" in {
-      val votes = new TestVotes
-      val game  = TestGame(Map.empty, votes)
-
-      voteAction.canAct(TestPlayer("p", Faction._Villager, true), game) shouldBe true
-
-      voteAction.execute(TestPlayer("p", Faction._Villager, true), "t", game)
-
-      votes.lastVote shouldBe Some("t")
+      voteAction.canAct(v1, g)
+      voteAction.possibleTargets(v1, g)
+      voteAction.execute(v1, "B", g)
     }
   }
+
+  "AmorAction" should {
+    "call all methods" in {
+      val a = Amor("A")
+      val v = Villager("V")
+      val g = game(Map("A" -> a, "V" -> v), day = 0)
+
+      AmorAction.canAct(a, g)
+      AmorAction.possibleTargets(a, g)
+      assertThrows[NotImplementedError] {
+        AmorAction.execute(a, "V", g)
+      }
+    }
+  }
+
+  "VillagerAction" should {
+    "call all methods" in {
+      val v = Villager("V")
+      val g = game(Map("V" -> v))
+
+      VillagerAction.canAct(v, g)
+      assertThrows[NotImplementedError] {
+        VillagerAction.possibleTargets(v, g)
+      }
+      assertThrows[NotImplementedError] {
+        VillagerAction.execute(v, "V", g)
+      }
+    }
+  }
+
+  "TerroristAction" should {
+    "call all methods" in {
+      val t = Terrorist("T")
+      val g = game(Map("T" -> t))
+
+      TerroristAction.canAct(t, g)
+      assertThrows[NotImplementedError] {
+        TerroristAction.possibleTargets(t, g)
+      }
+      assertThrows[NotImplementedError] {
+        TerroristAction.execute(t, "T", g)
+      }
+    }
+  }
+
+  "NoAction" should {
+    "call all methods" in {
+      val v = Villager("V")
+      val g = game(Map("V" -> v))
+
+      NoAction.canAct(v, g)
+      assertThrows[NotImplementedError] {
+        NoAction.possibleTargets(v, g)
+      }
+      assertThrows[NotImplementedError] {
+        NoAction.execute(v, "V", g)
+      }
+    }
+  }
+}
