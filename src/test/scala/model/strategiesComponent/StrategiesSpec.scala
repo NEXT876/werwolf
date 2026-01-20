@@ -83,10 +83,8 @@ class StrategiesFullCoverageSpec extends AnyWordSpec with Matchers {
       VillagerAction.canAct(v, g)
       assertThrows[NotImplementedError] {
         VillagerAction.possibleTargets(v, g)
-      }
-      assertThrows[NotImplementedError] {
+      }      
         VillagerAction.execute(v, "V", g)
-      }
     }
   }
 

@@ -66,7 +66,7 @@ case object VillagerAction extends NightActionStrategy {
 
   override def execute(player: Player, target: String, game: Game)(using
       ci: CommandInterface
-  ): Game = ???
+  ): Game = game
 
 }
 
