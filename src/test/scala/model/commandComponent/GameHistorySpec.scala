@@ -21,7 +21,6 @@ class FakeCommandInterface extends CommandInterface {
 
   override def executeCommand(cmd: GameCommand, game : Game): Game = ???
   override def undoLast(game : Game): Try[Game] = ???
-  override def replay(game : Game): Unit = ???
 }
 class GameMementoSpec extends AnyWordSpec with Matchers:
 

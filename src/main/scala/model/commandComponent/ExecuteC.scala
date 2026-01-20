@@ -21,9 +21,6 @@ case class ExecuteC() extends CommandInterface {
     // println("Zurück zum letzten Savepoint!")
   }
 
-  def list(): Unit = saves.zipWithIndex.reverse.foreach { case (m, i) => // println(s"$i: ${m}")
-  }
-
   def executeCommand(cmd: GameCommand, game: Game): Game =
     val updatedGame = cmd.execute(game)
     updatedGame.copy(commandHistory = updatedGame.commandHistory :+ cmd)
@@ -34,12 +31,6 @@ case class ExecuteC() extends CommandInterface {
     val revertedGame = cmd.undo(game)
     revertedGame.copy(commandHistory = revertedGame.commandHistory.init)
   }
-
-  def replay(game: Game): Unit =
-    println("=== REPLAY ===")
-    game.commandHistory.reverse.foreach { cmd =>
-      // println(s"• ${cmd.description}")
-    }
 
   def createMemento(game: Game): GameMemento =
     GameMemento(
@@ -60,5 +51,4 @@ case class ExecuteC() extends CommandInterface {
       isRunning = m.isRunning,
       commandHistory = m.commandHistory
     )
-
 }
