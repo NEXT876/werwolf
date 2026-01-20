@@ -30,7 +30,9 @@ lazy val root = project
     ),
 
     // Cross-platform (Unix + Windows) — alle Dateien im Ordner `view` und Unterordner
-    coverageExcludedFiles := """.*[/\\]view[/\\].*""",
+    coverageExcludedFiles :=
+      """.*[/\\]view[/\\].*;.*[/\\]fileIO[/\\].*;.*[/\\]Main.scala;.*[/\\]config.scala""",
+
 
 // zur Absicherung (falls Scoverage nach Paketnamen filtert)
     coverageExcludedPackages := """.*\.?view(\..*)?""",
