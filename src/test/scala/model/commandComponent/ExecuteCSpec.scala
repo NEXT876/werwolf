@@ -4,8 +4,18 @@ import org.scalatest.matchers.should.Matchers
 import de.htwg.werwolf.model.commandComponent.{ExecuteC,GameCommand}
 import scala.util.{Try, Success, Failure}
 import de.htwg.werwolf.model.{Game,CommandInterface}
+import de.htwg.werwolf.model.Phase
+import de.htwg.werwolf.model.gameCoreComponents.Votes
+import de.htwg.werwolf.fileIO.IOInterface
+import de.htwg.werwolf.model.GameCoreInterface
+import de.htwg.werwolf.model.NarratorInterface
 
-class ExecuteCSpec extends AnyWordSpec with Matchers {
+import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers
+
+class ExecuteCSpec extends AnyWordSpec with Matchers with MockitoSugar {
 
   "ExecuteC" should {
 
@@ -49,5 +59,46 @@ class ExecuteCSpec extends AnyWordSpec with Matchers {
       executor.save(dummyGame)
       noException should be thrownBy executor.undo(dummyGame)
     }
+
+    "undoLast returns Failure(NothingToUndo) when commandHistory is empty" in {
+    given NarratorInterface = mock[NarratorInterface]
+    given CommandInterface  = new ExecuteC()   // echte Implementierung
+    given GameCoreInterface = mock[GameCoreInterface]
+    given IOInterface       = mock[IOInterface]
+
+    val g = Game(
+      players = Map.empty,
+      phase = Phase.Day,
+      day = 1,
+      votes = Votes(),
+      isRunning = true,
+      commandHistory = Vector.empty // 👈 entscheidend
+    )
+
+    val result = summon[CommandInterface].undoLast(g)
+
+    result.isFailure shouldBe true
+  }
+  "undo does nothing when no savepoints exist (else branch)" in {
+  val ci = mock[CommandInterface]
+  given CommandInterface = ci
+
+  val exec = ExecuteC()   // echtes Objekt, saves ist leer
+
+  val g = Game(
+    players = Map.empty,
+    phase = Phase.Day,
+    day = 1,
+    votes = Votes(),
+    isRunning = true,
+    commandHistory = Vector.empty
+  )
+
+  exec.undo(g)  // saves.nonEmpty == false → else-Pfad
+
+  verify(ci, never()).restoreFromMemento(any(), any())
+}
+
+
   }
 }
