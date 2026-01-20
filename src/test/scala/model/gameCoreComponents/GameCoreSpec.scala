@@ -3,8 +3,9 @@ package de.htwg.werwolf
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.werwolf.model.{Game,Phase,CommandInterface,Roles}
-import de.htwg.werwolf.model.gameCoreComponents.{Votes,GameCore,DoubleVoteDecorator}
+import de.htwg.werwolf.model.gameCoreComponents.{Player,Votes,GameCore,DoubleVoteDecorator}
 import de.htwg.werwolf.model.commandComponent.{GameCommand,ExecuteC,GameMemento}
+import de.htwg.werwolf.model.gameCoreComponents.{Villager,Werwolf}
 
 class VotesSpec extends AnyWordSpec with Matchers {
   "the function addVote" should {
@@ -116,6 +117,24 @@ class GameCoreSpec extends AnyWordSpec with Matchers {
       val core = GameCore()
 
       core.resetVotes() shouldBe Votes()
+    }
+  }
+  "switchPhase" should {
+
+    "switch from Night to Day" in {
+      val core = GameCore()
+      val game = Game(phase = Phase.Night)
+      val result = core.switchPhase(game)
+
+      result.phase shouldBe Phase.Day
+    }
+
+    "switch from Day to Night" in {
+      val core = GameCore()
+      val game = Game(phase = Phase.Day)
+      val result = core.switchPhase(game)
+
+      result.phase shouldBe Phase.Night
     }
   }
 }
