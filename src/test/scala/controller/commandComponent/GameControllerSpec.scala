@@ -442,6 +442,68 @@ class GameControllerSpec extends AnyWordSpec with Matchers with MockitoSugar {
       val ctrl = new GameController(Game())
       ctrl.checkIfGameEnd(None)
     }
+    "submitNightChoice executes dayAction branch when phase is Day" in {
+      given NarratorInterface = mock[NarratorInterface]
+      given CommandInterface  = mock[CommandInterface]
+      given GameCoreInterface = mock[GameCoreInterface]
+      given IOInterface       = mock[IOInterface]
+
+      val v = Villager("V")
+
+      val g = Game(
+        players = Map("V" -> v),
+        phase = Phase.Day,                 // 👈 entscheidend
+        pendingNightActors = Set("V")
+      )
+
+      val ctrl = new GameController(g)
+      ctrl.submitNightChoice("V", "X")      // playerName != target → Action-Zweig
+    }
+    "runNightPhase covers sortBy role comparison" in {
+      given NarratorInterface = mock[NarratorInterface]
+      given CommandInterface  = mock[CommandInterface]
+      given GameCoreInterface = mock[GameCoreInterface]
+      given IOInterface       = mock[IOInterface]
+
+      val wolf1 = Werwolf("W1")
+      val wolf2 = Werwolf("W2")
+
+      val g = Game(
+        players = Map(
+          "W1" -> wolf1,
+          "W2" -> wolf2
+        ),
+        phase = Phase.Night,
+        pendingNightActors = Set()
+      )
+
+      val ctrl = new GameController(g)
+      ctrl.runNightPhase()
+
+      ctrl.game.pendingNightActors should contain allOf ("W1", "W2")
+    }
+    "countAlivePlayer covers both werwolf and non-werwolf counts" in {
+      given NarratorInterface = mock[NarratorInterface]
+      given CommandInterface  = mock[CommandInterface]
+      given GameCoreInterface = mock[GameCoreInterface]
+      given IOInterface       = mock[IOInterface]
+
+      val wolf = Werwolf("W", isAlive = true)
+      val vill = Villager("V", isAlive = true)
+
+      val g = Game(
+        players = Map(
+          "W" -> wolf,
+          "V" -> vill
+        ),
+        phase = Phase.Day
+      )
+
+      val ctrl = new GameController(g)
+
+      ctrl.countAlivePlayer() shouldBe (1, 1)
+    }
+
 
   }
 }
