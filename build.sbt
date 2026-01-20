@@ -31,11 +31,9 @@ lazy val root = project
 
     // Cross-platform (Unix + Windows) — alle Dateien im Ordner `view` und Unterordner
     coverageExcludedFiles :=
-      """.*[/\\]view[/\\].*;.*[/\\]fileIO[/\\].*;.*[/\\]Main.scala;.*[/\\]config.scala""",
+      """.*[/\\]view[/\\].*;.*[/\\]fileIO[/\\].*;.*Main;.*config""",
 
 
-// zur Absicherung (falls Scoverage nach Paketnamen filtert)
-    coverageExcludedPackages := """.*\.?view(\..*)?""",
     libraryDependencies ++= {
       val os = System.getProperty("os.name").toLowerCase match {
         case mac if mac.contains("mac") => "mac"
