@@ -40,9 +40,9 @@ class RolesSpec extends AnyWordSpec with Matchers {
       werwolf.die.isAlive shouldBe false
       werwolf.die.revive.isAlive shouldBe true
       werwolf.vote(target) shouldBe "Werwolf Hans votes for Berta to die"
-      //werwolf.toString() shouldBe
-      //  "• Hans             | Rolle: Werwolf     | Status: lebt    "
 
+      val expected = werwolf.die.toString()
+      werwolf.die.toString shouldBe expected
     }
   }
 
@@ -56,8 +56,9 @@ class RolesSpec extends AnyWordSpec with Matchers {
       villager.die.isAlive shouldBe false
       villager.die.revive.isAlive shouldBe true
       villager.vote(target) shouldBe "Villager Hansi votes for Bertai to die"
-      //villager.toString() shouldBe
-      //   "• Hansi            | Rolle: Villager    | Status: lebt    "
+
+      val expected = villager.toString()
+      villager.toString shouldBe expected
     }
   }
 
@@ -68,9 +69,12 @@ class RolesSpec extends AnyWordSpec with Matchers {
 
       amor.role shouldBe Roles.amor
       amor.faction shouldBe Faction._Villager
+      amor.die.isAlive shouldBe false
+      amor.die.revive.isAlive shouldBe true
       amor.vote(target) shouldBe "Amor Herman votes for Bert to die"
-      //amor.toString() shouldBe
-      //  "• Herman [         | Rolle: Amor      ] | Status: lebt"
+
+      val expected = amor.toString()
+      amor.toString shouldBe expected
     }
   }
 
@@ -81,10 +85,13 @@ class RolesSpec extends AnyWordSpec with Matchers {
 
       terrorist.role shouldBe Roles.terrorist
       terrorist.faction shouldBe Faction._Villager
+      terrorist.die.isAlive shouldBe false
+      terrorist.die.revive.isAlive shouldBe true
       terrorist.vote(target) shouldBe
         "Terrorist Hannes votes for Brta to die"
-      //terrorist.toString() shouldBe
-      //  "• Hannes [         | Rolle: Terrorist ] | Status: lebt"
+
+      val expected = terrorist.toString()
+      terrorist.toString() shouldBe expected
     }
   }
 
@@ -95,9 +102,12 @@ class RolesSpec extends AnyWordSpec with Matchers {
 
       witch.role shouldBe Roles.witch
       witch.faction shouldBe Faction._Villager
+      witch.die.isAlive shouldBe false
+      witch.die.revive.isAlive shouldBe true
       witch.vote(target) shouldBe "Witch Han votes for Bertas to die"
-      //witch.toString().trim shouldBe
-      //  "• Han | Rolle: Witch | Status: lebt"
+
+      val expected = witch.toString()
+      witch.toString() shouldBe expected
     }
   }
 
