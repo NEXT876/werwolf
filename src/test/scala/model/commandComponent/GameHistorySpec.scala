@@ -5,59 +5,44 @@ import de.htwg.werwolf.model.*
 import de.htwg.werwolf.model.commandComponent.GameMemento
 import de.htwg.werwolf.model.Phase
 import de.htwg.werwolf.model.gameCoreComponents.Votes
-//import de.htwg.werwolf.model.commandComponent.CommandInterface
 import de.htwg.werwolf.model.commandComponent.ExecuteC
+import scala.util.{Try, Success, Failure}
+import de.htwg.werwolf.model.commandComponent.GameCommand
 
-class GameHistorySpec extends AnyWordSpec with Matchers {
+class FakeCommandInterface extends CommandInterface {
+  var lastRestored: Option[GameMemento] = None
 
-  // Dummy-Memento, wir testen nur die Stack-Mechanik
-  val testMemento = GameMemento(
-    players = Map.empty,
-    phase = Phase.Day,            // oder Phase.Night, je nach Modell
-    day = 1,
-    votes = Votes(Map.empty),     // oder wie auch immer Votes gebaut wird
-    isRunning = true,
-    commandHistory = Vector.empty
-  )
-/*
-  // Minimal-Stub für Game
-  class TestGame extends Game {
-    var restored: Option[GameMemento] = None
+  override def createMemento(game: Game): GameMemento =
+    GameMemento(Map.empty, Phase.Day, 1, Votes(), isRunning = true)
 
-    override def createMemento(): GameMemento = testMemento
+  override def restoreFromMemento(m: GameMemento, game: Game): Game =
+    lastRestored = Some(m)
+    game
 
-    override def restoreFromMemento(m: GameMemento): Game = {
-      restored = Some(m)
-      this
-    }*/
-    }/*
-  "GameHistory" should {
-    "save pushes a memento onto the stack" in {
-      given CommandInterface = new ExecuteC()
-      val hist = GameMemento()  // leeres Memento als Start (felder egal)
-      val game = TestGame()  // mit restore-Logik
+  override def executeCommand(cmd: GameCommand, game : Game): Game = ???
+  override def undoLast(game : Game): Try[Game] = ???
+  override def replay(game : Game): Unit = ???
+}
+class GameMementoSpec extends AnyWordSpec with Matchers:
 
-      hist.save(game)
-      game.restored shouldBe None  // nichts restored vor undo
+  given FakeCommandInterface = new FakeCommandInterface
+  val dummyGame = new Game {}
 
-      hist.undo(game)
-      game.restored shouldBe Some(testMemento)  // ci.restoreFromMemento setzt es
+  "GameMemento" should {
+
+    "save a memento when save is called" in {
+      val memento = GameMemento(Map.empty, Phase.Day, 1, Votes(), isRunning = true)
+      memento.save(dummyGame)
+      noException should be thrownBy memento.undo(dummyGame)
     }
 
-    "undo pops the last memento and restores the game" in {
-      given CommandInterface = new ExecuteC()
-      val hist = GameMemento()
-      val game = TestGame()
+    "restore the last saved memento on undo" in {
+      val ci = summon[FakeCommandInterface]
+      val memento = GameMemento(Map.empty, Phase.Day, 1, Votes(), isRunning = true)
 
-      hist.save(game)  // push 1
-      hist.save(game)  // push 2 (stackt, nicht überschreibt)
+      memento.save(dummyGame)
+      memento.undo(dummyGame)
 
-      hist.undo(game)  // pop 2, restore 2
-      game.restored shouldBe Some(testMemento)  // letzter Save
+      ci.lastRestored shouldBe defined
     }
-
-    "list should not throw an exception even when empty" in {
-      val hist = GameMemento()
-      noException should be thrownBy hist.list()
-    }*/
-  
+  }

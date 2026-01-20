@@ -28,7 +28,4 @@ case class GameMemento(
     ci.restoreFromMemento(saves.pop(), game)
     // println("Zurück zum letzten Savepoint!")
   }
-
-  def list(): Unit = saves.zipWithIndex.reverse.foreach { case (m, i) => // println(s"$i: ${m}")
-  }
 }
