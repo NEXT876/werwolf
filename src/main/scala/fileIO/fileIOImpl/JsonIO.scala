@@ -17,6 +17,6 @@ class JsonIO extends IOInterface:
     val jsonStr = Files.readString(path)
     val result: JsResult[GameMemento] = Json.parse(jsonStr).validate[GameMemento]
 
-    result match
-      case s: JsSuccess[GameMemento] => s.get
-      case e: JsError => throw new RuntimeException(s"JSON parsing failed: ${e.errors}")
+    Json.parse(jsonStr).validate[GameMemento] match
+      case JsSuccess(game, _) => game
+      case JsError(errors) => throw new RuntimeException(s"JSON parsing failed: $errors")

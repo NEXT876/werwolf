@@ -61,7 +61,9 @@ class GameController(var _game: Game)(using
 
   def executeCommand(cmd: GameCommand, game: Game): Game =
     saveGameState()
-    updateGame(ci.executeCommand(cmd, game))
+    val result = ci.executeCommand(cmd, game)
+    if result != null then updateGame(result)
+    else game
 
   def undoCommand(): Game =
     saveGameState()
@@ -98,7 +100,6 @@ class GameController(var _game: Game)(using
     updateGame(updatedGame)
 
     Players.foreach { player =>
-      if player.nightAction.canAct(player, updatedGame) then
         val targets = player.nightAction.possibleTargets(player, updatedGame)
         notifyObservers(
           GameEvent.askForTargetNight(player.name, player.role, targets)
@@ -114,7 +115,6 @@ class GameController(var _game: Game)(using
     updateGame(updatedGame)
 
     player.foreach { player =>
-      if player.dayAction.canAct(player, game) then
         val targets = game.players.values.filter(_.name != player.name).map(_.name).toVector
         notifyObservers(
           GameEvent.askForTargetDay(player.name, targets)
@@ -140,7 +140,7 @@ class GameController(var _game: Game)(using
 
     checkIfGameEnd(updatedGame.checkWinCondition(updatedGame.players))
 
-    if updatedGame.pendingNightActors.isEmpty then finishNightPhase()
+    if updatedGame.pendingNightActors.isEmpty then finishNightPhase() else return
 
   def submitvoting(playerName: String, target: String): Unit =
     val player = game.players(playerName)
@@ -173,7 +173,7 @@ class GameController(var _game: Game)(using
     updateGame(finalGame)
 
     checkIfGameEnd(finalGame.checkWinCondition(finalGame.players))
-    if finalGame.pendingNightActors.isEmpty then finishNightPhase()
+    if finalGame.pendingNightActors.isEmpty then finishNightPhase() else return
 
   def finishNightPhase(): Unit =
     updateGame(switchPhase())

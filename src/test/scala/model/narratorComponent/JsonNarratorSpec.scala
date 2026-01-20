@@ -88,5 +88,41 @@ class JsonNarratorSpec extends AnyWordSpec with Matchers:
         noException should be thrownBy narrator.randomDayNarratorTexte("Start")
       }
     }
+    "return a night text from Witch list" in {
+      val root = Root(
+        Night(
+          Start = List("ns1"),
+          Werwolf = List("nw1"),
+          Amor = List("na1"),
+          Witch = List("nwi1", "nwi2")
+        ),
+        Day(Start = List("ds1"))
+      )
+
+      withTempJson(root) { path =>
+        val narrator = new JsonNarrator(path)
+        val res = narrator.randomNightNarratorTexte("Witch")
+        root.Night.Witch should contain (res)
+      }
+    }
+
+    "return a night text from Amor list" in {
+      val root = Root(
+        Night(
+          Start = List("ns1"),
+          Werwolf = List("nw1"),
+          Amor = List("na1", "na2"),
+          Witch = List("nwi1")
+        ),
+        Day(Start = List("ds1"))
+      )
+
+      withTempJson(root) { path =>
+        val narrator = new JsonNarrator(path)
+        val res = narrator.randomNightNarratorTexte("Amor")
+        root.Night.Amor should contain (res)
+      }
+    }
+
   }
 

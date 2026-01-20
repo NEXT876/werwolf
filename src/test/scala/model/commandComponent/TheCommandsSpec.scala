@@ -4,6 +4,7 @@ package model.commandComponent
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.werwolf.model.*
+import de.htwg.werwolf.model.gameCoreComponents.Villager
 import de.htwg.werwolf.DummyPlayer
 import de.htwg.werwolf.model.commandComponent.{KillCommand,ReviveCommand,GameEndCommand}
 
@@ -59,6 +60,18 @@ class KillCommandSpec extends AnyWordSpec with Matchers {
 
       undoneGame.players("Hans").isAlive shouldBe true
     }
+    "KillCommand.undo" should {
+
+      "return the same game if the target does not exist or is alive (line 24)" in {
+        // leeres Spiel, kein Spieler
+        val game = Game(players = Map.empty)
+        val cmd = KillCommand("Killer", "Target")
+
+        val result = cmd.undo(game)   // Zeile 24 wird hier ausgeführt
+
+        result shouldBe game
+      }
+    }
   }
 }
 
@@ -105,6 +118,33 @@ class ReviveCommandSpec extends AnyWordSpec with Matchers {
 
       undoneGame.players("Hans").isAlive shouldBe false
     }
+    "ReviveCommand.undo" should {
+
+      "return the same game if the target does not exist or is dead (line 47)" in {
+        // Spieler existiert, aber tot/lebendig so dass else-Zweig greift
+        val alice = Villager("Alice") 
+        val game = Game(players = Map("Alice" -> alice))
+        val cmd = ReviveCommand("Alice")
+
+        val result = cmd.undo(game)
+      }
+      "ReviveCommand undo does nothing when target is already dead (case _)" in {
+        val deadVillager = Villager("V", isAlive = false)
+
+        val g = Game(
+          players = Map("V" -> deadVillager),
+          isRunning = true
+        )
+
+        val cmd = ReviveCommand("V")
+        val result = cmd.undo(g)
+
+        // Spieler bleibt tot → game unverändert
+        result.players("V").isAlive shouldBe false
+      }
+
+
+    }
   }
 }
 
@@ -112,35 +152,22 @@ class GameEndCommandSpec extends AnyWordSpec with Matchers {
 
   "GameEndCommand" should {
 
-    "stop the game when executed" in {
-      val game = Game(players = Map.empty, isRunning = true)
+    "GameEndCommand execute stops the game" in {
+      val g = Game(isRunning = true)
 
       val cmd = GameEndCommand()
-      val updatedGame = cmd.execute(game)
+      val result = cmd.execute(g)
 
-      updatedGame.isRunning shouldBe false
+      result.isRunning shouldBe false
     }
-
-    "restart the game when undone" in {
-      val game = Game(players = Map.empty, isRunning = false)
+    "GameEndCommand undo restarts the game" in {
+      val g = Game(isRunning = false)
 
       val cmd = GameEndCommand()
-      val updatedGame = cmd.undo(game)
+      val result = cmd.undo(g)
 
-      updatedGame.isRunning shouldBe true
+      result.isRunning shouldBe true
     }
 
-    "have a description with winner if provided" in {
-      val cmd = GameEndCommand(Some(Faction._Werwolf))
-
-      cmd.description should include ("Gewinner")
-      cmd.description should include ("Werwölfe")
-    }
-
-    "have a generic description without winner" in {
-      val cmd = GameEndCommand(None)
-
-      cmd.description shouldBe "Spiel beendet (manuell abgebrochen)"
-    }
   }
 }

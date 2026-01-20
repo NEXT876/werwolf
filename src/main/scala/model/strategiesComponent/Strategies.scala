@@ -66,7 +66,7 @@ case object VillagerAction extends NightActionStrategy {
 
   override def execute(player: Player, target: String, game: Game)(using
       ci: CommandInterface
-  ): Game = ???
+  ): Game = game
 
 }
 
@@ -94,7 +94,7 @@ case object NoAction extends NightActionStrategy {
 
 }
 
-case object voteAction extends NightActionStrategy {
+case object VoteAction extends NightActionStrategy {
   override def canAct(player: Player, game: Game): Boolean =
     player.isAlive
 

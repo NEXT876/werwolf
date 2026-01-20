@@ -31,8 +31,6 @@ trait GameCoreInterface:
     def switchPhase(game : Game): Game
     def addRoles(playerNames: Vector[String], game: Game): Game
     def getRoles(playeramount: Int): Vector[Roles]
-    def addVote(player: String, game : Game): Votes
-    def getVotedPlayer(game : Game): Option[String]
     def resetVotes() : Votes
 
 

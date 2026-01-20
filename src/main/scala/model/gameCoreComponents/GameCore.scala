@@ -22,7 +22,7 @@ case class GameCore()(using ci: CommandInterface) extends GameCoreInterface {
     val newDay = game.day + 1
     game.copy(phase = newPhase, day = newDay, votes = Votes())
 
-  
+
   def addRoles(playerNames: Vector[String], game: Game): Game =
     val roles = getRoles(playerNames.size)
 
@@ -53,12 +53,6 @@ case class GameCore()(using ci: CommandInterface) extends GameCoreInterface {
       Vector.fill(playeramount / 3)(Roles.werwolf) ++ Random.shuffle(
         Vector(Roles.villager, Roles.witch, Roles.amor, Roles.terrorist)
       )
-
-  def addVote(player: String, game: Game): Votes =
-    game.votes.addVote(player, game)
-
-  def getVotedPlayer(game: Game): Option[String] =
-    game.votes.getVotedPlayer(game)
 
   def resetVotes() : Votes =
     Votes()

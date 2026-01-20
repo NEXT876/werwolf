@@ -5,8 +5,6 @@ import de.htwg.werwolf.model.Game
 import de.htwg.werwolf.model.Faction
 
 case class KillCommand(killerName: String, targetName: String) extends GameCommand {
-
-  override def description: String = s"${killerName} tötet ${targetName}"
   override def execute(game: Game): Game = {
     game.players.get(targetName) match {
       case Some(target) if target.isAlive =>
@@ -28,8 +26,6 @@ case class KillCommand(killerName: String, targetName: String) extends GameComma
 
 
 case class ReviveCommand(targetName: String) extends GameCommand {
-
-  override def description: String = s"${targetName} wurde von der Hexe wiederbelebt"
   override def execute(game: Game): Game = {
     game.players.get(targetName) match {
       case Some(target) if !target.isAlive =>
@@ -52,12 +48,6 @@ case class ReviveCommand(targetName: String) extends GameCommand {
 
 
 case class GameEndCommand(winner: Option[Faction] = None) extends GameCommand {
-
-  override val description: String = winner match
-      case Some(w) => s"Spiel beendet – Gewinner: $w"
-      case None    => "Spiel beendet (manuell abgebrochen)"
-
-
   override def execute(game: Game): Game = {
     game.copy(isRunning = false)
   }
