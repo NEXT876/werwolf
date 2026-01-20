@@ -32,6 +32,7 @@ case class ExecuteC() extends CommandInterface {
     revertedGame.copy(commandHistory = revertedGame.commandHistory.init)
   }
 
+
   def createMemento(game: Game): GameMemento =
     GameMemento(
       players = game.players,

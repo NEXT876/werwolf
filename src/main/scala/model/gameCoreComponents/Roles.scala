@@ -1,7 +1,7 @@
 // de.htwg.werwolf.model.roleUtils.PlayerInitializer.scala
 package de.htwg.werwolf.model.gameCoreComponents
 
-import de.htwg.werwolf.model.strategiesComponent.{AmorAction, TerroristAction, VillagerAction, WerwolfAction, WitchAction, voteAction}
+import de.htwg.werwolf.model.strategiesComponent.{AmorAction, TerroristAction, VillagerAction, WerwolfAction, WitchAction, VoteAction}
 import de.htwg.werwolf.model.{NightActionStrategy, Roles, Faction}
 import de.htwg.werwolf.model.narratorComponent.Night
 
@@ -52,7 +52,7 @@ final case class Werwolf(name: String, isAlive: Boolean = true) extends Player:
   def die = copy(isAlive = false)
   def revive = copy(isAlive = true)
   def nightAction: NightActionStrategy = WerwolfAction
-  def dayAction: NightActionStrategy = voteAction
+  def dayAction: NightActionStrategy = VoteAction
 
 final case class Villager(name: String, isAlive: Boolean = true) extends Player:
   def role = Roles.villager
@@ -61,7 +61,7 @@ final case class Villager(name: String, isAlive: Boolean = true) extends Player:
   def die = copy(isAlive = false)
   def revive = copy(isAlive = true)
   def nightAction: NightActionStrategy = VillagerAction
-  def dayAction: NightActionStrategy = voteAction
+  def dayAction: NightActionStrategy = VoteAction
 
 final case class Amor(name: String, isAlive: Boolean = true) extends Player:
   def role = Roles.amor
@@ -70,7 +70,7 @@ final case class Amor(name: String, isAlive: Boolean = true) extends Player:
   def die = copy(isAlive = false)
   def revive = copy(isAlive = true)
   def nightAction: NightActionStrategy = AmorAction
-  def dayAction: NightActionStrategy = voteAction
+  def dayAction: NightActionStrategy = VoteAction
 
 final case class Terrorist(name: String, isAlive: Boolean = true) extends Player:
   def role = Roles.terrorist
@@ -79,7 +79,7 @@ final case class Terrorist(name: String, isAlive: Boolean = true) extends Player
   def die = copy(isAlive = false)
   def revive = copy(isAlive = true)
   def nightAction: NightActionStrategy = TerroristAction
-  def dayAction: NightActionStrategy = voteAction
+  def dayAction: NightActionStrategy = VoteAction
 
 final case class Witch(name: String, isAlive: Boolean = true) extends Player:
   def role = Roles.witch
@@ -88,7 +88,7 @@ final case class Witch(name: String, isAlive: Boolean = true) extends Player:
   def die = copy(isAlive = false)
   def revive = copy(isAlive = true)
   def nightAction: NightActionStrategy = WitchAction
-  def dayAction: NightActionStrategy = voteAction
+  def dayAction: NightActionStrategy = VoteAction
 
 final case class DoubleVoteDecorator(override val inner: Player)
   extends PlayerDecorator(inner):

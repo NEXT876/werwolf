@@ -55,9 +55,9 @@ class StrategiesFullCoverageSpec extends AnyWordSpec with Matchers {
       val v2 = Villager("B")
       val g = game(Map("A" -> v1, "B" -> v2))
 
-      voteAction.canAct(v1, g)
-      voteAction.possibleTargets(v1, g)
-      voteAction.execute(v1, "B", g)
+      VoteAction.canAct(v1, g)
+      VoteAction.possibleTargets(v1, g)
+      VoteAction.execute(v1, "B", g)
     }
   }
 
