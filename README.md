@@ -26,11 +26,6 @@ cd werwolf
 to start the game write
 
 ```
-sbt compile
 sbt run
 ```
-
-or use just
-
-`sbt run`
 
