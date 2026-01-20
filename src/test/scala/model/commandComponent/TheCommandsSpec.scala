@@ -128,6 +128,22 @@ class ReviveCommandSpec extends AnyWordSpec with Matchers {
 
         val result = cmd.undo(game)
       }
+      "ReviveCommand undo does nothing when target is already dead (case _)" in {
+        val deadVillager = Villager("V", isAlive = false)
+
+        val g = Game(
+          players = Map("V" -> deadVillager),
+          isRunning = true
+        )
+
+        val cmd = ReviveCommand("V")
+        val result = cmd.undo(g)
+
+        // Spieler bleibt tot → game unverändert
+        result.players("V").isAlive shouldBe false
+      }
+
+
     }
   }
 }
@@ -136,13 +152,22 @@ class GameEndCommandSpec extends AnyWordSpec with Matchers {
 
   "GameEndCommand" should {
 
-    "stop the game when executed" in {
-      val game = Game(players = Map.empty, isRunning = true)
+    "GameEndCommand execute stops the game" in {
+      val g = Game(isRunning = true)
 
       val cmd = GameEndCommand()
-      val updatedGame = cmd.execute(game)
+      val result = cmd.execute(g)
 
-      updatedGame.isRunning shouldBe false
+      result.isRunning shouldBe false
     }
+    "GameEndCommand undo restarts the game" in {
+      val g = Game(isRunning = false)
+
+      val cmd = GameEndCommand()
+      val result = cmd.undo(g)
+
+      result.isRunning shouldBe true
+    }
+
   }
 }
