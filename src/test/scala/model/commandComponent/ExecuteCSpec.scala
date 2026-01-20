@@ -55,44 +55,42 @@ class ExecuteCSpec extends AnyWordSpec with Matchers with MockitoSugar {
     }
 
     "undoLast returns Failure(NothingToUndo) when commandHistory is empty" in {
-    given NarratorInterface = mock[NarratorInterface]
-    given CommandInterface  = new ExecuteC()   // echte Implementierung
-    given GameCoreInterface = mock[GameCoreInterface]
-    given IOInterface       = mock[IOInterface]
+      given NarratorInterface = mock[NarratorInterface]
+      given CommandInterface  = new ExecuteC()   // echte Implementierung
+      given GameCoreInterface = mock[GameCoreInterface]
+      given IOInterface       = mock[IOInterface]
 
-    val g = Game(
-      players = Map.empty,
-      phase = Phase.Day,
-      day = 1,
-      votes = Votes(),
-      isRunning = true,
-      commandHistory = Vector.empty // 👈 entscheidend
-    )
+      val g = Game(
+        players = Map.empty,
+        phase = Phase.Day,
+        day = 1,
+        votes = Votes(),
+        isRunning = true,
+        commandHistory = Vector.empty // 👈 entscheidend
+      )
 
-    val result = summon[CommandInterface].undoLast(g)
+      val result = summon[CommandInterface].undoLast(g)
 
-    result.isFailure shouldBe true
-  }
-  "undo does nothing when no savepoints exist (else branch)" in {
-  val ci = mock[CommandInterface]
-  given CommandInterface = ci
+      result.isFailure shouldBe true
+    }
+    "undo does nothing when no savepoints exist (else branch)" in {
+      val ci = mock[CommandInterface]
+      given CommandInterface = ci
 
-  val exec = ExecuteC()   // echtes Objekt, saves ist leer
+      val exec = ExecuteC()   // echtes Objekt, saves ist leer
 
-  val g = Game(
-    players = Map.empty,
-    phase = Phase.Day,
-    day = 1,
-    votes = Votes(),
-    isRunning = true,
-    commandHistory = Vector.empty
-  )
+      val g = Game(
+        players = Map.empty,
+        phase = Phase.Day,
+        day = 1,
+        votes = Votes(),
+        isRunning = true,
+        commandHistory = Vector.empty
+      )
 
-  exec.undo(g)  // saves.nonEmpty == false → else-Pfad
+      exec.undo(g)  // saves.nonEmpty == false → else-Pfad
 
-  verify(ci, never()).restoreFromMemento(any(), any())
-}
-
-
+      verify(ci, never()).restoreFromMemento(any(), any())
+    }
   }
 }

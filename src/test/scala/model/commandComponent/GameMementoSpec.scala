@@ -45,3 +45,29 @@ class GameMementoSpec extends AnyWordSpec with Matchers:
       ci.lastRestored shouldBe defined
     }
   }
+  class FakeCI extends CommandInterface {
+    var lastRestored: Option[GameMemento] = None
+    override def createMemento(game: Game): GameMemento = GameMemento(
+      Map.empty, Phase.Day, 1, Votes(), isRunning = true
+    )
+    override def restoreFromMemento(m: GameMemento, game: Game): Game =
+      lastRestored = Some(m)
+      game
+    override def undoLast(game: Game): Try[Game] = ???
+    override def executeCommand(cmd: GameCommand, game: Game): Game = ???
+  }
+
+  "GameMemento.undo" should {
+
+    "do nothing when saves is empty (else branch)" in {
+      val ci = new FakeCI
+      given CommandInterface = ci
+
+      val memento = GameMemento(Map.empty, Phase.Day, 1, Votes(), isRunning = true)
+
+      // saves ist leer → else branch wird getroffen
+      noException should be thrownBy memento.undo(new Game())
+
+      ci.lastRestored shouldBe None
+    }
+  }
