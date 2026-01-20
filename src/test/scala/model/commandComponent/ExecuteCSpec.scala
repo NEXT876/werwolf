@@ -23,9 +23,6 @@ class ExecuteCSpec extends AnyWordSpec with Matchers with MockitoSugar {
       val executor = ExecuteC()
       val dummyGame = Game()
       val cmd = new GameCommand {
-
-        override def description: String = ???
-
         def execute(game: Game): Game = game
         def undo(game: Game): Game = game
       }
@@ -37,9 +34,6 @@ class ExecuteCSpec extends AnyWordSpec with Matchers with MockitoSugar {
     "undoLast removes last command after undo" in {
       val executor = ExecuteC()
       val cmd = new GameCommand {
-
-        override def description: String = ???
-
         def execute(game: Game): Game = game
         def undo(game: Game): Game = game
       }
