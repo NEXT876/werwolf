@@ -61,7 +61,9 @@ class GameController(var _game: Game)(using
 
   def executeCommand(cmd: GameCommand, game: Game): Game =
     saveGameState()
-    updateGame(ci.executeCommand(cmd, game))
+    val result = ci.executeCommand(cmd, game)
+    if result != null then updateGame(result)
+    else game
 
   def undoCommand(): Game =
     saveGameState()
