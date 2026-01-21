@@ -14,10 +14,6 @@ if [ "$OS" = "Linux" ]; then
     xhost +local: || echo "Warning: xhost failed, continue anyway."
 fi
 
-# SBT Build
-echo "Running sbt clean assembly..."
-sbt clean assembly || { echo "SBT build failed"; exit 1; }
-
 # Docker Build
 echo "Building Docker image 'werwolf:tui'..."
 docker build -t werwolf:tui . || { echo "Docker build failed"; exit 1; }
