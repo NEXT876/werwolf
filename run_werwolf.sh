@@ -28,6 +28,5 @@ if [ "$OS" = "Linux" ]; then
 fi
 
 DOCKER_RUN_CMD+=" werwolf:tui"
-shutdown -h +30
 # Container starten
 eval $DOCKER_RUN_CMD
