@@ -17,15 +17,21 @@ Werewolf is a social deduction game where players secretly take on roles in a vi
 
 ```
 git clone https://github.com/NEXT876/werwolf
+```
+
+## Using with Docker
+
+```
 cd werwolf
+chmod +x run_werwolf.sh
+./run_werwolf.sh
 ```
 
 
-## Using
-
-to start the game write
+## Using without Docker
 
 ```
+cd werwolf
 sbt run
 ```
 
