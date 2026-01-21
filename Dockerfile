@@ -3,7 +3,7 @@ FROM eclipse-temurin:17-jre
 WORKDIR /werwolf
 
 # JAR sauber kopieren + umbenennen
-COPY target/scala-3.7.3/scalafx-test-assembly-0.1.0-SNAPSHOT.jar app.jar
+COPY  scalafx-test-assembly-0.1.0-SNAPSHOT.jar app.jar
 
 RUN apt-get update && apt-get install -y \
   libx11-6 \
