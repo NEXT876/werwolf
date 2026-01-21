@@ -163,9 +163,8 @@ class TUI()(using controller: GameControllerInterface) extends Observer[GameEven
     println(Source.fromResource("logo.txt").mkString)
 
   def clearScreen(): Unit =
-    import sys.process._
-    if (sys.props("os.name").toLowerCase.contains("win")) "cls".!
-    else "clear".! // clear Screen for WIndows and Linux/Mac
+    print("\u001b[H\u001b[2J")
+    System.out.flush()
 
   def showGameOver(): Unit =
     println("Das Game ist vorbei")

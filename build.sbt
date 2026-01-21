@@ -1,5 +1,20 @@
 ThisBuild / scalaVersion := "3.7.3"
 
+import sbtassembly.AssemblyPlugin.autoImport._
+
+assembly / assemblyMergeStrategy := {
+  case PathList("META-INF", "subtrate", _ @_*)     => MergeStrategy.discard
+  case PathList("META-INF", "native-image", _ @_*) => MergeStrategy.discard
+  case PathList("META-INF", xs @ _*) =>
+    xs.map(_.toLowerCase) match {
+      case "manifest.mf" :: Nil => MergeStrategy.discard
+      case _                    => MergeStrategy.first
+    }
+  case _ => MergeStrategy.first
+}
+
+assembly / mainClass := Some("de.htwg.werwolf.Main")
+
 lazy val root = project
   .in(file("."))
   .settings(
@@ -32,8 +47,6 @@ lazy val root = project
     // Cross-platform (Unix + Windows) — alle Dateien im Ordner `view` und Unterordner
     coverageExcludedFiles :=
       """.*[/\\]view[/\\].*;.*[/\\]fileIO[/\\].*;.*Main;.*config""",
-
-
     libraryDependencies ++= {
       val os = System.getProperty("os.name").toLowerCase match {
         case mac if mac.contains("mac") => "mac"
