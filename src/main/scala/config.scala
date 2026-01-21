@@ -10,15 +10,9 @@ import de.htwg.werwolf.model.Game
 import de.htwg.werwolf.fileIO.IOInterface
 import de.htwg.werwolf.fileIO.fileIOImpl.*
 
-
 object config:
-  given NarratorInterface =
-    new JsonNarrator(
-      os.pwd / "src" / "main" / "resources" / "narrator.json"
-    )
-  given IOInterface = new XmlIO() //new JsonIO()
+  given NarratorInterface = JsonNarrator()
+  given IOInterface = new XmlIO() // new JsonIO()
   given CommandInterface = new ExecuteC
   given GameCoreInterface = new GameCore
   given GameControllerInterface = new GameController(Game())
-
-
