@@ -115,7 +115,7 @@ class GameController(var _game: Game)(using
     updateGame(updatedGame)
 
     player.foreach { player =>
-        val targets = game.players.values.filter(_.name != player.name).map(_.name).toVector
+        val targets = game.players.values.filter(_.name != player.name).filter(_.isAlive).map(_.name).toVector
         notifyObservers(
           GameEvent.askForTargetDay(player.name, targets)
         )
