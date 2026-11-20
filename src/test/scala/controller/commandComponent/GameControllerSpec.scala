@@ -264,7 +264,7 @@ class GameControllerSpec extends AnyWordSpec with Matchers with MockitoSugar {
         Votes(),
         isRunning = true,
         commandHistory = Vector(),
-        pendingNightActors = Set()
+        pendingNightActors = Set("W")
       )
 
       val ctrl = new GameController(g)
@@ -283,7 +283,7 @@ class GameControllerSpec extends AnyWordSpec with Matchers with MockitoSugar {
         Votes(Map("V" -> 1)),
         isRunning = true,
         commandHistory = Vector(),
-        pendingNightActors = Set()
+        pendingNightActors = Set("W")
       )
 
       when(summon[CommandInterface].executeCommand(any(), any()))
@@ -293,6 +293,26 @@ class GameControllerSpec extends AnyWordSpec with Matchers with MockitoSugar {
       ctrl.submitvoting("W", "V")
 
       ctrl.game.players("V").isAlive shouldBe false
+    }
+    "submitvoting only accepts the first answer per player (GUI + TUI)" in {
+      val wolf = Werwolf("W")
+      val vill = Villager("V")
+      val g = Game(
+        Map("W" -> wolf, "V" -> vill),
+        Phase.Day,
+        pendingNightActors = Set("W", "V")
+      )
+      val ctrl = new GameController(g)
+      var events = Vector.empty[GameEvent]
+      ctrl.addObserver(new de.htwg.werwolf.util.Observer[GameEvent] {
+        def update(e: GameEvent): Unit = events :+= e
+      })
+
+      ctrl.submitvoting("V", "W")
+      ctrl.submitvoting("V", "W") // zweite Ansicht antwortet zu spät
+
+      events.count(_ == GameEvent.playerActed("V", "W")) shouldBe 1
+      ctrl.game.pendingNightActors shouldBe Set("W")
     }
     "runNightPhase enters player loop" in {
 

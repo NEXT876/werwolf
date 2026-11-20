@@ -18,7 +18,7 @@ import scalafx.animation.{FillTransition, Timeline, KeyFrame}
 
 import scala.compiletime.uninitialized
 
-import de.htwg.werwolf.model.GameEvent
+import de.htwg.werwolf.model.{GameEvent, Roles}
 import de.htwg.werwolf.controller.GameControllerInterface
 import de.htwg.werwolf.util.Observer
 
@@ -26,11 +26,68 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
   
   var controller: GameControllerInterface = uninitialized
 
+  // Offene Abfragen vom Controller; nur auf dem FX-Thread angefasst
+  private case class Prompt(name: String, witch: Boolean, targets: Vector[String])
+  private var prompts = Vector.empty[Prompt]
+  private var gameUiBuilt = false
+
   override def update(event: GameEvent): Unit =
     event match
       case GameEvent.printGameState(players) => printPlayerRoles(players)
-      case GameEvent.switchPhase(phase) => Platform.runLater { NightDayCycleText.value = phase }
-      case _                            => ()
+      case _                                 => ()
+    Platform.runLater {
+      describe(event).foreach(t => SpecialInformationText.value = SpecialInformationText.value + t + "\n")
+      event match
+        case GameEvent.switchPhase(phase) => NightDayCycleText.value = phase
+        case GameEvent.initialThingsDone =>
+          // Setup kann auch in der TUI abgeschlossen worden sein
+          if !gameUiBuilt then buildGameUI(controller.game.players.keys.toSeq)
+          NightDayCycleText.value = controller.game.phase.toString // switchPhase kommt erst beim 1. Wechsel
+        case GameEvent.askForTargetNight(name, role, targets)
+            if targets.nonEmpty && (role == Roles.werwolf || role == Roles.witch) =>
+          prompts :+= Prompt(name, role == Roles.witch, targets)
+          showPrompt()
+        case GameEvent.askForTargetDay(name, targets) =>
+          prompts :+= Prompt(name, false, targets)
+          showPrompt()
+        case GameEvent.playerActed(name, _) =>
+          prompts = prompts.filterNot(_.name == name)
+          showPrompt()
+        case GameEvent.gameOver =>
+          prompts = Vector.empty
+          showPrompt()
+          NightDayCycleText.value = "Spiel vorbei"
+        case _ => ()
+    }
+
+  private def describe(event: GameEvent): Option[String] = event match
+    case GameEvent.printNarratorText(text)       => Some(text)
+    case GameEvent.printText(text, _)            => Some(text)
+    case GameEvent.printErrorMSG(msg)            => Some(s"Fehler: $msg")
+    case GameEvent.switchPhase(phase)            => Some(s"Phase: $phase")
+    case GameEvent.initialThingsDone             => Some("Spiel startet")
+    case GameEvent.askForTargetNight(name, r, _) => Some(s"$name ($r) ist dran")
+    case GameEvent.askForTargetDay(name, _)      => Some(s"$name stimmt ab")
+    case GameEvent.playerActed(name, target)     => Some(s"$name hat gewählt: $target")
+    case GameEvent.gameOver                      => Some("Das Game ist vorbei")
+    case _                                       => None
+
+  private lazy val actionBox = new VBox(6)
+
+  // Klick ruft nur den Controller; entfernt wird die Abfrage erst über playerActed (wie in der TUI)
+  private def showPrompt(): Unit =
+    actionBox.children = prompts.headOption match
+      case None => Seq(new Label("Keine Eingabe nötig"))
+      case Some(p) =>
+        val submit: String => Unit =
+          if p.witch then t => controller.submitNightChoice(p.name, t)
+          else t => controller.submitvoting(p.name, t)
+        val skip =
+          if p.witch then Seq(new Button("Keine Aktion") { onAction = _ => submit(p.name) })
+          else Seq()
+        Seq(new Label(s"${p.name}, wähle ein Ziel:"))
+          ++ p.targets.map(t => new Button(t) { onAction = _ => submit(t) })
+          ++ skip
 
   def init()(using c: GameControllerInterface): Unit =
     controller = c
@@ -196,15 +253,11 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
           if n.isEmpty then s"Spieler${i + 1}" else n
         }
 
-        // we add roles (controller will assign roles based on names)
-        controller.addRoles(names.toVector)
-        // set displayed phase
-        NightDayCycleText.value = "Tag/Nacht: Initialisiert"
-        // Build game UI now that we have names
-        buildGameUI(names)
-        // Start or run the game loop in controller
+        // Spiel-UI wird bei initialThingsDone gebaut (gleicher Weg wie Start aus der TUI)
         new Thread {
-          override def run(): Unit = controller.runGame()
+          override def run(): Unit =
+            controller.addRoles(names.toVector)
+            controller.runGame()
         }.start()
       }
     }
@@ -233,7 +286,7 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
     * aufgerufen, wenn Namen vorliegen.
     */
   private def buildGameUI(namesSeq: Seq[String]): Unit = {
-    // Update title
+    gameUiBuilt = true
     titleText.text = "Werwolf — Spiel"
 
     // --- Left: Chat + Players ---
@@ -399,7 +452,9 @@ object GUI extends JFXApp3 with Observer[GameEvent] {
         },
         new Label("Fraktionen"),
         factionArea,
-        new Label("Spezial"),
+        new Label("Aktion"),
+        actionBox,
+        new Label("Ereignisse"),
         specialInfo,
         new Label("Rollen"),
         rollenInfoField,

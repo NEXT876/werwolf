@@ -7,6 +7,7 @@ import de.htwg.werwolf.model.commandComponent.GameCommand
 
 
 trait GameControllerInterface extends Subject[GameEvent]:
+    def game: Game
     def saveIntoFile(name: String): Unit
     def loadFromFile(name: String): Unit
     def saveGameState(): Unit

@@ -16,4 +16,5 @@ enum GameEvent:
   case initialThingsDone
   case askForTargetNight(name : String, role : Roles, targets : Vector[String])
   case askForTargetDay(name : String, targets : Vector[String])
+  case playerActed(name : String, target : String)
   case gameLoaded()

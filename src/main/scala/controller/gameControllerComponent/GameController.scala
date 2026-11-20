@@ -84,8 +84,10 @@ class GameController(var _game: Game)(using
       alivePlayers.count(_.role != Roles.werwolf)
     )
 
-  def addRoles(names: Vector[String]): Unit =
-    updateGame(GC.addRoles(names, game))
+  // synchronized: TUI-Thread und GUI-Thread rufen den Controller parallel auf
+  def addRoles(names: Vector[String]): Unit = synchronized {
+    if game.players.isEmpty then updateGame(GC.addRoles(names, game))
+  }
 
   def runNightPhase(): Unit =
     val Players =
@@ -115,13 +117,20 @@ class GameController(var _game: Game)(using
     updateGame(updatedGame)
 
     player.foreach { player =>
-        val targets = game.players.values.filter(_.name != player.name).map(_.name).toVector
+        val targets = game.players.values.filter(p => p.isAlive && p.name != player.name).map(_.name).toVector
         notifyObservers(
           GameEvent.askForTargetDay(player.name, targets)
         )
     }
 
-  def submitNightChoice(playerName: String, target: String): Unit =
+  def submitNightChoice(playerName: String, target: String): Unit = synchronized {
+    // die andere Ansicht hat schon für diesen Spieler geantwortet
+    if game.pendingNightActors.contains(playerName) then
+      notifyObservers(GameEvent.playerActed(playerName, target))
+      doNightChoice(playerName, target)
+  }
+
+  private def doNightChoice(playerName: String, target: String): Unit =
     val player = game.players(playerName)
 
     val afterActorRemoval =
@@ -140,9 +149,15 @@ class GameController(var _game: Game)(using
 
     checkIfGameEnd(updatedGame.checkWinCondition(updatedGame.players))
 
-    if updatedGame.pendingNightActors.isEmpty then finishNightPhase() else return
+    if game.isRunning && game.pendingNightActors.isEmpty then finishNightPhase()
 
-  def submitvoting(playerName: String, target: String): Unit =
+  def submitvoting(playerName: String, target: String): Unit = synchronized {
+    if game.pendingNightActors.contains(playerName) then
+      notifyObservers(GameEvent.playerActed(playerName, target))
+      doVoting(playerName, target)
+  }
+
+  private def doVoting(playerName: String, target: String): Unit =
     val player = game.players(playerName)
 
     val afterActorRemoval =
@@ -173,7 +188,7 @@ class GameController(var _game: Game)(using
     updateGame(finalGame)
 
     checkIfGameEnd(finalGame.checkWinCondition(finalGame.players))
-    if finalGame.pendingNightActors.isEmpty then finishNightPhase() else return
+    if game.isRunning && game.pendingNightActors.isEmpty then finishNightPhase()
 
   def finishNightPhase(): Unit =
     updateGame(switchPhase())
@@ -183,9 +198,13 @@ class GameController(var _game: Game)(using
   def switchPhase(): Game =
     game.copy(phase = if game.phase == Phase.Night then Phase.Day else Phase.Night)
 
-  def runGame(): Unit =
-    notifyObservers(GameEvent.initialThingsDone)
-    runCurrentPhase()
+  private var started = false
+  def runGame(): Unit = synchronized {
+    if !started then
+      started = true
+      notifyObservers(GameEvent.initialThingsDone)
+      runCurrentPhase()
+  }
 
   def runCurrentPhase(): Unit =
     notifyObservers(GameEvent.clearScreen)
